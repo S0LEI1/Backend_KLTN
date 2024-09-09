@@ -16,4 +16,12 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
+    - image: thuthism/client 
+      context: client
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.tsx'
+            dest: .
     
