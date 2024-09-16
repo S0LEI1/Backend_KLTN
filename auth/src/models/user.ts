@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 import { Password } from '../services/password';
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 interface AttrsUser {
   email: string;
   password: string;
   fullName: string;
   gender: boolean;
+  phoneNumber: string;
+  address: string;
+  avatar?: string;
 }
 // property model build has
 interface UserModel extends mongoose.Model<UserDoc> {
@@ -16,6 +20,8 @@ interface UserDoc extends mongoose.Document {
   password: string;
   fullName: string;
   gender: boolean;
+  version: number;
+  avatar?: string;
 }
 const userSchema = new mongoose.Schema(
   {
@@ -35,18 +41,31 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       require: true,
     },
+    phoneNumber: {
+      type: String,
+      require: true,
+    },
+    address: {
+      type: String,
+      require: true,
+    },
+    avatar: {
+      type: String,
+    },
   },
   {
     toJSON: {
-      versionKey: false,
       transform(doc, ret) {
         ret.id = ret._id;
         delete ret._id;
         delete ret.password;
       },
     },
+    timestamps: true,
   }
 );
+userSchema.set('versionKey', 'version');
+userSchema.plugin(updateIfCurrentPlugin);
 userSchema.pre('save', async function (done) {
   if (this.isModified('password')) {
     const hashed = await Password.toHash(this.get('password'));

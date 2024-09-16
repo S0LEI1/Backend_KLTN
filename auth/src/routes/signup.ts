@@ -1,11 +1,24 @@
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import jwt from 'jsonwebtoken';
+import otpGenerator from 'otp-generator';
+import nodemailer from 'nodemailer';
+import { createClient } from 'redis';
 
+import { templateHtml } from '../services/template-html';
 import { User } from '../models/user';
-import { BadRequestError, validationRequest } from '@m-auth/common';
+import {
+  BadRequestError,
+  validationRequest,
+  SendMail,
+} from '@share-package/common';
+import { UserCreatedPublisher } from '../events/publishers/user-created-publisher';
+import { natsWrapper } from '../nats-wrapper';
+import { setValue } from '../services/redis';
+import { Mail } from '../services/send-mail';
 
 const router = express.Router();
+const OTP_TIME = 5;
 const PASSWORD_ERR =
   'Password must contain one digit from 1 to 9, one lowercase letter, one uppercase letter, one special character, no space, and it must be 8-16 characters long.';
 router.post(
@@ -17,21 +30,44 @@ router.post(
       .notEmpty()
       .matches(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$/)
       .withMessage(PASSWORD_ERR),
+    body('confirmPassword')
+      .trim()
+      .notEmpty()
+      .matches(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$/)
+      .withMessage(PASSWORD_ERR),
+    body('confirmPassword').custom(async (confirmPassword, { req }) => {
+      const { password } = req.body;
+      if (password != confirmPassword) {
+        throw new BadRequestError('Password do not match');
+      }
+    }),
     body('fullName').not().isEmpty().withMessage('Full name must be provided'),
     body('gender').not().isEmpty().withMessage('Gender must be provided'),
+    body('phoneNumber')
+      .isMobilePhone('vi-VN')
+      .withMessage('Phone number must be 10 number'),
+    body('address').not().isEmpty().withMessage('Address must be provided.'),
   ],
 
   // middleware validationRequest
   validationRequest,
   async (req: Request, res: Response) => {
-    const { email, password, fullName, gender } = req.body;
+    const { email, password, fullName, gender, phoneNumber, address } =
+      req.body;
 
     const existsUser = await User.findOne({ email });
     if (existsUser) {
       throw new BadRequestError('Email in use');
     }
 
-    const user = User.build({ email, password, fullName, gender });
+    const user = User.build({
+      email,
+      password,
+      fullName,
+      gender,
+      phoneNumber,
+      address,
+    });
     await user.save();
 
     // Genarate JWT
@@ -49,8 +85,10 @@ router.post(
     req.session = {
       jwt: userJWT,
     };
-
-    res.status(201).send(user);
+    const otp = await Mail.send(user.email);
+    // Publish created event
+    // ...
+    res.status(201).send(otp);
 
     // new User({ email, password })
   }

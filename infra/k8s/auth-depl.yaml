@@ -23,6 +23,23 @@ spec:
                 secretKeyRef:
                   name: jwt-secret
                   key: JWT_KEY
+            - name: AUTH_MAIL
+              valueFrom:
+                secretKeyRef:
+                  name: auth-mail
+                  key: AUTH_MAIL
+            - name: AUTH_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: auth-pass
+                  key: AUTH_PASS
+            - name: AUTH_REDIS_HOST
+              value: auth-redis-srv
+            - name: OTP_TIME
+              valueFrom:
+                secretKeyRef:
+                  name: otp-time
+                  key: OTP_TIME
 ---
 apiVersion: v1
 kind: Service

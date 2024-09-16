@@ -1,10 +1,11 @@
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
-import { validationRequest, BadRequestError } from '@m-auth/common';
+import { validationRequest, BadRequestError } from '@share-package/common';
 import jwt from 'jsonwebtoken';
 
 import { User } from '../models/user';
 import { Password } from '../services/password';
+import { getValue } from '../services/redis';
 const router = express.Router();
 const PASSWORD_ERR =
   'Password must contain one digit from 1 to 9, one lowercase letter, one uppercase letter, one special character, no space, and it must be 8-16 characters long.';
@@ -32,6 +33,11 @@ router.post(
     );
     if (!passwordMatch) {
       throw new BadRequestError('Password not match');
+    }
+
+    const otp = await getValue(email);
+    if (otp !== null) {
+      throw new BadRequestError('Unverified account');
     }
     // Genarate JWT
 
