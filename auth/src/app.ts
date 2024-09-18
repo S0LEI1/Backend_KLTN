@@ -11,6 +11,7 @@ import { errorHandler, NotFoundError } from '@share-package/common';
 import { verifyRouter } from './routes/verify-otp';
 import { updatePasswordRouter } from './routes/update-password';
 import { sendOtpRouter } from './routes/send-otp';
+
 const app = express();
 app.use(json());
 app.set('trust proxy', true);
@@ -31,7 +32,7 @@ app.use(verifyRouter);
 app.use(updatePasswordRouter);
 app.use(sendOtpRouter);
 app.all('*', async (req, res) => {
-  throw new NotFoundError();
+  throw new NotFoundError('Route');
 });
 app.use(errorHandler);
 export { app };

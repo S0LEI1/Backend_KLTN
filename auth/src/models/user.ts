@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import { Password } from '../services/password';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+import { UserURMapping } from './user-ur-mapping';
+import { NotFoundError } from '@share-package/common';
 interface AttrsUser {
   email: string;
   password: string;
@@ -13,9 +15,10 @@ interface AttrsUser {
 // property model build has
 interface UserModel extends mongoose.Model<UserDoc> {
   build(attrs: AttrsUser): UserDoc;
+  checkExists(id: string): UserDoc;
 }
 // property user doc has
-interface UserDoc extends mongoose.Document {
+export interface UserDoc extends mongoose.Document {
   email: string;
   password: string;
   fullName: string;
@@ -76,7 +79,11 @@ userSchema.pre('save', async function (done) {
 userSchema.statics.build = (attrs: AttrsUser) => {
   return new User(attrs);
 };
-
+userSchema.statics.checkExists = async (id: string) => {
+  const user = await User.findById(id);
+  if (!user) throw new NotFoundError('User');
+  return user;
+};
 const User = mongoose.model<UserDoc, UserModel>('User', userSchema);
 
 export { User };

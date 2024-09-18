@@ -11,11 +11,16 @@ import {
   BadRequestError,
   validationRequest,
   SendMail,
+  UserRoleDetail,
+  NotFoundError,
 } from '@share-package/common';
 import { UserCreatedPublisher } from '../events/publishers/user-created-publisher';
 import { natsWrapper } from '../nats-wrapper';
 import { setValue } from '../services/redis';
 import { Mail } from '../services/send-mail';
+import { UserRole } from '../models/user-role';
+import { UserURMapping } from '../models/user-ur-mapping';
+import { UserURMappingCreatedPublisher } from '../events/publishers/user-role-mapping-created-event';
 
 const router = express.Router();
 const OTP_TIME = 5;
@@ -86,9 +91,28 @@ router.post(
       jwt: userJWT,
     };
     const otp = await Mail.send(user.email);
+    const role = await UserRole.findOne({ name: UserRoleDetail.Customer });
+    if (!role) throw new NotFoundError('Role');
+    const userURM = UserURMapping.build({
+      user: user.id,
+      role: role.id,
+    });
+    await userURM.save();
     // Publish created event
-    // ...
-    res.status(201).send(otp);
+    new UserCreatedPublisher(natsWrapper.client).publish({
+      id: user.id,
+      fullName: user.fullName,
+      gender: user.gender,
+      version: user.version,
+    });
+    //publish UserURMapping created event
+    new UserURMappingCreatedPublisher(natsWrapper.client).publish({
+      id: userURM.id,
+      userId: userURM.user.id,
+      roleId: userURM.role.id,
+      version: userURM.version,
+    });
+    res.status(201).send({ otp: otp });
 
     // new User({ email, password })
   }

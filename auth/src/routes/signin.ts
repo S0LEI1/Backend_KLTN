@@ -6,6 +6,8 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/user';
 import { Password } from '../services/password';
 import { getValue } from '../services/redis';
+import { UserURMapping } from '../models/user-ur-mapping';
+import { RolePermission } from '../models/role-permission';
 const router = express.Router();
 const PASSWORD_ERR =
   'Password must contain one digit from 1 to 9, one lowercase letter, one uppercase letter, one special character, no space, and it must be 8-16 characters long.';
@@ -39,12 +41,18 @@ router.post(
     if (otp !== null) {
       throw new BadRequestError('Unverified account');
     }
-    // Genarate JWT
+    const userURM = await UserURMapping.checkRoleByUserId(existingUser.id);
+    const rolePs = await RolePermission.checkPermissionByRoleId(
+      userURM!.roleId
+    );
 
+    // Genarate JWT
     const userJWT = jwt.sign(
       {
         id: existingUser.id,
         email: existingUser.email,
+        role: userURM!.userRole,
+        PermissionCreatedPublisher: rolePs,
       },
       process.env.JWT_KEY!
     );
@@ -54,7 +62,12 @@ router.post(
     req.session = {
       jwt: userJWT,
     };
-    res.status(200).send(existingUser);
+    res.status(200).send({
+      id: existingUser.id,
+      email: existingUser.email,
+      role: userURM!.userRole,
+      permissions: rolePs,
+    });
   }
 );
 

@@ -1,12 +1,13 @@
 import mongoose, { mongo } from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 interface PermissionAttrs {
+  id: string;
   name: string;
   systemName: string;
   description: string;
 }
 
-interface PermissionDoc extends mongoose.Document {
+export interface PermissionDoc extends mongoose.Document {
   name: string;
   systemName: string;
   description: string;
@@ -43,7 +44,12 @@ const permissionSchema = new mongoose.Schema(
 permissionSchema.set('versionKey', 'version');
 permissionSchema.plugin(updateIfCurrentPlugin);
 permissionSchema.statics.build = (attrs: PermissionAttrs) => {
-  return new Permission(attrs);
+  return new Permission({
+    _id: attrs.id,
+    name: attrs.name,
+    systemName: attrs.systemName,
+    description: attrs.description,
+  });
 };
 
 const Permission = mongoose.model<PermissionDoc, PermissionModel>(

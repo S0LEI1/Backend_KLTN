@@ -33,7 +33,7 @@ spec:
               '2',
               '-SD',
               '-cid',
-              'ticketing',
+              'kimbeautyspa',
             ]
 ---
 apiVersion: v1

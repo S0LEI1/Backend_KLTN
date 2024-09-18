@@ -16,19 +16,27 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    - image: vannggoc/client
-      context: client
+    - image: vannggoc/rules
+      context: rules
       docker:
         dockerfile: Dockerfile
       sync:
         manual:
-          - src: '**/*.tsx'
+          - src: 'src/**/*.ts'
             dest: .
-    - image: vannggoc/expiration
-      context: expiration
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          - src: '**/*.tsx'
-            dest: .
+    # - image: vannggoc/client
+    #   context: client
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       - src: '**/*.tsx'
+    #         dest: .
+    # - image: vannggoc/expiration
+    #   context: expiration
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       - src: '**/*.tsx'
+    #         dest: .

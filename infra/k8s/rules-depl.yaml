@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rules-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rules
+  template:
+    metadata:
+      labels:
+        app: rules
+    spec:
+      containers:
+        - name: rules
+          image: vannggoc/rules
+          env:
+            - name: MONGO_URI
+              value: 'mongodb+srv://soleil:01636878201@cluster0.4x48u.mongodb.net/rules?retryWrites=true&w=majority&appName=Cluster0'
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_KEY
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NATS_URL
+              value: 'http://nats-srv:4222'
+            - name: NATS_CLUSTER_ID
+              value: kimbeautyspa
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rules-srv
+spec:
+  selector:
+    app: rules
+  ports:
+    - name: rules
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
