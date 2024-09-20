@@ -91,26 +91,12 @@ router.post(
       jwt: userJWT,
     };
     const otp = await Mail.send(user.email);
-    const role = await UserRole.findOne({ name: UserRoleDetail.Customer });
-    if (!role) throw new NotFoundError('Role');
-    const userURM = UserURMapping.build({
-      user: user.id,
-      role: role.id,
-    });
-    await userURM.save();
     // Publish created event
     new UserCreatedPublisher(natsWrapper.client).publish({
       id: user.id,
       fullName: user.fullName,
       gender: user.gender,
       version: user.version,
-    });
-    //publish UserURMapping created event
-    new UserURMappingCreatedPublisher(natsWrapper.client).publish({
-      id: userURM.id,
-      userId: userURM.user.id,
-      roleId: userURM.role.id,
-      version: userURM.version,
     });
     res.status(201).send({ otp: otp });
 

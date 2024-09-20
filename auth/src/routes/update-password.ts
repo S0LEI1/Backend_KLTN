@@ -15,6 +15,7 @@ const PASSWORD_ERR =
 router.patch(
   '/users',
   [
+    body('email').isEmail().withMessage('Email must be valid'),
     body('password')
       .trim()
       .notEmpty()
@@ -37,10 +38,14 @@ router.patch(
     const { email, password } = req.body;
     const user = await User.findOne({ email: email });
     if (!user) {
-      throw new BadRequestError('User not found');
+      throw new NotFoundError('User');
     }
-    const hashPassword = Password.toHash(password);
-    user.set({ password: hashPassword });
+    const passwordMatch = await Password.compare(user.password, password);
+    if (passwordMatch) {
+      throw new BadRequestError('Password is used');
+    }
+    user.set({ password: password });
+    user.save();
     // publish user update event
     res.status(200).send({ update: true });
   }

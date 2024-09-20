@@ -8,8 +8,16 @@ import {
   errorHandler,
   NotFoundError,
 } from '@share-package/common';
-import { indexRouter } from './routes/permissions';
+import { indexPerRouter } from './routes/permissions';
 import { newPerIndex } from './routes/permissions/new';
+import { updatePermissionRouter } from './routes/permissions/update';
+import { deletePermissionRouter } from './routes/permissions/disable';
+import { indexRolesRouter } from './routes/roles';
+import { newRoleIndex } from './routes/roles/new';
+import { updateRoleRouter } from './routes/roles/update';
+import { deleteRoleRouter } from './routes/roles/disable';
+import { addRolePermissionRouter } from './routes/role-permission/add';
+import { deleteRolePermissionRouter } from './routes/role-permission/remove';
 
 const app = express();
 app.use(json());
@@ -24,9 +32,19 @@ app.use(
 
 app.use(cors());
 app.use(currentUser);
-app.use(indexRouter);
+// permission routes
+app.use(indexPerRouter);
 app.use(newPerIndex);
+app.use(updatePermissionRouter);
+app.use(deletePermissionRouter);
 
+app.use(indexRolesRouter);
+app.use(newRoleIndex);
+app.use(updateRoleRouter);
+app.use(deleteRoleRouter);
+// role permission
+app.use(addRolePermissionRouter);
+app.use(deleteRolePermissionRouter);
 app.all('*', async (req, res) => {
   throw new NotFoundError('Route');
 });

@@ -3,12 +3,14 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 interface PermissionAttrs {
   name: string;
   systemName: string;
+  active: boolean;
   description: string;
 }
 
 export interface PermissionDoc extends mongoose.Document {
   name: string;
   systemName: string;
+  active: boolean;
   description: string;
   version: number;
 }
@@ -26,6 +28,11 @@ const permissionSchema = new mongoose.Schema(
     systemName: {
       type: String,
       required: true,
+    },
+    active: {
+      type: Boolean,
+      require: true,
+      default: true,
     },
     description: {
       type: String,

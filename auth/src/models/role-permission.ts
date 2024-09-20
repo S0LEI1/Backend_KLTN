@@ -4,38 +4,47 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { PermissionDoc } from './permission';
 import { UserRoleDoc } from './user-role';
 interface RolePermissionAttrs {
+  id: string;
   permission: PermissionDoc;
   userRole: UserRoleDoc;
 }
 interface PopulateDoc {}
 interface RolePermissionDoc extends mongoose.Document {
   permission: PermissionDoc;
-  role: UserRoleDoc;
+  userRole: UserRoleDoc;
   version: number;
 }
 
 interface RolePermissionModel extends mongoose.Model<RolePermissionDoc> {
   build(attrs: RolePermissionAttrs): RolePermissionDoc;
   checkPermissionByRoleId(id: string): Promise<RolePermissionDoc | null>;
+  findByEvent(event: {
+    id: string;
+    version: number;
+  }): Promise<RolePermissionDoc | null>;
 }
 
 const rolePermissionSchema = new mongoose.Schema({
   permission: {
     type: mongoose.Types.ObjectId,
     ref: 'Permission',
-    require: true,
+    required: true,
   },
-  role: {
+  userRole: {
     type: mongoose.Types.ObjectId,
     ref: 'UserRole',
-    require: true,
+    required: true,
   },
 });
 
 rolePermissionSchema.set('versionKey', 'version');
 rolePermissionSchema.plugin(updateIfCurrentPlugin);
 rolePermissionSchema.statics.build = (attrs: RolePermissionAttrs) => {
-  return new RolePermission(attrs);
+  return new RolePermission({
+    _id: attrs.id,
+    permission: attrs.permission,
+    userRole: attrs.userRole,
+  });
 };
 
 rolePermissionSchema.statics.checkPermissionByRoleId = async (id: string) => {
@@ -48,6 +57,17 @@ rolePermissionSchema.statics.checkPermissionByRoleId = async (id: string) => {
   const pers: any = [];
   rolePS.forEach((rp) => pers.push(rp.permission.name));
   return pers;
+};
+rolePermissionSchema.statics.findByEvent = async (event: {
+  id: string;
+  version: number;
+}) => {
+  const rolePer = await RolePermission.findOne({
+    _id: event.id,
+    version: event.version,
+  });
+  if (!rolePer) throw new NotFoundError('Role-Permission');
+  return rolePer;
 };
 const RolePermission = mongoose.model<RolePermissionDoc, RolePermissionModel>(
   'RolePermission',

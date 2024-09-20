@@ -3,11 +3,13 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { UserRoleDetail } from '@share-package/common';
 interface UserRoleAttrs {
   name: string;
+  active: boolean;
   description: string;
 }
 
 export interface UserRoleDoc extends mongoose.Document {
   name: string;
+  active: boolean;
   description: string;
   version: number;
 }
@@ -21,6 +23,11 @@ const userRoleSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+    },
+    active: {
+      type: Boolean,
+      require: true,
+      default: true,
     },
     description: {
       type: String,

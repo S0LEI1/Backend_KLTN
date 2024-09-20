@@ -1,5 +1,7 @@
 import {
   BadRequestError,
+  NotFoundError,
+  UserRoleDetail,
   currentUser,
   requireAuth,
   validationRequest,
@@ -9,6 +11,9 @@ import { natsWrapper } from '../nats-wrapper';
 import { createClient } from 'redis';
 import { getValue, redisClient } from '../services/redis';
 import { body } from 'express-validator';
+import { UserRole } from '../models/user-role';
+import { UserURMapping } from '../models/user-ur-mapping';
+import { User } from '../models/user';
 
 const router = express.Router();
 router.post(
@@ -24,8 +29,10 @@ router.post(
     //   .on('error', (err) => console.log('Redis Client Error', err))
     //   .connect();
 
-    const storeOtp = await getValue(email);
+    const user = await User.findOne({ email: email });
+    if (!user) throw new NotFoundError('User');
 
+    const storeOtp = await getValue(email);
     if (storeOtp === null) {
       throw new BadRequestError('Otp has expires');
     }
@@ -33,8 +40,18 @@ router.post(
       throw new BadRequestError('Invalid OTP');
     }
     await redisClient.del(email);
-
-    res.status(200).json({ success: true });
+    const userURMExist = await UserURMapping.findOne({ user: user.id });
+    if (!userURMExist) {
+      const role = await UserRole.findOne({ name: UserRoleDetail.Customer });
+      if (!role) throw new NotFoundError('Role');
+      const userURM = UserURMapping.build({
+        user: user.id,
+        role: role.id,
+      });
+      await userURM.save();
+      res.status(201).send({ 'verify-created': true });
+    }
+    res.status(200).json({ verify: true });
   }
 );
 

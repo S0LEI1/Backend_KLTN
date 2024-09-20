@@ -10,7 +10,7 @@ interface RolePermissionAttrs {
 interface PopulateDoc {}
 interface RolePermissionDoc extends mongoose.Document {
   permission: PermissionDoc;
-  role: UserRoleDoc;
+  userRole: UserRoleDoc;
   version: number;
 }
 
@@ -23,12 +23,12 @@ const rolePermissionSchema = new mongoose.Schema({
   permission: {
     type: mongoose.Types.ObjectId,
     ref: 'Permission',
-    require: true,
+    required: true,
   },
-  role: {
+  userRole: {
     type: mongoose.Types.ObjectId,
     ref: 'UserRole',
-    require: true,
+    required: true,
   },
 });
 
