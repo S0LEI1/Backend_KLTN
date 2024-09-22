@@ -63,10 +63,7 @@ router.post(
       jwt: userJWT,
     };
     res.status(200).send({
-      id: existingUser.id,
-      email: existingUser.email,
-      role: userURM!.userRole,
-      permissions: rolePs,
+      token: userJWT,
     });
   }
 );

@@ -7,7 +7,7 @@ import { body } from 'express-validator';
 const router = express.Router();
 
 router.post(
-  '/user/otp',
+  '/users/otp',
   [body('email').isEmail().withMessage('Email must be valid')],
   validationRequest,
   async (req: Request, res: Response) => {

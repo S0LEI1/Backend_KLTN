@@ -16,6 +16,7 @@ interface AttrsUser {
 interface UserModel extends mongoose.Model<UserDoc> {
   build(attrs: AttrsUser): UserDoc;
   checkExists(id: string): UserDoc;
+  findUser(id: string): Promise<UserDoc | null>;
 }
 // property user doc has
 export interface UserDoc extends mongoose.Document {
@@ -80,6 +81,11 @@ userSchema.statics.build = (attrs: AttrsUser) => {
   return new User(attrs);
 };
 userSchema.statics.checkExists = async (id: string) => {
+  const user = await User.findById(id);
+  if (!user) throw new NotFoundError('User');
+  return user;
+};
+userSchema.statics.findUser = async (id: string) => {
   const user = await User.findById(id);
   if (!user) throw new NotFoundError('User');
   return user;

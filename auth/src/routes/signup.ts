@@ -1,26 +1,11 @@
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import jwt from 'jsonwebtoken';
-import otpGenerator from 'otp-generator';
-import nodemailer from 'nodemailer';
-import { createClient } from 'redis';
-
-import { templateHtml } from '../services/template-html';
 import { User } from '../models/user';
-import {
-  BadRequestError,
-  validationRequest,
-  SendMail,
-  UserRoleDetail,
-  NotFoundError,
-} from '@share-package/common';
+import { BadRequestError, validationRequest } from '@share-package/common';
 import { UserCreatedPublisher } from '../events/publishers/user-created-publisher';
 import { natsWrapper } from '../nats-wrapper';
-import { setValue } from '../services/redis';
 import { Mail } from '../services/send-mail';
-import { UserRole } from '../models/user-role';
-import { UserURMapping } from '../models/user-ur-mapping';
-import { UserURMappingCreatedPublisher } from '../events/publishers/user-role-mapping-created-event';
 
 const router = express.Router();
 const OTP_TIME = 5;
@@ -77,19 +62,19 @@ router.post(
 
     // Genarate JWT
 
-    const userJWT = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-      },
-      process.env.JWT_KEY!
-    );
+    // const userJWT = jwt.sign(
+    //   {
+    //     id: user._id,
+    //     email: user.email,
+    //   },
+    //   process.env.JWT_KEY!
+    // );
 
-    // store jwt
+    // // store jwt
 
-    req.session = {
-      jwt: userJWT,
-    };
+    // req.session = {
+    //   jwt: userJWT,
+    // };
     const otp = await Mail.send(user.email);
     // Publish created event
     new UserCreatedPublisher(natsWrapper.client).publish({

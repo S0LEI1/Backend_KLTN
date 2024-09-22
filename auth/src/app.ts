@@ -11,6 +11,8 @@ import { errorHandler, NotFoundError } from '@share-package/common';
 import { verifyRouter } from './routes/verify-otp';
 import { updatePasswordRouter } from './routes/update-password';
 import { sendOtpRouter } from './routes/send-otp';
+import { addUserURMRouter } from './routes/add-roles/add';
+import { deleteUserURM } from './routes/add-roles/delete';
 
 const app = express();
 app.use(json());
@@ -31,6 +33,8 @@ app.use(signupRouter);
 app.use(verifyRouter);
 app.use(updatePasswordRouter);
 app.use(sendOtpRouter);
+app.use(addUserURMRouter);
+app.use(deleteUserURM);
 app.all('*', async (req, res) => {
   throw new NotFoundError('Route');
 });

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
-import { UserRoleDetail } from '@share-package/common';
+import { NotFoundError } from '@share-package/common';
 interface UserRoleAttrs {
   id: string;
   name: string;
@@ -21,6 +21,7 @@ interface UserRoleModel extends mongoose.Model<UserRoleDoc> {
     id: string;
     version: number;
   }): Promise<UserRoleDoc | null>;
+  findRole(id: string): Promise<UserRoleDoc | null>;
 }
 
 const userRoleSchema = new mongoose.Schema(
@@ -66,6 +67,11 @@ userRoleSchema.statics.findByEvent = async (event: {
     version: event.version,
   });
   return role;
+};
+userRoleSchema.statics.findUser = async (id: string) => {
+  const userRole = await UserRole.findById(id);
+  if (!userRole) throw new NotFoundError('User-Role');
+  return userRole;
 };
 const UserRole = mongoose.model<UserRoleDoc, UserRoleModel>(
   'UserRole',
