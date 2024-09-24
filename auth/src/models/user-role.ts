@@ -21,7 +21,7 @@ interface UserRoleModel extends mongoose.Model<UserRoleDoc> {
     id: string;
     version: number;
   }): Promise<UserRoleDoc | null>;
-  findRole(id: string): Promise<UserRoleDoc | null>;
+  findUserRole(id: string): Promise<UserRoleDoc | null>;
 }
 
 const userRoleSchema = new mongoose.Schema(
@@ -55,6 +55,7 @@ userRoleSchema.statics.build = (attrs: UserRoleAttrs) => {
   return new UserRole({
     _id: attrs.id,
     name: attrs.name,
+    active: attrs.active,
     description: attrs.description,
   });
 };
@@ -68,7 +69,7 @@ userRoleSchema.statics.findByEvent = async (event: {
   });
   return role;
 };
-userRoleSchema.statics.findUser = async (id: string) => {
+userRoleSchema.statics.findUserRole = async (id: string) => {
   const userRole = await UserRole.findById(id);
   if (!userRole) throw new NotFoundError('User-Role');
   return userRole;

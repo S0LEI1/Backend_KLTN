@@ -1,7 +1,6 @@
 import {
   BadRequestError,
   NotFoundError,
-  requireManagerRole,
   validationRequest,
 } from '@share-package/common';
 import express, { Request, Response } from 'express';
@@ -15,7 +14,6 @@ const router = express.Router();
 
 router.post(
   '/rules/add/',
-  requireManagerRole,
   [
     body('roleId').isMongoId().withMessage('Role ID must be valid'),
     body('permissionId').isMongoId().withMessage('Permission ID must be valid'),

@@ -48,12 +48,12 @@ rolePermissionSchema.statics.build = (attrs: RolePermissionAttrs) => {
 };
 
 rolePermissionSchema.statics.checkPermissionByRoleId = async (id: string) => {
-  const rolePS = await RolePermission.find({ role: id }).populate(
+  const rolePS = await RolePermission.find({ userRole: id }).populate(
     'permission',
     // return data
     'name systemName'
   );
-  if (!rolePS) throw new NotFoundError('Role-Permission');
+  if (!rolePS) return [];
   const pers: any = [];
   rolePS.forEach((rp) => pers.push(rp.permission.name));
   return pers;

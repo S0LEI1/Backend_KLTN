@@ -14,6 +14,10 @@ export class RoleCreatedListener extends Listener<RoleCreatedEvent> {
       active: data.active,
     });
     await role.save();
+    console.log('data.id', data.id);
+    console.log('role._id', role._id);
+    console.log('role.id', role.id);
+
     msg.ack();
   }
 }

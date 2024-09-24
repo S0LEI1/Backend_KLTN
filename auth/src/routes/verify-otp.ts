@@ -1,6 +1,7 @@
 import {
   BadRequestError,
   NotFoundError,
+  UserType,
   validationRequest,
 } from '@share-package/common';
 import express, { Request, Response } from 'express';
@@ -9,6 +10,8 @@ import { body } from 'express-validator';
 import { UserRole } from '../models/user-role';
 import { UserURMapping } from '../models/user-ur-mapping';
 import { User } from '../models/user';
+import { UserCreatedPublisher } from '../events/publishers/user-created-publisher';
+import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
 router.post(
@@ -35,17 +38,17 @@ router.post(
       throw new BadRequestError('Invalid OTP');
     }
     await redisClient.del(email);
-    // const userURMExist = await UserURMapping.findOne({ user: user.id });
-    // if (!userURMExist) {
-    //   const role = await UserRole.findOne({ name: UserRoleDetail.Customer });
-    //   if (!role) throw new NotFoundError('Role');
-    //   const userURM = UserURMapping.build({
-    //     user: user.id,
-    //     role: role.id,
-    //   });
-    //   await userURM.save();
-    //   res.status(201).send({ 'verify-created': true });
-    // }
+    const userURMExist = await UserURMapping.findOne({ user: user.id });
+    if (!userURMExist) {
+      new UserCreatedPublisher(natsWrapper.client).publish({
+        id: user.id,
+        fullName: user.fullName,
+        gender: user.gender,
+        version: user.version,
+        type: UserType.Customer,
+      });
+      return res.status(201).json({ 'verify-create': 'success' });
+    }
     res.status(200).json({ verify: true });
   }
 );

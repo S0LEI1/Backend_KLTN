@@ -2,7 +2,11 @@ import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user';
-import { BadRequestError, validationRequest } from '@share-package/common';
+import {
+  BadRequestError,
+  UserType,
+  validationRequest,
+} from '@share-package/common';
 import { UserCreatedPublisher } from '../events/publishers/user-created-publisher';
 import { natsWrapper } from '../nats-wrapper';
 import { Mail } from '../services/send-mail';
@@ -57,6 +61,7 @@ router.post(
       gender,
       phoneNumber,
       address,
+      type: UserType.Customer,
     });
     await user.save();
 
@@ -77,12 +82,13 @@ router.post(
     // };
     const otp = await Mail.send(user.email);
     // Publish created event
-    new UserCreatedPublisher(natsWrapper.client).publish({
-      id: user.id,
-      fullName: user.fullName,
-      gender: user.gender,
-      version: user.version,
-    });
+    // new UserCreatedPublisher(natsWrapper.client).publish({
+    //   id: user.id,
+    //   fullName: user.fullName,
+    //   gender: user.gender,
+    //   version: user.version,
+    //   type: UserType.Customer,
+    // });
     res.status(201).send({ otp: otp });
 
     // new User({ email, password })

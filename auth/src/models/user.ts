@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { Password } from '../services/password';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { UserURMapping } from './user-ur-mapping';
-import { NotFoundError } from '@share-package/common';
+import { NotFoundError, UserType } from '@share-package/common';
 interface AttrsUser {
   email: string;
   password: string;
@@ -11,6 +11,7 @@ interface AttrsUser {
   phoneNumber: string;
   address: string;
   avatar?: string;
+  type: UserType;
 }
 // property model build has
 interface UserModel extends mongoose.Model<UserDoc> {
@@ -26,6 +27,7 @@ export interface UserDoc extends mongoose.Document {
   gender: boolean;
   version: number;
   avatar?: string;
+  type: UserType;
 }
 const userSchema = new mongoose.Schema(
   {
@@ -55,6 +57,12 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
+    },
+    type: {
+      type: String,
+      enum: UserType,
+      default: UserType.Customer,
+      required: true,
     },
   },
   {

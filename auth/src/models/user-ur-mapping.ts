@@ -1,11 +1,11 @@
-import { NotFoundError } from '@share-package/common';
+import { BadRequestError, NotFoundError } from '@share-package/common';
 import mongoose, { mongo } from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { UserDoc } from './user';
 import { UserRoleDoc } from './user-role';
 interface UserURMappingAttrs {
   user: UserDoc;
-  role: UserRoleDoc;
+  userRole: UserRoleDoc;
 }
 interface PopulateDoc {
   id: string;
@@ -15,7 +15,7 @@ interface PopulateDoc {
 }
 interface UserURMappingDoc extends mongoose.Document {
   user: UserDoc;
-  role: UserRoleDoc;
+  userRole: UserRoleDoc;
   version: number;
 }
 
@@ -31,7 +31,7 @@ const userURMappingSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    role: {
+    userRole: {
       type: mongoose.Types.ObjectId,
       ref: 'UserRole',
       reqiored: true,
@@ -56,13 +56,14 @@ userURMappingSchema.statics.build = (attrs: UserURMappingAttrs) => {
 userURMappingSchema.statics.checkRoleByUserId = async (id: string) => {
   const userURM = await UserURMapping.findOne({ user: id })
     // .lean()
-    .populate('role', 'name');
-  if (!userURM) throw new NotFoundError('User-UserRoleMapping');
+    .populate('userRole', 'name');
+  if (!userURM)
+    throw new BadRequestError('You dont have permission or not verified otp');
   return {
     // id: userURM.id,
     // userId: userURM.userId,
-    roleId: userURM.role.id,
-    userRole: userURM.role.name,
+    roleId: userURM.userRole.id,
+    userRole: userURM.userRole.name,
   };
 };
 const UserURMapping = mongoose.model<UserURMappingDoc, UserURMappingModel>(

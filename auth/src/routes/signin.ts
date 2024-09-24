@@ -51,8 +51,8 @@ router.post(
       {
         id: existingUser.id,
         email: existingUser.email,
-        role: userURM!.userRole,
-        PermissionCreatedPublisher: rolePs,
+        type: existingUser.type,
+        permissions: rolePs,
       },
       process.env.JWT_KEY!
     );
@@ -64,6 +64,8 @@ router.post(
     };
     res.status(200).send({
       token: userJWT,
+      // userURM,
+      // permissions: rolePs,
     });
   }
 );

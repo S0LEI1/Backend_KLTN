@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
-import { UserRoleDetail } from '@share-package/common';
 interface UserRoleAttrs {
   name: string;
   active: boolean;

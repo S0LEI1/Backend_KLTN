@@ -1,10 +1,5 @@
 import express, { Request, Response } from 'express';
-import {
-  BadRequestError,
-  ManagerPermission,
-  requireManagerRole,
-  validationRequest,
-} from '@share-package/common';
+import { BadRequestError, validationRequest } from '@share-package/common';
 import { Permission } from '../../models/permission';
 import { natsWrapper } from '../../nats-wrapper';
 import { UserRole } from '../../models/user-role';
@@ -16,7 +11,6 @@ router.patch(
   '/rules/update/role/:id',
   [body('name').not().isEmpty().withMessage('Role name must be provided')],
   validationRequest,
-  requireManagerRole,
   async (req: Request, res: Response) => {
     const permissions = req.currentUser?.permissions;
     /// if (

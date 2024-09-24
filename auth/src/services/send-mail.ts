@@ -18,7 +18,6 @@ export class Mail {
         otp: otp,
         message: html,
       });
-      console.log(info);
       // store otp
       // expires 5 minutes
       await setValue(email, otp, Number(process.env.OTP_TIME));

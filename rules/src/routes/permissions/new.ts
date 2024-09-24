@@ -1,9 +1,5 @@
 import express, { Request, Response } from 'express';
-import {
-  BadRequestError,
-  ManagerPermission,
-  requireManagerRole,
-} from '@share-package/common';
+import { BadRequestError } from '@share-package/common';
 import { Permission } from '../../models/permission';
 import { PermissionCreatedPublisher } from '../../events/publishers/permissions/permission-created-publisher';
 import { natsWrapper } from '../../nats-wrapper';
@@ -12,7 +8,6 @@ const router = express.Router();
 
 router.post(
   '/rules/new/permission',
-  requireManagerRole,
   [
     body('name').not().isEmpty().withMessage('Role name must be provided'),
     body('systemName')

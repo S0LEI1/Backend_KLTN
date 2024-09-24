@@ -9,6 +9,7 @@ import { RoleUpdatedListener } from './events/listeners/roles/role-updated-liste
 import { RoleDeletedListener } from './events/listeners/roles/role-deleted-listener';
 import { RolePermissionCreatedListener } from './events/listeners/role-permission/role-permission-created-listener';
 import { RolePermissionDeletedListener } from './events/listeners/role-permission/role-permission-deleted-listener';
+import { UserURMappingCreatedListener } from './events/listeners/user-userrole-mapping/user-userrole-mapping-created-listener';
 const start = async () => {
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
@@ -50,6 +51,8 @@ const start = async () => {
     // role-permission
     new RolePermissionCreatedListener(natsWrapper.client).listen();
     new RolePermissionDeletedListener(natsWrapper.client).listen();
+    //
+    new UserURMappingCreatedListener(natsWrapper.client).listen();
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connecting mongo!!');
   } catch (error) {
