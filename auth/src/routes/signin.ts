@@ -64,8 +64,8 @@ router.post(
     };
     res.status(200).send({
       token: userJWT,
-      // userURM,
-      // permissions: rolePs,
+      type: existingUser.type,
+      permissions: rolePs,
     });
   }
 );

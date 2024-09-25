@@ -8,10 +8,10 @@ import {
   errorHandler,
   NotFoundError,
 } from '@share-package/common';
-import { indexPerRouter } from './routes/permissions';
-import { newPerIndex } from './routes/permissions/new';
-import { updatePermissionRouter } from './routes/permissions/update';
-import { deletePermissionRouter } from './routes/permissions/disable';
+// import { indexPerRouter } from './routes/permissions';
+// import { newPerIndex } from './routes/permissions/new';
+// import { updatePermissionRouter } from './routes/permissions/update';
+// import { deletePermissionRouter } from './routes/permissions/disable';
 import { indexRolesRouter } from './routes/roles';
 import { newRoleIndex } from './routes/roles/new';
 import { updateRoleRouter } from './routes/roles/update';
@@ -33,10 +33,10 @@ app.use(
 app.use(cors());
 app.use(currentUser);
 // permission routes
-app.use(indexPerRouter);
-app.use(newPerIndex);
-app.use(updatePermissionRouter);
-app.use(deletePermissionRouter);
+// app.use(indexPerRouter);
+// app.use(newPerIndex);
+// app.use(updatePermissionRouter);
+// app.use(deletePermissionRouter);
 
 app.use(indexRolesRouter);
 app.use(newRoleIndex);

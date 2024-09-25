@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 import { app } from './app';
 import { natsWrapper } from './nats-wrapper';
-import { PermissionCreatedListener } from './events/listeners/permissions/permission-created-listener';
-import { PermissionUpdatedListener } from './events/listeners/permissions/permission-updated-listener';
-import { PermissionDeletedListener } from './events/listeners/permissions/permission-deleted-listener';
+// import { PermissionCreatedListener } from './events/listeners/permissions/permission-created-listener';
+// import { PermissionUpdatedListener } from './events/listeners/permissions/permission-updated-listener';
+// import { PermissionDeletedListener } from './events/listeners/permissions/permission-deleted-listener';
 import { RoleCreatedListener } from './events/listeners/roles/role-created-listener';
 import { RoleUpdatedListener } from './events/listeners/roles/role-updated-listener';
 import { RoleDeletedListener } from './events/listeners/roles/role-deleted-listener';
@@ -41,9 +41,9 @@ const start = async () => {
     // declare listenr
 
     // new PaymentCreatedListener(natsWrapper.client).listen();
-    new PermissionCreatedListener(natsWrapper.client).listen();
-    new PermissionUpdatedListener(natsWrapper.client).listen();
-    new PermissionDeletedListener(natsWrapper.client).listen();
+    // new PermissionCreatedListener(natsWrapper.client).listen();
+    // new PermissionUpdatedListener(natsWrapper.client).listen();
+    // new PermissionDeletedListener(natsWrapper.client).listen();
     // role event
     new RoleCreatedListener(natsWrapper.client).listen();
     new RoleUpdatedListener(natsWrapper.client).listen();

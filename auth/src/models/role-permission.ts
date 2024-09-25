@@ -8,7 +8,6 @@ interface RolePermissionAttrs {
   permission: PermissionDoc;
   userRole: UserRoleDoc;
 }
-interface PopulateDoc {}
 interface RolePermissionDoc extends mongoose.Document {
   permission: PermissionDoc;
   userRole: UserRoleDoc;
@@ -55,7 +54,7 @@ rolePermissionSchema.statics.checkPermissionByRoleId = async (id: string) => {
   );
   if (!rolePS) return [];
   const pers: any = [];
-  rolePS.forEach((rp) => pers.push(rp.permission.name));
+  rolePS.forEach((rp) => pers.push(rp.permission.systemName));
   return pers;
 };
 rolePermissionSchema.statics.findByEvent = async (event: {
