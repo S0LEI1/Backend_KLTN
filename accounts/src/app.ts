@@ -3,15 +3,15 @@ import 'express-async-errors';
 import { json } from 'body-parser';
 import cookieSession from 'cookie-session';
 import cors from 'cors';
-import { signupRouter } from './routes/signup';
-import { verifyRouter } from './routes/verify-otp';
 import {
   errorHandler,
   NotFoundError,
   currentUser,
 } from '@share-package/common';
-import { updatePasswordRouter } from './routes/update-password';
-import { sendOtpRouter } from './routes/send-otp';
+import { profileRouter } from './routes/profiles.routes';
+import { accountRouter } from './routes/account.routes';
+import { mailRouter } from './routes/mail.routes';
+import { managerRouter } from './routes/manager.routes';
 
 const app = express();
 app.use(json());
@@ -26,12 +26,11 @@ app.use(
 );
 
 app.use(cors());
-// app.use(currentUser);
-app.use(signupRouter);
-app.use(verifyRouter);
-app.use(updatePasswordRouter);
-app.use(sendOtpRouter);
-
+app.use(currentUser);
+app.use(profileRouter);
+app.use(accountRouter);
+app.use(mailRouter);
+app.use(managerRouter);
 app.all('*', async (req, res) => {
   throw new NotFoundError('Route');
 });

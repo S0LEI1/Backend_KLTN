@@ -2,13 +2,14 @@ import mongoose from 'mongoose';
 import { Password } from '../services/password';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { NotFoundError, UserType } from '@share-package/common';
+import { AccountDoc } from './account';
 interface AttrsUser {
   fullName: string;
   gender: boolean;
   phoneNumber: string;
   address: string;
   avatar?: string;
-  account?: string;
+  account?: AccountDoc;
 }
 // property model build has
 interface UserModel extends mongoose.Model<UserDoc> {
@@ -28,7 +29,7 @@ export interface UserDoc extends mongoose.Document {
   phoneNumber: string;
   address: string;
   avatar?: string;
-  account?: string;
+  account?: AccountDoc;
   version: number;
 }
 const userSchema = new mongoose.Schema(
@@ -106,6 +107,14 @@ userSchema.statics.findUserByAccountId = async (id: string) => {
   if (!user) throw new NotFoundError('User');
   return user;
 };
+
+userSchema.virtual('info', {
+  ref: 'Account',
+  localField: 'account',
+  foreignField: '_id',
+  getters: true,
+});
+
 const User = mongoose.model<UserDoc, UserModel>('User', userSchema);
 
 export { User };

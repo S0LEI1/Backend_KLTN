@@ -1,5 +1,6 @@
 import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
+import generator from 'generate-password';
 const scryptAsync = promisify(scrypt);
 export class Password {
   static async toHash(password: string) {
@@ -11,5 +12,15 @@ export class Password {
     const [hashPassword, salt] = storedPassword.split('.');
     const buf = (await scryptAsync(suplliedPassword, salt, 64)) as Buffer;
     return buf.toString('hex') === hashPassword;
+  }
+  static generate() {
+    const password = generator.generate({
+      length: 10,
+      numbers: true,
+      lowercase: true,
+      uppercase: true,
+      symbols: true,
+    });
+    return password;
   }
 }

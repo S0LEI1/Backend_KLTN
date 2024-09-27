@@ -40,6 +40,12 @@ const accountSchema = new mongoose.Schema({
 accountSchema.set('versionKey', 'version');
 accountSchema.plugin(updateIfCurrentPlugin);
 
+// accountSchema.virtual('user', {
+//   ref:'User',
+//   localField:'id',
+//   foreignField:'account',
+// })
+
 accountSchema.statics.build = (attrs: AccountAttrs) => {
   return new Account(attrs);
 };
