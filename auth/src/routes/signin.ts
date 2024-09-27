@@ -5,9 +5,9 @@ import jwt from 'jsonwebtoken';
 
 import { User } from '../models/user';
 import { Password } from '../services/password';
-import { getValue } from '../services/redis';
-import { UserURMapping } from '../models/user-ur-mapping';
+import { AccountRole } from '../models/account-role-mapping';
 import { RolePermission } from '../models/role-permission';
+import { Account } from '../models/account';
 const router = express.Router();
 const PASSWORD_ERR =
   'Password must contain one digit from 1 to 9, one lowercase letter, one uppercase letter, one special character, no space, and it must be 8-16 characters long.';
@@ -25,33 +25,28 @@ router.post(
   validationRequest,
   async (req: Request, res: Response) => {
     const { email, password } = req.body;
-    const existingUser = await User.findOne({ email });
-    if (!existingUser) {
+    const existingAccount = await Account.findOne({ email });
+    if (!existingAccount) {
       throw new BadRequestError('Invalid credentitals');
     }
     const passwordMatch = await Password.compare(
-      existingUser.password,
+      existingAccount.password,
       password
     );
     if (!passwordMatch) {
       throw new BadRequestError('Password not match');
     }
-
-    const otp = await getValue(email);
-    if (otp !== null) {
-      throw new BadRequestError('Unverified account');
-    }
-    const userURM = await UserURMapping.checkRoleByUserId(existingUser.id);
+    const accountRole = await AccountRole.checkRoleByUserId(existingAccount.id);
     const rolePs = await RolePermission.checkPermissionByRoleId(
-      userURM!.roleId
+      accountRole!.roleId
     );
 
     // Genarate JWT
     const userJWT = jwt.sign(
       {
-        id: existingUser.id,
-        email: existingUser.email,
-        type: existingUser.type,
+        id: existingAccount.id,
+        email: existingAccount.email,
+        type: accountRole!.role,
         permissions: rolePs,
       },
       process.env.JWT_KEY!
@@ -64,7 +59,6 @@ router.post(
     };
     res.status(200).send({
       token: userJWT,
-      type: existingUser.type,
       permissions: rolePs,
     });
   }

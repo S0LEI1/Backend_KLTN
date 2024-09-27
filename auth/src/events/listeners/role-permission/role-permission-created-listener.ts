@@ -8,7 +8,7 @@ import { queueGroupName } from '../queue-group-name';
 import { Message } from 'node-nats-streaming';
 import { RolePermission } from '../../../models/role-permission';
 import { Permission } from '../../../models/permission';
-import { UserRole } from '../../../models/user-role';
+import { Role } from '../../../models/role';
 
 export class RolePermissionCreatedListener extends Listener<RolePermissionCreatedEvent> {
   subject: Subjects.RolePermissionCreated = Subjects.RolePermissionCreated;
@@ -16,12 +16,12 @@ export class RolePermissionCreatedListener extends Listener<RolePermissionCreate
   async onMessage(data: RolePermissionCreatedEvent['data'], msg: Message) {
     const permission = await Permission.findById(data.permissionId);
     if (!permission) throw new NotFoundError('Permission');
-    const role = await UserRole.findById(data.roleId);
+    const role = await Role.findById(data.roleId);
     if (!role) throw new NotFoundError('Role');
     const rolePer = RolePermission.build({
       id: data.id,
       permission: permission,
-      userRole: role,
+      role: role,
     });
     await rolePer.save();
     msg.ack();

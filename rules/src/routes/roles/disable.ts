@@ -10,7 +10,7 @@ import {
 } from '@share-package/common';
 import { Permission } from '../../models/permission';
 import { natsWrapper } from '../../nats-wrapper';
-import { UserRole } from '../../models/user-role';
+import { Role } from '../../models/role';
 import { RoleDeletedPublisher } from '../../events/publishers/roles/role-deleted-publisher';
 const router = express.Router();
 
@@ -20,7 +20,7 @@ router.patch(
   requireType([UserType.Customer]),
   requirePermission(ListPermission.RoleDelete),
   async (req: Request, res: Response) => {
-    const role = await UserRole.findById(req.params.id);
+    const role = await Role.findById(req.params.id);
     if (!role) throw new NotFoundError('Permission');
     role.set({ active: !role.active });
     await role.save();

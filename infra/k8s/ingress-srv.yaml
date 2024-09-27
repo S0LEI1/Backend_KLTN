@@ -24,6 +24,13 @@ spec:
                 name: rules-srv
                 port:
                   number: 3000
+          - path: /accounts/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: accounts-srv
+                port:
+                  number: 3000
           - path: /?(.*)
             pathType: ImplementationSpecific
             backend:

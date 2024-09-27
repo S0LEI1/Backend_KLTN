@@ -9,7 +9,7 @@ import {
 } from '@share-package/common';
 import { Permission } from '../../models/permission';
 import { natsWrapper } from '../../nats-wrapper';
-import { UserRole } from '../../models/user-role';
+import { Role } from '../../models/role';
 const router = express.Router();
 
 router.get(
@@ -18,7 +18,7 @@ router.get(
   requireType([UserType.Manager]),
   requirePermission(ListPermission.RoleRead),
   async (req: Request, res: Response) => {
-    const roles = await UserRole.find();
+    const roles = await Role.find();
     res.status(201).send(roles);
   }
 );

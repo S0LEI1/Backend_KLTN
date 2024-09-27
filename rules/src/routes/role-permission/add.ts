@@ -6,7 +6,7 @@ import {
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { Permission } from '../../models/permission';
-import { UserRole } from '../../models/user-role';
+import { Role } from '../../models/role';
 import { RolePermission } from '../../models/role-permission';
 import { RolePermissionCreatedPublisher } from '../../events/publishers/role-permission/role-permission-created-event';
 import { natsWrapper } from '../../nats-wrapper';
@@ -23,11 +23,11 @@ router.post(
     const { permissionId, roleId } = req.body;
     const permission = await Permission.findById(permissionId);
     if (!permission) throw new NotFoundError('Permission');
-    const role = await UserRole.findById(roleId);
+    const role = await Role.findById(roleId);
     if (!role) throw new NotFoundError('Role');
     const existRolePer = await RolePermission.findOne({
       permission: permission._id,
-      userRole: role._id,
+      Role: role._id,
     });
     if (existRolePer)
       throw new BadRequestError('Role-Permission already exists');
@@ -36,13 +36,13 @@ router.post(
     if (role.active === false) throw new BadRequestError('Role has disable');
     const rolePer = RolePermission.build({
       permission: permission,
-      userRole: role,
+      role: role,
     });
     await rolePer.save();
     new RolePermissionCreatedPublisher(natsWrapper.client).publish({
       id: rolePer.id,
       permissionId: rolePer.permission.id,
-      roleId: rolePer.userRole.id,
+      roleId: rolePer.role.id,
       version: rolePer.version,
     });
     res.status(201).send({ message: 'add permission success', rolePer });

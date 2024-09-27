@@ -10,7 +10,7 @@ import {
 } from '@share-package/common';
 import { Permission } from '../../models/permission';
 import { natsWrapper } from '../../nats-wrapper';
-import { UserRole } from '../../models/user-role';
+import { Role } from '../../models/role';
 import { RoleUpdatedPublisher } from '../../events/publishers/roles/role-updated-publisher';
 import { body } from 'express-validator';
 const router = express.Router();
@@ -30,7 +30,7 @@ router.patch(
     // ) {
     //   throw new BadRequestError('Not permission for update role');
     // }
-    const existsRole = await UserRole.findById(req.params.id);
+    const existsRole = await Role.findById(req.params.id);
     if (!existsRole) {
       throw new BadRequestError('Role do not exists');
     }

@@ -1,33 +1,36 @@
 import mongoose from 'mongoose';
 import { Password } from '../services/password';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
-import { UserURMapping } from './user-ur-mapping';
 import { NotFoundError, UserType } from '@share-package/common';
 interface AttrsUser {
-  email: string;
-  password: string;
+  id: string;
   fullName: string;
   gender: boolean;
   phoneNumber: string;
   address: string;
   avatar?: string;
-  type: UserType;
+  account?: string;
 }
 // property model build has
 interface UserModel extends mongoose.Model<UserDoc> {
   build(attrs: AttrsUser): UserDoc;
   checkExists(id: string): UserDoc;
   findUser(id: string): Promise<UserDoc | null>;
+  findUserByEvent(event: {
+    id: string;
+    version: number;
+  }): Promise<UserDoc | null>;
 }
 // property user doc has
 export interface UserDoc extends mongoose.Document {
-  email: string;
-  password: string;
+  id: string;
   fullName: string;
   gender: boolean;
-  version: number;
+  phoneNumber: string;
+  address: string;
   avatar?: string;
-  type: UserType;
+  account?: string;
+  version: number;
 }
 const userSchema = new mongoose.Schema(
   {
@@ -45,23 +48,22 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: Boolean,
-      require: true,
+      required: true,
     },
     phoneNumber: {
       type: String,
-      require: true,
+      required: true,
     },
     address: {
       type: String,
-      require: true,
+      required: true,
     },
     avatar: {
       type: String,
     },
-    type: {
-      type: String,
-      enum: UserType,
-      default: UserType.Customer,
+    account: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Account',
       required: true,
     },
   },
@@ -78,15 +80,16 @@ const userSchema = new mongoose.Schema(
 );
 userSchema.set('versionKey', 'version');
 userSchema.plugin(updateIfCurrentPlugin);
-userSchema.pre('save', async function (done) {
-  if (this.isModified('password')) {
-    const hashed = await Password.toHash(this.get('password'));
-    this.set('password', hashed);
-  }
-  done();
-});
 userSchema.statics.build = (attrs: AttrsUser) => {
-  return new User(attrs);
+  return new User({
+    _id: attrs.id,
+    fullName: attrs.fullName,
+    phoneNumber: attrs.phoneNumber,
+    gender: attrs.gender,
+    avatar: attrs.avatar,
+    address: attrs.address,
+    account: attrs.account,
+  });
 };
 userSchema.statics.checkExists = async (id: string) => {
   const user = await User.findById(id);
@@ -95,6 +98,17 @@ userSchema.statics.checkExists = async (id: string) => {
 };
 userSchema.statics.findUser = async (id: string) => {
   const user = await User.findById(id);
+  if (!user) throw new NotFoundError('User');
+  return user;
+};
+userSchema.statics.findUserByEvent = async (event: {
+  id: string;
+  version: number;
+}) => {
+  const user = await User.findOne({
+    _id: event.id,
+    version: event.version,
+  });
   if (!user) throw new NotFoundError('User');
   return user;
 };

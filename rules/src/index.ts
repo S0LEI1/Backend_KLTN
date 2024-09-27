@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { app } from './app';
 import { natsWrapper } from './nats-wrapper';
-import { UserCreatedListenr } from './events/listeners/user-created-listener';
+import { AccountCreatedListenr } from './events/listeners/account-created-listener';
 
 const start = async () => {
   if (!process.env.JWT_KEY) {
@@ -32,7 +32,7 @@ const start = async () => {
     process.on('SIGINT', () => natsWrapper.client!.close());
     process.on('SIGTERM', () => natsWrapper.client!.close());
     // declare listenr
-    new UserCreatedListenr(natsWrapper.client).listen();
+    new AccountCreatedListenr(natsWrapper.client).listen();
     // new PaymentCreatedListener(natsWrapper.client).listen();
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connecting mongo!!');

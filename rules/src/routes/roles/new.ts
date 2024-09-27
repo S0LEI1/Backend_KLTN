@@ -10,7 +10,7 @@ import {
 } from '@share-package/common';
 import { Permission } from '../../models/permission';
 import { natsWrapper } from '../../nats-wrapper';
-import { UserRole } from '../../models/user-role';
+import { Role } from '../../models/role';
 import { RoleCreatedPublisher } from '../../events/publishers/roles/role-created-publisher';
 import { body } from 'express-validator';
 const router = express.Router();
@@ -24,7 +24,7 @@ router.post(
   requirePermission(ListPermission.RoleCreate),
   async (req: Request, res: Response) => {
     const { name, description } = req.body;
-    const newRole = UserRole.build({
+    const newRole = Role.build({
       name: name,
       active: true,
       description: description,

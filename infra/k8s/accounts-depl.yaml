@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounts-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: accounts
+  template:
+    metadata:
+      labels:
+        app: accounts
+    spec:
+      containers:
+        - name: accounts
+          image: vannggoc/accounts
+          env:
+            - name: MONGO_URI
+              value: 'mongodb+srv://soleil:01636878201@cluster0.4x48u.mongodb.net/accounts?retryWrites=true&w=majority&appName=Cluster0'
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_KEY
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NATS_URL
+              value: 'http://nats-srv:4222'
+            - name: NATS_CLUSTER_ID
+              value: kimbeautyspa
+            - name: ACCOUNT_REDIS_HOST
+              value: accounts-redis-srv
+            - name: OTP_TIME
+              valueFrom:
+                secretKeyRef:
+                  name: otp-time
+                  key: OTP_TIME
+            - name: AUTH_MAIL
+              valueFrom:
+                secretKeyRef:
+                  name: auth-mail
+                  key: AUTH_MAIL
+            - name: AUTH_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: auth-pass
+                  key: AUTH_PASS
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: accounts-srv
+spec:
+  selector:
+    app: accounts
+  ports:
+    - name: accounts
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

@@ -2,15 +2,15 @@ import { NotFoundError } from '@share-package/common';
 import mongoose, { mongo } from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { PermissionDoc } from './permission';
-import { UserRoleDoc } from './user-role';
+import { RoleDoc } from './role';
 interface RolePermissionAttrs {
   permission: PermissionDoc;
-  userRole: UserRoleDoc;
+  role: RoleDoc;
 }
 interface PopulateDoc {}
 interface RolePermissionDoc extends mongoose.Document {
   permission: PermissionDoc;
-  userRole: UserRoleDoc;
+  role: RoleDoc;
   version: number;
 }
 
@@ -25,9 +25,9 @@ const rolePermissionSchema = new mongoose.Schema({
     ref: 'Permission',
     required: true,
   },
-  userRole: {
+  role: {
     type: mongoose.Types.ObjectId,
-    ref: 'UserRole',
+    ref: 'Role',
     required: true,
   },
 });

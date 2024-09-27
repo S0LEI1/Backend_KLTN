@@ -2,15 +2,15 @@ import { NotFoundError } from '@share-package/common';
 import mongoose, { mongo } from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { PermissionDoc } from './permission';
-import { UserRoleDoc } from './user-role';
+import { RoleDoc } from './role';
 interface RolePermissionAttrs {
   id: string;
   permission: PermissionDoc;
-  userRole: UserRoleDoc;
+  role: RoleDoc;
 }
 interface RolePermissionDoc extends mongoose.Document {
   permission: PermissionDoc;
-  userRole: UserRoleDoc;
+  role: RoleDoc;
   version: number;
 }
 
@@ -29,9 +29,9 @@ const rolePermissionSchema = new mongoose.Schema({
     ref: 'Permission',
     required: true,
   },
-  userRole: {
+  role: {
     type: mongoose.Types.ObjectId,
-    ref: 'UserRole',
+    ref: 'Role',
     required: true,
   },
 });
@@ -42,12 +42,12 @@ rolePermissionSchema.statics.build = (attrs: RolePermissionAttrs) => {
   return new RolePermission({
     _id: attrs.id,
     permission: attrs.permission,
-    userRole: attrs.userRole,
+    role: attrs.role,
   });
 };
 
 rolePermissionSchema.statics.checkPermissionByRoleId = async (id: string) => {
-  const rolePS = await RolePermission.find({ userRole: id }).populate(
+  const rolePS = await RolePermission.find({ role: id }).populate(
     'permission',
     // return data
     'name systemName'
