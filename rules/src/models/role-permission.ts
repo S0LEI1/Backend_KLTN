@@ -8,7 +8,7 @@ interface RolePermissionAttrs {
   role: RoleDoc;
 }
 interface PopulateDoc {}
-interface RolePermissionDoc extends mongoose.Document {
+export interface RolePermissionDoc extends mongoose.Document {
   permission: PermissionDoc;
   role: RoleDoc;
   version: number;

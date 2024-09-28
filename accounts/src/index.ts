@@ -2,9 +2,6 @@ import mongoose from 'mongoose';
 import { app } from './app';
 import { natsWrapper } from './nats-wrapper';
 import { AccountRoleCreatedListener } from './events/listeners/account-role-created-listener';
-import { RoleCreatedListener } from './events/listeners/roles/role-created-listener';
-import { RoleUpdatedListener } from './events/listeners/roles/role-updated-listener';
-import { RoleDeletedListener } from './events/listeners/roles/role-deleted-listener';
 const start = async () => {
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
@@ -33,10 +30,6 @@ const start = async () => {
     });
     process.on('SIGINT', () => natsWrapper.client!.close());
     process.on('SIGTERM', () => natsWrapper.client!.close());
-    // -------------role ----------------------
-    new RoleCreatedListener(natsWrapper.client).listen();
-    new RoleUpdatedListener(natsWrapper.client).listen();
-    new RoleDeletedListener(natsWrapper.client).listen();
 
     new AccountRoleCreatedListener(natsWrapper.client).listen();
     await mongoose.connect(process.env.MONGO_URI);

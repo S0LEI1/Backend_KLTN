@@ -1,5 +1,4 @@
 import { NotFoundError, UserType } from '@share-package/common';
-import { UserDoc } from './user';
 import mongoose, { mongo } from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { Password } from '../services/password';

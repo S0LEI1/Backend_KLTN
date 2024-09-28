@@ -29,4 +29,11 @@ router.patch(
   requirePermission(ListPermission.EmployeeRead),
   ManagerControllers.updateUserProfile
 );
+router.delete(
+  '/accounts/manager/:id',
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission(ListPermission.EmployeeDelete),
+  ManagerControllers.deleteUser
+);
 export { router as managerRouter };

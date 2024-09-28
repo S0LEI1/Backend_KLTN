@@ -15,8 +15,7 @@ export class RoleDeletedListener extends Listener<RoleDeletedEvent> {
     console.log(data);
     const role = await Role.findByEvent(data);
     if (!role) throw new NotFoundError('Role');
-    role.set({ active: data.active });
-    await role.save();
+    await Role.deleteOne({ _id: role.id });
     msg.ack();
   }
 }

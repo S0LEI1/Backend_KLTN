@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { app } from './app';
 import { natsWrapper } from './nats-wrapper';
 import { AccountCreatedListenr } from './events/listeners/account-created-listener';
+import { AccountDeletedListener } from './events/listeners/account-deleted-listener';
 
 const start = async () => {
   if (!process.env.JWT_KEY) {
@@ -33,6 +34,7 @@ const start = async () => {
     process.on('SIGTERM', () => natsWrapper.client!.close());
     // declare listenr
     new AccountCreatedListenr(natsWrapper.client).listen();
+    new AccountDeletedListener(natsWrapper.client).listen();
     // new PaymentCreatedListener(natsWrapper.client).listen();
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connecting mongo!!');

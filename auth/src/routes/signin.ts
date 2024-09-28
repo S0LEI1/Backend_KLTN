@@ -3,7 +3,6 @@ import { body } from 'express-validator';
 import { validationRequest, BadRequestError } from '@share-package/common';
 import jwt from 'jsonwebtoken';
 
-import { User } from '../models/user';
 import { Password } from '../services/password';
 import { AccountRole } from '../models/account-role-mapping';
 import { RolePermission } from '../models/role-permission';
@@ -36,9 +35,11 @@ router.post(
     if (!passwordMatch) {
       throw new BadRequestError('Password not match');
     }
-    const accountRole = await AccountRole.checkRoleByUserId(existingAccount.id);
+    const accountRole = await AccountRole.checkRoleByAccountId(
+      existingAccount.id
+    );
     const rolePs = await RolePermission.checkPermissionByRoleId(
-      accountRole!.roleId
+      accountRole!.role.id
     );
 
     // Genarate JWT
@@ -46,7 +47,7 @@ router.post(
       {
         id: existingAccount.id,
         email: existingAccount.email,
-        type: accountRole!.role,
+        type: existingAccount.type,
         permissions: rolePs,
       },
       process.env.JWT_KEY!
@@ -60,6 +61,7 @@ router.post(
     res.status(200).send({
       token: userJWT,
       permissions: rolePs,
+      type: existingAccount.type,
     });
   }
 );

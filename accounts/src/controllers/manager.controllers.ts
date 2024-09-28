@@ -4,18 +4,25 @@ import { NotFoundError, UserType } from '@share-package/common';
 import { AccountService } from '../services/account.service';
 import { Account } from '../models/account';
 import { AccountRole } from '../models/account-role-mapping';
-import { Role } from '../models/role';
+import { PublisherServices } from '../services/publisher.service';
 export class ManagerControllers {
   static async deleteUser(req: Request, res: Response) {
     const { id } = req.params;
-    const user = await User.findUser(id);
-    const account = await Account.findAccount(user!.account!.id);
-    const accountRole = await AccountRole.findOne(account!.id);
-    const role = Role.findById(accountRole!.role!.id);
-    await User.deleteOne({ id });
-    await Account.deleteOne(account!.id);
-    await AccountRole.deleteOne(accountRole!.id);
-    await Role.deleteOne(accountRole!.role.id);
+    try {
+      const user = await User.findUser(id);
+      const account = await Account.findById(user!.account);
+      if (!account) throw new NotFoundError('Account');
+      const accountRole = await AccountRole.findOne({ account: account });
+      await User.deleteOne({ _id: user!.id });
+      await Account.deleteOne({ _id: account!.id });
+      await AccountRole.deleteOne({ _id: accountRole!.id });
+      PublisherServices.accountDelete(account!, user!.id);
+      res
+        .status(200)
+        .send({ message: 'DELETE: sucess', user, account, accountRole });
+    } catch (error) {
+      console.log(error);
+    }
   }
   static async updateUserProfile(req: Request, res: Response) {
     const { fullName, gender, phoneNumber, address } = req.body;

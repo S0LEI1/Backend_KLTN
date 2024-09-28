@@ -6,7 +6,6 @@ import {
 import { Message } from 'node-nats-streaming';
 import { queueGroupName } from '../queue-group-name';
 import { AccountRole } from '../../../models/account-role-mapping';
-import { User } from '../../../models/user';
 import { Role } from '../../../models/role';
 import { Account } from '../../../models/account';
 
@@ -17,6 +16,7 @@ export class AccountRoleCreatedListener extends Listener<AccountRoleCreatedEvent
     const account = await Account.findAccount(data.accountId);
     const role = await Role.findRole(data.roleId);
     const accountRole = AccountRole.build({
+      id: data.id,
       account: account!,
       role: role!,
     });

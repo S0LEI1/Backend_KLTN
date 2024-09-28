@@ -1,6 +1,11 @@
 import {
   BadRequestError,
+  ListPermission,
   NotFoundError,
+  UserType,
+  requireAuth,
+  requirePermission,
+  requireType,
   validationRequest,
 } from '@share-package/common';
 import express, { Request, Response } from 'express';
@@ -19,6 +24,9 @@ router.post(
     body('permissionId').isMongoId().withMessage('Permission ID must be valid'),
   ],
   validationRequest,
+  requireAuth,
+  requireType([UserType.Manager]),
+  // requirePermission(ListPermission.RolePermissionCreate),
   async (req: Request, res: Response) => {
     const { permissionId, roleId } = req.body;
     const permission = await Permission.findById(permissionId);

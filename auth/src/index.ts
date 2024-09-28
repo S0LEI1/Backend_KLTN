@@ -9,10 +9,11 @@ import { RoleUpdatedListener } from './events/listeners/roles/role-updated-liste
 import { RoleDeletedListener } from './events/listeners/roles/role-deleted-listener';
 import { RolePermissionCreatedListener } from './events/listeners/role-permission/role-permission-created-listener';
 import { RolePermissionDeletedListener } from './events/listeners/role-permission/role-permission-deleted-listener';
-import { CustomerCreatedListener } from './events/listeners/customers/customer-created-listener';
 import { AccountRoleCreatedListener } from './events/listeners/account-role/account-role-created-listener';
 import { AccountCreatedListener } from './events/listeners/accounts/account-created-listener';
 import { AccountUpdatedListener } from './events/listeners/accounts/account-updated-listener';
+import { AccountRoleDeletedListener } from './events/listeners/account-role/account-role-deleted-listener';
+import { AccountDeletedListener } from './events/listeners/accounts/account-deleted-listener';
 const start = async () => {
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
@@ -55,12 +56,13 @@ const start = async () => {
     new RolePermissionCreatedListener(natsWrapper.client).listen();
     new RolePermissionDeletedListener(natsWrapper.client).listen();
     // user
-    new CustomerCreatedListener(natsWrapper.client).listen();
     // ----------------account role
     new AccountRoleCreatedListener(natsWrapper.client).listen();
+    new AccountRoleDeletedListener(natsWrapper.client).listen();
     // ----------------acount
     new AccountCreatedListener(natsWrapper.client).listen();
     new AccountUpdatedListener(natsWrapper.client).listen();
+    new AccountDeletedListener(natsWrapper.client).listen();
 
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connecting mongo!!');

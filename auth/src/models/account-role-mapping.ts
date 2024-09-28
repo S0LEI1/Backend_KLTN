@@ -4,6 +4,7 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { RoleDoc } from './role';
 import { AccountDoc } from './account';
 interface AccountRoleAttrs {
+  id: string;
   account: AccountDoc;
   role: RoleDoc;
 }
@@ -14,6 +15,7 @@ interface PopulateDoc {
   role: string;
 }
 interface AccountRoleDoc extends mongoose.Document {
+  id: string;
   account: AccountDoc;
   role: RoleDoc;
   version: number;
@@ -21,7 +23,7 @@ interface AccountRoleDoc extends mongoose.Document {
 
 interface AccountRoleModel extends mongoose.Model<AccountRoleDoc> {
   build(attrs: AccountRoleAttrs): AccountRoleDoc;
-  checkRoleByUserId(id: string): Promise<PopulateDoc | null>;
+  checkRoleByAccountId(id: string): Promise<AccountRoleAttrs | null>;
 }
 
 const accountRoleSchema = new mongoose.Schema(
@@ -51,20 +53,19 @@ accountRoleSchema.set('versionKey', 'version');
 accountRoleSchema.plugin(updateIfCurrentPlugin);
 
 accountRoleSchema.statics.build = (attrs: AccountRoleAttrs) => {
-  return new AccountRole(attrs);
+  return new AccountRole({
+    _id: attrs.id,
+    account: attrs.account,
+    role: attrs.role,
+  });
 };
-accountRoleSchema.statics.checkRoleByUserId = async (id: string) => {
+accountRoleSchema.statics.checkRoleByAccountId = async (id: string) => {
   const accountRole = await AccountRole.findOne({ account: id })
     // .lean()
     .populate('role', 'name');
   if (!accountRole)
     throw new BadRequestError('You dont have permission or not verified otp');
-  return {
-    // id: userURM.id,
-    // userId: userURM.userId,
-    roleId: accountRole.role.id,
-    roleName: accountRole.role.name,
-  };
+  return accountRole;
 };
 const AccountRole = mongoose.model<AccountRoleDoc, AccountRoleModel>(
   'AccountRole',
