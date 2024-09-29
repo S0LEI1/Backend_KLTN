@@ -42,16 +42,18 @@ export class ManagerControllers {
   static async readUserProfiles(req: Request, res: Response) {
     const { type, pages = 1 } = req.query;
     const perPage = 25;
+    const query: Record<string, any> = {};
+    query.type = { $eq: type };
     try {
-      const totalItems = await User.find().countDocuments();
+      const totalItems = await User.find(query).countDocuments();
       const users = await AccountService.pagination(
         totalItems,
         parseInt(pages as string)
       );
-      const userFilter = users.filter((user) => user.account!.type === type);
+      // const userFilter = users.filter((user) => user.account!.type === type);
       res
         .status(200)
-        .send({ message: 'GET: user successfully', userFilter, totalItems });
+        .send({ message: 'GET: user successfully', users, totalItems });
     } catch (error) {
       console.log(error);
     }

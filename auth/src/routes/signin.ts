@@ -50,7 +50,8 @@ router.post(
         type: existingAccount.type,
         permissions: rolePs,
       },
-      process.env.JWT_KEY!
+      process.env.JWT_KEY!,
+      { expiresIn: '3h' }
     );
 
     // store jwt
