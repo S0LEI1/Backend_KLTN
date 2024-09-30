@@ -1,4 +1,6 @@
-./auth/node_modules
-./common/node_modules
-./expiration/node_modules
-./employees/node_modules
+../auth/node_modules
+../common/node_modules
+../expiration/node_modules
+../employees/node_modules
+../products/node_modules
+../accounts/node_modules
