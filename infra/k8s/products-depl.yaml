@@ -51,6 +51,11 @@ spec:
                 secretKeyRef:
                   name: region
                   key: REGION
+            - name: PER_PAGE
+              valueFrom:
+                secretKeyRef:
+                  name: per-page
+                  key: PER_PAGE
 ---
 apiVersion: v1
 kind: Service

@@ -1,3 +1,4 @@
+import { NotFoundError } from '@share-package/common';
 import mongoose, { mongo } from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
@@ -13,6 +14,7 @@ export interface SuplierDoc extends mongoose.Document {
 
 interface SuplierModel extends mongoose.Model<SuplierDoc> {
   build(attrs: SuplierAttrs): SuplierDoc;
+  findSuplier(id: string): Promise<SuplierDoc | null>;
 }
 
 const suplierSchema = new mongoose.Schema(
@@ -42,7 +44,11 @@ suplierSchema.plugin(updateIfCurrentPlugin);
 suplierSchema.statics.build = (attrs: SuplierAttrs) => {
   return new Suplier(attrs);
 };
-
+suplierSchema.statics.findSuplier = async (id: string) => {
+  const suplier = await Suplier.findById({ _id: id });
+  if (!suplier) throw new NotFoundError('Suplier');
+  return suplier;
+};
 const Suplier = mongoose.model<SuplierDoc, SuplierModel>(
   'Suplier',
   suplierSchema

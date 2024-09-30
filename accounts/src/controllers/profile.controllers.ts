@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { User } from '../models/user';
 import { ProfileServices } from '../services/profiles.service';
+import { Account } from '../models/account';
+import { NotFoundError } from '@share-package/common';
 
 export class ProfileController {
   static async updateAvatar(req: Request, res: Response) {
@@ -20,9 +22,19 @@ export class ProfileController {
     }
   }
   static async information(req: Request, res: Response) {
-    const { id } = req.currentUser!;
-    const user = await User.findUserByAccountId(id);
-    res.status(200).send(user!);
+    try {
+      const { id } = req.currentUser!;
+      const account = await Account.findById({ _id: id });
+      if (!account) throw new NotFoundError('Account');
+      const user = await User.findUserByAccountId(account.id);
+      res.status(200).send({
+        message: 'GET: User information successfully',
+        user,
+        email: account.email,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
   static async updateInformation(req: Request, res: Response) {
     const { fullName, gender, phoneNumber, address } = req.body;
