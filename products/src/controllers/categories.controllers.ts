@@ -17,11 +17,19 @@ export class CategoriesControllers {
     }
   }
   static async readAll(req: Request, res: Response) {
+    const { pages } = req.query || 1;
+
     try {
-      const categories = await CategoriesServices.readAll();
+      const { categories, totalItems } = await CategoriesServices.readAll(
+        parseInt(pages as string)
+      );
       res
         .status(200)
-        .send({ message: 'GET: List categories successfully', categories });
+        .send({
+          message: 'GET: List categories successfully',
+          categories,
+          totalItems,
+        });
     } catch (error) {
       if (error instanceof Error) {
         throw new BadRequestError(error.message);

@@ -1,6 +1,6 @@
 import { BadRequestError, NotFoundError } from '@share-package/common';
 import { Category, CategoryDoc } from '../models/category';
-
+const PER_PAGE = 25;
 export class CategoriesServices {
   static async create(name: string, description: string) {
     const existCategory = await Category.findOne({ name: name });
@@ -12,10 +12,15 @@ export class CategoriesServices {
     await category.save();
     return category;
   }
-  static async readAll() {
-    const categories = Category.find();
+  static async readAll(pages: number) {
+    const totalItems = await Category.find().countDocuments();
+    const categories = await Category.find()
+      .sort({ createdAt: -1 })
+      .skip((pages - 1) * PER_PAGE)
+      .limit(PER_PAGE)
+      .exec();
     if (!categories) throw new NotFoundError('Categories');
-    return categories;
+    return { categories, totalItems };
   }
   static async readOne(id: string) {
     const category = await Category.findById(id);

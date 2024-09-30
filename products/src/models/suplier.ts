@@ -8,6 +8,7 @@ interface SuplierAttrs {
 export interface SuplierDoc extends mongoose.Document {
   name: string;
   description: string;
+  version: number;
 }
 
 interface SuplierModel extends mongoose.Model<SuplierDoc> {
