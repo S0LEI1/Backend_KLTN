@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: products-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: products
+  template:
+    metadata:
+      labels:
+        app: products
+    spec:
+      containers:
+        - name: products
+          image: vannggoc/products
+          env:
+            - name: MONGO_URI
+              value: 'mongodb+srv://soleil:01636878201@cluster0.4x48u.mongodb.net/products?retryWrites=true&w=majority&appName=Cluster0'
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_KEY
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NATS_URL
+              value: 'http://nats-srv:4222'
+            - name: NATS_CLUSTER_ID
+              value: kimbeautyspa
+            - name: BUCKET_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: bucket-name
+                  key: BUCKET_NAME
+            - name: ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: access-key-id
+                  key: ACCESS_KEY_ID
+            - name: SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secret-access-key
+                  key: SECRET_ACCESS_KEY
+            - name: REGION
+              valueFrom:
+                secretKeyRef:
+                  name: region
+                  key: REGION
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: products-srv
+spec:
+  selector:
+    app: products
+  ports:
+    - name: products
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

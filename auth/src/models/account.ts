@@ -25,21 +25,32 @@ interface AccountModel extends mongoose.Model<AccountDoc> {
   }): Promise<AccountDoc | null>;
 }
 
-const accountSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
+const accountSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: UserType,
+      default: UserType.Customer,
+    },
   },
-  password: {
-    type: String,
-    required: true,
-  },
-  type: {
-    type: String,
-    enum: UserType,
-    default: UserType.Customer,
-  },
-});
+  {
+    toJSON: {
+      transform(doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+      },
+    },
+    timestamps: true,
+  }
+);
 
 accountSchema.set('versionKey', 'version');
 accountSchema.plugin(updateIfCurrentPlugin);

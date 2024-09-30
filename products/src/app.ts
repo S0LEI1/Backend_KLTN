@@ -8,10 +8,8 @@ import {
   NotFoundError,
   currentUser,
 } from '@share-package/common';
-import { profileRouter } from './routes/profiles.routes';
-import { accountRouter } from './routes/account.routes';
-import { mailRouter } from './routes/mail.routes';
-import { managerRouter } from './routes/manager.routes';
+import { categoriesRouter } from './routes/categories.routes';
+import { suplierRouter } from './routes/suplier.routes';
 
 const app = express();
 app.use(json());
@@ -36,10 +34,9 @@ app.use(
 );
 app.use(cors());
 app.use(currentUser);
-app.use(profileRouter);
-app.use(accountRouter);
-app.use(mailRouter);
-app.use(managerRouter);
+app.use(categoriesRouter);
+app.use(suplierRouter);
+
 app.all('*', async (req, res) => {
   throw new NotFoundError('Route');
 });

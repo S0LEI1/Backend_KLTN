@@ -31,6 +31,13 @@ spec:
                 name: accounts-srv
                 port:
                   number: 3000
+          - path: /products/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: products-srv
+                port:
+                  number: 3000
           - path: /?(.*)
             pathType: ImplementationSpecific
             backend:
