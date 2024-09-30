@@ -24,46 +24,49 @@ router.post(
   validationRequest,
   async (req: Request, res: Response) => {
     const { email, password } = req.body;
-    const existingAccount = await Account.findOne({ email });
-    if (!existingAccount) {
-      throw new BadRequestError('Invalid credentitals');
-    }
-    const passwordMatch = await Password.compare(
-      existingAccount.password,
-      password
-    );
-    if (!passwordMatch) {
-      throw new BadRequestError('Password not match');
-    }
-    const accountRole = await AccountRole.checkRoleByAccountId(
-      existingAccount.id
-    );
-    const rolePs = await RolePermission.checkPermissionByRoleId(
-      accountRole!.role.id
-    );
+    try {
+      const existingAccount = await Account.findOne({ email });
+      if (!existingAccount) {
+        throw new BadRequestError('Invalid credentitals');
+      }
+      const passwordMatch = await Password.compare(
+        existingAccount.password,
+        password
+      );
+      if (!passwordMatch) {
+        throw new BadRequestError('Password not match');
+      }
+      const accountRole = await AccountRole.checkRoleByAccountId(
+        existingAccount.id
+      );
+      const rolePs = await RolePermission.checkPermissionByRoleId(
+        accountRole!.role.id
+      );
+      // Genarate JWT
+      const userJWT = jwt.sign(
+        {
+          id: existingAccount.id,
+          email: existingAccount.email,
+          type: existingAccount.type,
+          permissions: rolePs,
+        },
+        process.env.JWT_KEY!,
+        { expiresIn: '3h' }
+      );
 
-    // Genarate JWT
-    const userJWT = jwt.sign(
-      {
-        id: existingAccount.id,
-        email: existingAccount.email,
-        type: existingAccount.type,
+      // store jwt
+
+      req.session = {
+        jwt: userJWT,
+      };
+      res.status(200).send({
+        token: userJWT,
         permissions: rolePs,
-      },
-      process.env.JWT_KEY!,
-      { expiresIn: '3h' }
-    );
-
-    // store jwt
-
-    req.session = {
-      jwt: userJWT,
-    };
-    res.status(200).send({
-      token: userJWT,
-      permissions: rolePs,
-      type: existingAccount.type,
-    });
+        type: existingAccount.type,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 );
 

@@ -1,6 +1,10 @@
 import express, { Request, Response } from 'express';
 import { ProfileController } from '../controllers/profile.controllers';
-import { requireAuth, validationRequest } from '@share-package/common';
+import {
+  requireAuth,
+  singleUploadMiddleware,
+  validationRequest,
+} from '@share-package/common';
 import { body } from 'express-validator';
 import {
   ADDRESS_MESSAGE,
@@ -21,5 +25,11 @@ router.patch(
   validationRequest,
   requireAuth,
   ProfileController.updateInformation
+);
+router.patch(
+  '/accounts/avatar',
+  singleUploadMiddleware,
+  requireAuth,
+  ProfileController.updateAvatar
 );
 export { router as profileRouter };

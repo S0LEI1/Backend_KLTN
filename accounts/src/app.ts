@@ -16,7 +16,17 @@ import { managerRouter } from './routes/manager.routes';
 const app = express();
 app.use(json());
 app.set('trust proxy', true);
-
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'OPTIONS, GET, POST, PUT, PATCH, DELETE'
+  );
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '50mb' }));
 // config cookie session
 app.use(
   cookieSession({
@@ -24,7 +34,6 @@ app.use(
     secure: process.env.NODE_ENV != 'test',
   })
 );
-
 app.use(cors());
 app.use(currentUser);
 app.use(profileRouter);
