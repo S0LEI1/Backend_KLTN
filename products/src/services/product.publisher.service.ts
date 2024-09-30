@@ -11,6 +11,10 @@ export class ProductPublisher {
       categoryId: product.category.id,
       suplierId: product.suplier.id,
       active: product.active,
+      expire: product.expire,
+      costPrice: product.costPrice,
+      salePrice: product.salePrice,
+      quantity: product.quantiy,
     });
   }
 }

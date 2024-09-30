@@ -11,12 +11,11 @@ export class ProductControllers {
       suplierId,
       expire,
       costPrice,
-      salePrice,
       quantity,
     } = req.body;
     const { file } = req;
     if (!file) throw new BadRequestError('Image must be provided');
-
+    const salePrice = costPrice + (costPrice * 10) / 100;
     const product = await ProductService.new({
       name: name,
       description: description,
@@ -24,9 +23,9 @@ export class ProductControllers {
       suplierId: suplierId,
       file: file!,
       expire: expire,
-      costPrice: 0,
-      salePrice: 0,
-      quantity: 0,
+      costPrice: costPrice,
+      salePrice: salePrice,
+      quantity: quantity,
     });
     ProductPublisher.new(product!);
     res.status(201).send({
