@@ -34,7 +34,7 @@ export class ProductService {
         expire: productAttrs.expire,
         costPrice: productAttrs.costPrice,
         salePrice: productAttrs.salePrice,
-        quantiy: productAttrs.quantity,
+        quantity: productAttrs.quantity,
       });
       await product.save();
       return product;

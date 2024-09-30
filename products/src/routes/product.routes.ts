@@ -19,7 +19,7 @@ router.post(
     body('name').notEmpty().withMessage(`Product ${NAME_MESSAGE}`),
     body('categoryId').isMongoId().withMessage('Category Id must be valid'),
     body('suplierId').isMongoId().withMessage('Suplier Id must be valid'),
-    body('expire').isDate().withMessage('Expire must be valid'),
+    body('expire').isISO8601().toDate().withMessage('Expire must be valid'),
     body('costPrice').isNumeric().withMessage('Cost price must be valid'),
     body('quantity').isNumeric().withMessage('Quanity must be valid'),
   ],

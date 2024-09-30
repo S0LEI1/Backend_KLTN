@@ -13,7 +13,7 @@ export interface ProductAttrs {
   expire: Date;
   costPrice: number;
   salePrice: number;
-  quantiy: number;
+  quantity: number;
   discount?: number;
   active: boolean;
 }
@@ -26,7 +26,7 @@ export interface ProductDoc extends mongoose.Document {
   expire: Date;
   costPrice: number;
   salePrice: number;
-  quantiy: number;
+  quantity: number;
   discount?: number;
   active: boolean;
   version: boolean;

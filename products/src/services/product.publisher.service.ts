@@ -14,7 +14,7 @@ export class ProductPublisher {
       expire: product.expire,
       costPrice: product.costPrice,
       salePrice: product.salePrice,
-      quantity: product.quantiy,
+      quantity: product.quantity,
     });
   }
 }

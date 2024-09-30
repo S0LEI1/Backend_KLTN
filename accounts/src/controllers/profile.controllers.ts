@@ -29,8 +29,17 @@ export class ProfileController {
       const user = await User.findUserByAccountId(account.id);
       res.status(200).send({
         message: 'GET: User information successfully',
-        user,
-        email: account.email,
+        user: {
+          id: user?.id,
+          fullName: user?.fullName,
+          phoneNumber: user?.phoneNumber,
+          gender: user?.gender,
+          avatar: user?.avatar,
+          address: user?.address,
+          accountId: account.id,
+          email: account.email,
+          type: account.type,
+        },
       });
     } catch (error) {
       console.log(error);
