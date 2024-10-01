@@ -13,7 +13,7 @@ import {
 import { ProductControllers } from '../controllers/product.controllers';
 const router = express.Router();
 router.post(
-  '/products/new',
+  '/products/manage/new',
   singleUploadMiddleware,
   [
     body('name').notEmpty().withMessage(`Product ${NAME_MESSAGE}`),
@@ -29,6 +29,7 @@ router.post(
   requirePermission(ListPermission.ProductCreate),
   ProductControllers.new
 );
+router.get('/products/', requireAuth, ProductControllers.readAll);
 router.get(
   '/products/:id',
   requireAuth,
@@ -37,7 +38,7 @@ router.get(
   ProductControllers.readOne
 );
 router.patch(
-  '/products/:id',
+  '/products/manage/:id',
   singleUploadMiddleware,
   [
     body('name').notEmpty().withMessage(`Product ${NAME_MESSAGE}`),
@@ -54,7 +55,7 @@ router.patch(
   ProductControllers.update
 );
 router.patch(
-  '/products/disable/:id',
+  '/products/manage/disable/:id',
   requireAuth,
   requireType([UserType.Manager]),
   requirePermission(ListPermission.ProductUpdate),
@@ -74,7 +75,7 @@ router.get(
   ProductControllers.readAllByName
 );
 router.get(
-  '/products/find/unactive/',
+  '/products/manage/unactive/',
   requireAuth,
   requireType([UserType.Manager]),
   requirePermission(ListPermission.ProductRead),
