@@ -15,7 +15,7 @@ export interface ProductAttrs {
   salePrice: number;
   quantity: number;
   discount?: number;
-  active: boolean;
+  active?: boolean;
 }
 export interface ProductDoc extends mongoose.Document {
   name: string;
@@ -28,12 +28,13 @@ export interface ProductDoc extends mongoose.Document {
   salePrice: number;
   quantity: number;
   discount?: number;
-  active: boolean;
-  version: boolean;
+  active?: boolean;
+  version: number;
 }
 interface ProductModel extends mongoose.Model<ProductDoc> {
   build(attrs: ProductAttrs): ProductDoc;
   findByName(name: string): Promise<ProductDoc | null>;
+  findProduct(id: string): Promise<ProductDoc | null>;
 }
 const productSchema = new mongoose.Schema(
   {
@@ -105,6 +106,12 @@ productSchema.statics.findByName = async (name: string) => {
   const product = await Product.findOne({ name: name });
   if (product) throw new BadRequestError('Product existing');
   return product;
+};
+productSchema.statics.findProduct = async (id: string) => {
+  return await Product.findById({ _id: id })
+    .populate('category')
+    .populate('suplier')
+    .exec();
 };
 const Product = mongoose.model<ProductDoc, ProductModel>(
   'Product',
