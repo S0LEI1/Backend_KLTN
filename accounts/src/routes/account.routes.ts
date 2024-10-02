@@ -35,7 +35,7 @@ router.post(
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.EmployeeCreate),
+  requirePermission([ListPermission.EmployeeCreate]),
   AccountControllers.createEmployee
 );
 router.patch(

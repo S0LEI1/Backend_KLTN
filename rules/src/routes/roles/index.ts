@@ -16,7 +16,7 @@ router.get(
   '/rules/roles',
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.RoleRead),
+  requirePermission([ListPermission.RoleRead]),
   async (req: Request, res: Response) => {
     const roles = await Role.find();
     res.status(201).send(roles);

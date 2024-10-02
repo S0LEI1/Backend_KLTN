@@ -18,28 +18,28 @@ router.post(
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductCreate),
+  requirePermission([ListPermission.ProductCreate]),
   CategoriesControllers.new
 );
 router.get(
   '/products/categories',
   requireAuth,
   requireType([UserType.Employee, UserType.Manager]),
-  requirePermission(ListPermission.ProductRead),
+  requirePermission([ListPermission.ProductRead]),
   CategoriesControllers.readAll
 );
 router.get(
   '/products/category/:id',
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductRead),
+  requirePermission([ListPermission.ProductRead]),
   CategoriesControllers.readOne
 );
 router.get(
   '/products/category',
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductRead),
+  requirePermission([ListPermission.ProductRead]),
   CategoriesControllers.findByName
 );
 router.patch(
@@ -48,14 +48,14 @@ router.patch(
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductRead),
+  requirePermission([ListPermission.ProductRead]),
   CategoriesControllers.update
 );
 router.delete(
   '/products/category/:id',
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductRead),
+  requirePermission([ListPermission.ProductRead]),
   CategoriesControllers.delete
 );
 export { router as categoriesRouter };

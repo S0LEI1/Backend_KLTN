@@ -26,7 +26,7 @@ router.post(
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductCreate),
+  requirePermission([ListPermission.ProductCreate]),
   ProductControllers.new
 );
 router.get('/products/', requireAuth, ProductControllers.readAll);
@@ -51,14 +51,14 @@ router.patch(
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductUpdate),
+  requirePermission([ListPermission.ProductUpdate]),
   ProductControllers.update
 );
 router.patch(
   '/products/manage/disable/:id',
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductUpdate),
+  requirePermission([ListPermission.ProductUpdate]),
   ProductControllers.disable
 );
 router.get(
@@ -78,7 +78,7 @@ router.get(
   '/products/manage/unactive/',
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductRead),
+  requirePermission([ListPermission.ProductRead]),
   ProductControllers.readAllProductUnactive
 );
 export { router as productRouter };

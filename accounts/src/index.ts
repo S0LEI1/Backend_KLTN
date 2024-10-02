@@ -18,11 +18,35 @@ const start = async () => {
   if (!process.env.NATS_CLUSTER_ID) {
     throw new Error('NATS cluster id must be defined');
   }
+  if (!process.env.OTP_TIME) {
+    throw new Error('OTP time must be defined');
+  }
+  if (!process.env.AUTH_MAIL) {
+    throw new Error('Mail must be defined');
+  }
+  if (!process.env.AUTH_PASS) {
+    throw new Error('Email password must be defined');
+  }
+  if (!process.env.BUCKET_NAME) {
+    throw new Error('Bucket name must be defined');
+  }
+  if (!process.env.ACCESS_KEY_ID) {
+    throw new Error('Access key Id must be defined');
+  }
+  if (!process.env.SECRET_ACCESS_KEY) {
+    throw new Error('Secret access key name must be defined');
+  }
+  if (!process.env.REGION) {
+    throw new Error('Region name must be defined');
+  }
+  if (!process.env.PER_PAGE) {
+    throw new Error('Per page name must be defined');
+  }
   try {
     await natsWrapper.connect(
-      process.env.NATS_CLUSTER_ID,
-      process.env.NATS_CLIENT_ID,
-      process.env.NATS_URL
+      process.env.NATS_CLUSTER_ID!,
+      process.env.NATS_CLIENT_ID!,
+      process.env.NATS_URL!
     );
     natsWrapper.client.on('close', () => {
       console.log('Nats connection closed');
@@ -32,7 +56,7 @@ const start = async () => {
     process.on('SIGTERM', () => natsWrapper.client!.close());
 
     new AccountRoleCreatedListener(natsWrapper.client).listen();
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI!);
     console.log('Connecting mongo!!');
   } catch (error) {
     console.log(error);

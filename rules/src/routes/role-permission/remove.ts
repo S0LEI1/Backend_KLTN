@@ -15,7 +15,7 @@ router.delete(
   '/rules/delete/:id',
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.RolePermissionDelete),
+  requirePermission([ListPermission.RolePermissionDelete]),
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const rolePer = await RolePermission.findById(id);

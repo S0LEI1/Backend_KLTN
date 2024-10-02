@@ -1,9 +1,10 @@
+import { NotFoundError } from '@share-package/common';
 import { AccountCreatedPublisher } from '../events/publishers/account-created-publisher';
 import { AccountDoc } from '../models/account';
 import { User, UserDoc } from '../models/user';
 import { natsWrapper } from '../nats-wrapper';
 import { compareType } from '../utils/type';
-const PER_PAGE = 25;
+const PER_PAGE = process.env.PER_PAGE!;
 export class AccountService {
   static async pagination(total: number, pages: number) {
     const users = await User.find({})
@@ -25,8 +26,8 @@ export class AccountService {
         select: 'email type',
       })
       .sort({ createdAt: -1 })
-      .skip((pages - 1) * PER_PAGE)
-      .limit(PER_PAGE)
+      .skip(((pages - 1) * parseInt(PER_PAGE as string)) as number)
+      .limit(parseInt(PER_PAGE as string))
       .exec();
     return users;
   }
@@ -37,5 +38,72 @@ export class AccountService {
       password: account.password,
       type: compareType(account.type),
     });
+  }
+  static async readByType(type: string, sortBy: string, pages: number) {
+    const users = await User.aggregate([
+      {
+        $lookup: {
+          from: 'accounts',
+          localField: 'account',
+          foreignField: '_id',
+          as: 'account',
+        },
+      },
+      {
+        $sort: { createdAt: sortBy === 'asc' ? 1 : -1 },
+      },
+      {
+        $skip: (pages - 1) * parseInt(PER_PAGE as string)!,
+      },
+      {
+        $limit: parseInt(PER_PAGE as string)!,
+      },
+      {
+        $match: {
+          'account.type': type,
+        },
+      },
+      {
+        $addFields: {
+          accountId: '$account._id',
+          email: '$account.email',
+          type: '$account.type',
+        },
+      },
+      {
+        $unwind: '$email',
+      },
+      {
+        $unwind: '$type',
+      },
+      {
+        $unwind: '$accountId',
+      },
+      {
+        $project: {
+          _id: 1,
+          fullName: 1,
+          phoneNumber: 1,
+          address: 1,
+          avatar: 1,
+          accountId: 1,
+          email: 1,
+          type: 1,
+        },
+      },
+    ]);
+    return users;
+  }
+  static async readByName(name: string, pages: number, sortBy: string) {
+    const totalItems = await User.find({
+      fullName: new RegExp(name, 'i'),
+    }).countDocuments();
+    const users = await User.find({ fullName: new RegExp(name, 'i') })
+      .populate('account')
+      .sort({ createdAt: -1 })
+      .skip((pages - 1) * parseInt(PER_PAGE as string))
+      .limit(parseInt(PER_PAGE as string))
+      .exec();
+    return { users, totalItems };
   }
 }

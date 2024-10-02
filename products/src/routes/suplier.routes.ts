@@ -17,28 +17,28 @@ router.post(
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductCreate),
+  requirePermission([ListPermission.ProductCreate]),
   SuplierControllers.new
 );
 router.get(
   '/products/supliers',
   requireAuth,
   requireType([UserType.Employee, UserType.Manager]),
-  requirePermission(ListPermission.ProductRead),
+  requirePermission([ListPermission.ProductRead]),
   SuplierControllers.readAll
 );
 router.get(
   '/products/suplier/:id',
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductRead),
+  requirePermission([ListPermission.ProductRead]),
   SuplierControllers.readOne
 );
 router.get(
   '/products/suplier',
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductRead),
+  requirePermission([ListPermission.ProductRead]),
   SuplierControllers.findByName
 );
 router.patch(
@@ -47,14 +47,14 @@ router.patch(
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductRead),
+  requirePermission([ListPermission.ProductUpdate]),
   SuplierControllers.update
 );
 router.delete(
   '/products/suplier/:id',
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.ProductRead),
+  requirePermission([ListPermission.ProductDelete]),
   SuplierControllers.delete
 );
 export { router as suplierRouter };

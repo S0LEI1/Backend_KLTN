@@ -21,7 +21,7 @@ router.post(
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.RoleCreate),
+  requirePermission([ListPermission.RoleCreate]),
   async (req: Request, res: Response) => {
     const { name, description } = req.body;
     const newRole = Role.build({

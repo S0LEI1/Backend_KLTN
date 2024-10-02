@@ -21,7 +21,7 @@ router.patch(
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission(ListPermission.RoleUpdate),
+  requirePermission([ListPermission.RoleUpdate]),
   async (req: Request, res: Response) => {
     const permissions = req.currentUser?.permissions;
     /// if (

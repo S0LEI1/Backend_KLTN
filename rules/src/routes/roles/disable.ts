@@ -18,7 +18,7 @@ router.patch(
   '/rules/role/:id',
   requireAuth,
   requireType([UserType.Customer]),
-  requirePermission(ListPermission.RoleDelete),
+  requirePermission([ListPermission.RoleDelete]),
   async (req: Request, res: Response) => {
     const role = await Role.findById(req.params.id);
     if (!role) throw new NotFoundError('Permission');

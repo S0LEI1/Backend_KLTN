@@ -5,6 +5,7 @@ import { AccountService } from '../services/account.service';
 import { Account } from '../models/account';
 import { AccountRole } from '../models/account-role-mapping';
 import { PublisherServices } from '../services/publisher.service';
+import { Convert } from '../utils/convert';
 export class ManagerControllers {
   static async deleteUser(req: Request, res: Response) {
     const { id } = req.params;
@@ -77,5 +78,31 @@ export class ManagerControllers {
         },
       },
     });
+  }
+  static async readByType(req: Request, res: Response) {
+    const { type, sortBy, pages = 1 } = req.query;
+
+    const users = await AccountService.readByType(
+      type as string,
+      sortBy as string,
+      parseInt(pages as string)
+    );
+    res.status(200).send({
+      message: 'GET: users by type successfully',
+      users,
+    });
+  }
+  static async readByName(req: Request, res: Response) {
+    const { name } = req.body;
+    const { pages = 1, sortBy } = req.query;
+    const { users, totalItems } = await AccountService.readByName(
+      name,
+      parseInt(pages as string),
+      sortBy as string
+    );
+    const convertUsers = Convert.users(users);
+    res
+      .status(200)
+      .json({ message: 'GET: user by name successfully', users: convertUsers });
   }
 }
