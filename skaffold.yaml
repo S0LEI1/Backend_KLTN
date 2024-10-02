@@ -40,6 +40,14 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
+    - image: vannggoc/services
+      context: services
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
     # - image: vannggoc/client
     #   context: client
     #   docker:
