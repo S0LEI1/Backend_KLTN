@@ -48,7 +48,6 @@ const serviceSchema = new mongoose.Schema(
     },
     discount: {
       type: Number,
-      required: true,
     },
     active: {
       type: Boolean,

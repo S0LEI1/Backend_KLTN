@@ -1,4 +1,8 @@
-import { BadRequestError, NotFoundError } from '@share-package/common';
+import {
+  BadRequestError,
+  NotFoundError,
+  UserType,
+} from '@share-package/common';
 import { Service } from '../models/service';
 import { checkImage } from '../utils/check-image';
 import { AwsServices } from './aws.service';
@@ -20,28 +24,43 @@ export class ServiceServices {
       active: true,
       description: description,
       costPrice: costPrice,
-      salePrice: 0,
+      salePrice: costPrice + (costPrice * 90) / 100,
     });
     await service.save();
     return service;
   }
-  static async readAll(pages: string, sortBy: string) {
+  static async readAll(pages: string, sortBy: string, isManager: boolean) {
     const query = Pagination.query();
-    query.active = true;
     query.isDeleted = false;
-    const select = { name: 1, imageUrl: 1, costPrice: 1 };
+    const select = {
+      _id: 1,
+      name: 1,
+      imageUrl: 1,
+      salePrice: 1,
+      description: 1,
+    };
+
     const options = Pagination.options(pages, PER_PAGES!, sortBy);
-    const services = await Service.find(query, { name: 1 }, options);
+    const services = await Service.find(
+      query,
+      isManager ? null : select,
+      options
+    );
     const totalItems = await Service.find(query).countDocuments();
     return { services, totalItems };
   }
-  static async readOne(id: string) {
-    const service = await Service.findOne({ _id: id, active: true });
-    if (!service) throw new NotFoundError('Service');
-    return service;
-  }
-  static async readOneForManager(id: string) {
-    const service = await Service.findById({ _id: id });
+  static async readOne(id: string, isManager: boolean) {
+    const query = Pagination.query();
+    query.isDeleted = false;
+    query._id = id;
+    const select = {
+      _id: 1,
+      name: 1,
+      imageUrl: 1,
+      salePrice: 1,
+      description: 1,
+    };
+    const service = await Service.find(query, isManager ? null : select, null);
     if (!service) throw new NotFoundError('Service');
     return service;
   }

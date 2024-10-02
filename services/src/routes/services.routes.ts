@@ -16,7 +16,7 @@ router.post(
   singleUploadMiddleware,
   [
     body('name').notEmpty().withMessage('Name service must be provided'),
-    body('price').isNumeric().withMessage('Price must be number'),
+    body('costPrice').isNumeric().withMessage('Price must be number'),
   ],
   validationRequest,
   requireAuth,
