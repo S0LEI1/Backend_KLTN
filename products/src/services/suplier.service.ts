@@ -1,6 +1,12 @@
-import { BadRequestError, NotFoundError } from '@share-package/common';
+import {
+  BadRequestError,
+  NotFoundError,
+  Pagination,
+} from '@share-package/common';
 import { Suplier } from '../models/suplier';
-const PER_PAGE = 25;
+import { ProductService } from './products.service';
+import { Convert } from '../utils/convert';
+const PER_PAGE = process.env.PER_PAGE;
 export class SuplierServices {
   static async create(name: string, description: string) {
     const existSuplier = await Suplier.findOne({ name: name });
@@ -12,23 +18,42 @@ export class SuplierServices {
     await suplier.save();
     return suplier;
   }
-  static async readAll(pages: number) {
-    const totalItems = await Suplier.find().countDocuments();
-    const supliers = await Suplier.find()
-      .sort({ createdAt: -1 })
-      .skip((pages - 1) * PER_PAGE)
-      .limit(PER_PAGE)
-      .exec();
+  static async readAll(pages: string, sortBy: string) {
+    const query = Pagination.query();
+    query.isDeleted = false;
+    const options = Pagination.options(pages, PER_PAGE!, sortBy);
+    const totalItems = await Suplier.find(query).countDocuments();
+    const supliers = await Suplier.find(query, null, options);
     if (!supliers) throw new NotFoundError('Categories');
     return { supliers, totalItems };
   }
-  static async readOne(id: string) {
-    const suplier = await Suplier.findById(id);
+  static async readOne(
+    id: string,
+    isManager: boolean,
+    pages: string,
+    sortBy: string
+  ) {
+    const query = Pagination.query();
+    query._id = id;
+    query.isDeleted = false;
+    const suplier = await Suplier.findOne(query);
     if (!suplier) throw new NotFoundError('Suplier');
-    return suplier;
+    const { products, totalItems } =
+      await ProductService.sortByCategoryOrSuplier(
+        id,
+        sortBy as string,
+        pages as string,
+        isManager
+      );
+    const convertProducts = Convert.products(products);
+    return { suplier, products: convertProducts, totalItems };
   }
-  static async findByName(name: string) {
-    const suplier = await Suplier.findOne({ name: name });
+  static async findByName(name: string, pages: string, sortBy: string) {
+    const query = Pagination.query();
+    query.name = new RegExp(name, 'i');
+    query.isDeleted = false;
+    const options = Pagination.options(pages, PER_PAGE!, sortBy);
+    const suplier = await Suplier.find(query, null, options);
     if (!suplier) throw new NotFoundError('Suplier by name');
     return suplier;
   }
@@ -40,9 +65,13 @@ export class SuplierServices {
     return existSuplier;
   }
   static async delete(id: string) {
-    const existSuplier = await Suplier.findById(id);
+    const query = Pagination.query();
+    query._id = id;
+    query.isDeleted = false;
+    const existSuplier = await Suplier.findOne(query);
     if (!existSuplier) throw new NotFoundError('Suplier delete');
-    await Suplier.deleteOne({ _id: id });
+    existSuplier.set({ isDeleted: true });
+    await existSuplier.save();
     return existSuplier;
   }
 }

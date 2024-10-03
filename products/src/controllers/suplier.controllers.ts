@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
-import { BadRequestError } from '@share-package/common';
+import { BadRequestError, ListPermission } from '@share-package/common';
 import { SuplierServices } from '../services/suplier.service';
 import { SuplierPublisher } from '../services/suplier.publiser.service';
+import { Check } from '../utils/check-type';
 
 export class SuplierControllers {
   static async new(req: Request, res: Response) {
@@ -13,26 +14,39 @@ export class SuplierControllers {
       .send({ message: 'POST: create suplier successfully', category });
   }
   static async readAll(req: Request, res: Response) {
-    const { pages = 1 } = req.query;
+    const { pages = 1, sortBy } = req.query;
     const { supliers, totalItems } = await SuplierServices.readAll(
-      parseInt(pages as string)
+      pages as string,
+      sortBy as string
     );
-    res
-      .status(200)
-      .send({
-        message: 'GET: List supliers successfully',
-        supliers,
-        totalItems,
-      });
+    res.status(200).send({
+      message: 'GET: List supliers successfully',
+      supliers,
+      totalItems,
+    });
   }
   static async readOne(req: Request, res: Response) {
     const { id } = req.params;
-    const suplier = await SuplierServices.readOne(id);
+    const { pages = 1, sortBy } = req.query;
+    const { type, permissions } = req.currentUser!;
+    const isManager = Check.isManager(type, permissions, [
+      ListPermission.ProductRead,
+    ]);
+    const suplier = await SuplierServices.readOne(
+      id,
+      isManager,
+      pages as string,
+      sortBy as string
+    );
     res.status(200).send({ message: 'GET: Suplier successfully', suplier });
   }
   static async findByName(req: Request, res: Response) {
-    const { name } = req.body;
-    const suplier = await SuplierServices.findByName(name);
+    const { pages = 1, sortBy, name } = req.query;
+    const suplier = await SuplierServices.findByName(
+      name as string,
+      pages as string,
+      sortBy as string
+    );
     res
       .status(200)
       .send({ message: 'GET: suplier by name successfully', suplier });
@@ -51,6 +65,6 @@ export class SuplierControllers {
     const { id } = req.params;
     const suplier = await SuplierServices.delete(id);
     SuplierPublisher.delete(suplier);
-    res.status(200).send({ message: 'DELETE: suplier successfully' });
+    res.status(200).send({ message: 'PATCH: delete suplier successfully' });
   }
 }

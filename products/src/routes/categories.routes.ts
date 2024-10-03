@@ -10,7 +10,6 @@ import express, { Request, Response } from 'express';
 import { NAME_MESSAGE } from '../utils/message';
 import { body } from 'express-validator';
 import { CategoriesControllers } from '../controllers/categories.controllers';
-import { CategoriesServices } from '../services/categories.service';
 const router = express.Router();
 router.post(
   '/products/category',
@@ -21,38 +20,24 @@ router.post(
   requirePermission([ListPermission.ProductCreate]),
   CategoriesControllers.new
 );
-router.get(
-  '/products/categories',
-  requireAuth,
-  requireType([UserType.Employee, UserType.Manager]),
-  requirePermission([ListPermission.ProductRead]),
-  CategoriesControllers.readAll
-);
+router.get('/products/categories', requireAuth, CategoriesControllers.readAll);
 router.get(
   '/products/category/:id',
   requireAuth,
-  requireType([UserType.Manager]),
-  requirePermission([ListPermission.ProductRead]),
   CategoriesControllers.readOne
 );
-router.get(
-  '/products/category',
-  requireAuth,
-  requireType([UserType.Manager]),
-  requirePermission([ListPermission.ProductRead]),
-  CategoriesControllers.findByName
-);
+router.get('/products/category', requireAuth, CategoriesControllers.findByName);
 router.patch(
   '/products/category/:id',
   [body('name').not().isEmpty().withMessage(`Category ${NAME_MESSAGE}`)],
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission([ListPermission.ProductRead]),
+  requirePermission([ListPermission.ProductUpdate]),
   CategoriesControllers.update
 );
-router.delete(
-  '/products/category/:id',
+router.patch(
+  '/products/category/delete/:id',
   requireAuth,
   requireType([UserType.Manager]),
   requirePermission([ListPermission.ProductRead]),

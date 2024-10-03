@@ -70,7 +70,6 @@ router.get(
 );
 router.get(
   '/products/find/name',
-  [body('name').notEmpty().withMessage(`Product ${NAME_MESSAGE}`)],
   validationRequest,
   ProductControllers.readAllByName
 );

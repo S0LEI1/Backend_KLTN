@@ -17,6 +17,21 @@ const start = async () => {
   if (!process.env.NATS_CLUSTER_ID) {
     throw new Error('NATS cluster id must be defined');
   }
+  if (!process.env.BUCKET_NAME) {
+    throw new Error('Bucket name must be defined');
+  }
+  if (!process.env.ACCESS_KEY_ID) {
+    throw new Error('Access key Id must be defined');
+  }
+  if (!process.env.SECRET_ACCESS_KEY) {
+    throw new Error('Secret access key name must be defined');
+  }
+  if (!process.env.REGION) {
+    throw new Error('Region name must be defined');
+  }
+  if (!process.env.PER_PAGE) {
+    throw new Error('Per page name must be defined');
+  }
   try {
     await natsWrapper.connect(
       process.env.NATS_CLUSTER_ID,

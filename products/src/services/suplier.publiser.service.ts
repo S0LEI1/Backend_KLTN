@@ -24,6 +24,7 @@ export class SuplierPublisher {
     new SuplierDeletedPublisher(natsWrapper.client).publish({
       id: suplier.id,
       version: suplier.version,
+      isDeleted: suplier.isDeleted!,
     });
   }
 }

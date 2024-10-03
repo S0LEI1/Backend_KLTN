@@ -50,8 +50,8 @@ router.patch(
   requirePermission([ListPermission.ProductUpdate]),
   SuplierControllers.update
 );
-router.delete(
-  '/products/suplier/:id',
+router.patch(
+  '/products/suplier/delete/:id',
   requireAuth,
   requireType([UserType.Manager]),
   requirePermission([ListPermission.ProductDelete]),

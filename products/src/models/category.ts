@@ -5,10 +5,12 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 interface CategoryAttrs {
   name: string;
   description: string;
+  isDeleted?: boolean;
 }
 export interface CategoryDoc extends mongoose.Document {
   name: string;
   description: string;
+  isDeleted?: boolean;
   version: number;
 }
 
@@ -26,6 +28,10 @@ const categorySchema = new mongoose.Schema(
     description: {
       type: String,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: {
@@ -37,7 +43,7 @@ const categorySchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
+categorySchema.index({ name: 1 });
 categorySchema.set('versionKey', 'version');
 categorySchema.plugin(updateIfCurrentPlugin);
 

@@ -5,11 +5,13 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 interface SuplierAttrs {
   name: string;
   description: string;
+  isDeleted?: boolean;
 }
 export interface SuplierDoc extends mongoose.Document {
   name: string;
   description: string;
   version: number;
+  isDeleted?: boolean;
 }
 
 interface SuplierModel extends mongoose.Model<SuplierDoc> {
@@ -25,6 +27,10 @@ const suplierSchema = new mongoose.Schema(
     },
     description: {
       type: String,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

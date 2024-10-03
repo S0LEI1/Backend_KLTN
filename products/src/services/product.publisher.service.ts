@@ -12,10 +12,8 @@ export class ProductPublisher {
       description: product.description,
       categoryId: product.category.id,
       suplierId: product.suplier.id,
-      active: product.active!,
       expire: product.expire,
-      costPrice: product.costPrice,
-      salePrice: product.salePrice,
+      salePrice: product.salePrice!,
       quantity: product.quantity,
     });
   }
@@ -28,18 +26,16 @@ export class ProductPublisher {
       suplierId: productDoc.suplier.id,
       categoryId: productDoc.category.id,
       expire: productDoc.expire,
-      costPrice: productDoc.costPrice,
-      salePrice: productDoc.salePrice,
+      salePrice: productDoc.salePrice!,
       quantity: productDoc.quantity,
       version: productDoc.version,
-      active: productDoc.active!,
     });
   }
   static delete(productDoc: ProductDoc) {
     new ProductDeletedPublisher(natsWrapper.client).publish({
       id: productDoc.id,
       version: productDoc.version,
-      active: productDoc.active!,
+      isDeleted: productDoc.isDeleted!,
     });
   }
 }

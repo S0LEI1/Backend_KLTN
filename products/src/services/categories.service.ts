@@ -1,6 +1,13 @@
-import { BadRequestError, NotFoundError } from '@share-package/common';
+import {
+  BadRequestError,
+  NotFoundError,
+  Pagination,
+} from '@share-package/common';
 import { Category, CategoryDoc } from '../models/category';
-const PER_PAGE = 25;
+import { Product } from '../models/product';
+import { ProductService } from './products.service';
+import { Convert } from '../utils/convert';
+const PER_PAGE = process.env.PER_PAGE;
 export class CategoriesServices {
   static async create(name: string, description: string) {
     const existCategory = await Category.findOne({ name: name });
@@ -12,23 +19,46 @@ export class CategoriesServices {
     await category.save();
     return category;
   }
-  static async readAll(pages: number) {
-    const totalItems = await Category.find().countDocuments();
-    const categories = await Category.find()
-      .sort({ createdAt: -1 })
-      .skip((pages - 1) * PER_PAGE)
-      .limit(PER_PAGE)
-      .exec();
+  static async readAll(pages: string, sortBy: string) {
+    const query = Pagination.query();
+    query.isDeleted = false;
+    const options = Pagination.options(pages, PER_PAGE as string, sortBy);
+    const totalItems = await Category.find(query).countDocuments();
+    const categories = await Category.find(query, null, options);
     if (!categories) throw new NotFoundError('Categories');
     return { categories, totalItems };
   }
-  static async readOne(id: string) {
-    const category = await Category.findById(id);
+  static async readOne(
+    id: string,
+    pages: string,
+    sortBy: string,
+    isManager: boolean
+  ) {
+    const query = Pagination.query();
+    query._id = id;
+    query.isDeleted = false;
+    // const pQuery = Pagination.query();
+    // pQuery.category = id;
+    // pQuery.isDeleted = false;
+    const pOptions = Pagination.options(pages, PER_PAGE!, sortBy);
+    const category = await Category.findOne(query);
     if (!category) throw new NotFoundError('Category');
-    return category;
+    const { products, totalItems } =
+      await ProductService.sortByCategoryOrSuplier(
+        id,
+        sortBy as string,
+        pages as string,
+        isManager
+      );
+    const convertProducts = Convert.products(products);
+    return { category, products: convertProducts, totalItems };
   }
-  static async findByName(name: string) {
-    const category = await Category.findOne({ name: name });
+  static async findByName(name: string, pages: string, sortBy: string) {
+    const query = Pagination.query();
+    query.name = new RegExp(name, 'i');
+    query.isDeleted = false;
+    const options = Pagination.options(pages, PER_PAGE!, sortBy);
+    const category = await Category.find(query, null, options);
     if (!category) throw new NotFoundError('Category by name');
     return category;
   }
@@ -40,9 +70,13 @@ export class CategoriesServices {
     return existCategory;
   }
   static async delete(id: string) {
-    const existCategory = await Category.findById(id);
+    const query = Pagination.query();
+    query._id = id;
+    query.isDeleted = false;
+    const existCategory = await Category.findOne(query);
     if (!existCategory) throw new NotFoundError('Category delete');
-    await Category.deleteOne({ _id: id });
+    existCategory.set({ isDeleted: true });
+    await existCategory.save();
     return existCategory;
   }
 }

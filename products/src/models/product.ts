@@ -12,10 +12,11 @@ export interface ProductAttrs {
   imageUrl: string;
   expire: Date;
   costPrice: number;
-  salePrice: number;
+  salePrice?: number;
   quantity: number;
   discount?: number;
   active?: boolean;
+  isDeleted?: boolean;
 }
 export interface ProductDoc extends mongoose.Document {
   name: string;
@@ -25,11 +26,12 @@ export interface ProductDoc extends mongoose.Document {
   imageUrl: string;
   expire: Date;
   costPrice: number;
-  salePrice: number;
+  salePrice?: number;
   quantity: number;
   discount?: number;
   active?: boolean;
   version: number;
+  isDeleted?: boolean;
 }
 interface ProductModel extends mongoose.Model<ProductDoc> {
   build(attrs: ProductAttrs): ProductDoc;
@@ -77,10 +79,15 @@ const productSchema = new mongoose.Schema(
     },
     discount: {
       type: Number,
+      default: 0,
     },
     active: {
       type: Boolean,
       default: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

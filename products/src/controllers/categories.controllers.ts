@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
-import { CategoriesServices } from '../services/categories.service';
-import { BadRequestError } from '@share-package/common';
+import { BadRequestError, ListPermission } from '@share-package/common';
 import { CategoriesPublisher } from '../services/categories.publisher.service';
+import { CategoriesServices } from '../services/categories.service';
+import { Check } from '../utils/check-type';
 
 export class CategoriesControllers {
   static async new(req: Request, res: Response) {
@@ -17,19 +18,18 @@ export class CategoriesControllers {
     }
   }
   static async readAll(req: Request, res: Response) {
-    const { pages } = req.query || 1;
+    const { pages = 1, sortBy } = req.query;
 
     try {
       const { categories, totalItems } = await CategoriesServices.readAll(
-        parseInt(pages as string)
+        pages as string,
+        sortBy as string
       );
-      res
-        .status(200)
-        .send({
-          message: 'GET: List categories successfully',
-          categories,
-          totalItems,
-        });
+      res.status(200).send({
+        message: 'GET: List categories successfully',
+        categories,
+        totalItems,
+      });
     } catch (error) {
       if (error instanceof Error) {
         throw new BadRequestError(error.message);
@@ -38,12 +38,36 @@ export class CategoriesControllers {
   }
   static async readOne(req: Request, res: Response) {
     const { id } = req.params;
-    const category = await CategoriesServices.readOne(id);
-    res.status(200).send({ message: 'GET:Category successfully', category });
+    const { pages = 1, sortBy } = req.query;
+    const { type, permissions } = req.currentUser!;
+    const isManager = Check.isManager(type, permissions, [
+      ListPermission.ProductRead,
+    ]);
+    try {
+      const { category, products, totalItems } =
+        await CategoriesServices.readOne(
+          id,
+          pages as string,
+          sortBy as string,
+          isManager
+        );
+      res.status(200).send({
+        message: 'GET:Category successfully',
+        category,
+        products,
+        totalItems,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
   static async findByName(req: Request, res: Response) {
-    const { name } = req.body;
-    const category = await CategoriesServices.findByName(name);
+    const { name, pages = 1, sortBy } = req.query;
+    const category = await CategoriesServices.findByName(
+      name as string,
+      pages as string,
+      sortBy as string
+    );
     res
       .status(200)
       .send({ message: 'GET: Category by name successfully', category });

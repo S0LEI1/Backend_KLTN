@@ -10,6 +10,7 @@ import { Convert } from '../utils/convert';
 import { checkImage } from '../utils/check-image';
 import { ProductDoc } from '../models/product';
 import { String } from 'aws-sdk/clients/apigateway';
+import { Check } from '../utils/check-type';
 export class ProductControllers {
   static async new(req: Request, res: Response) {
     const {
@@ -35,7 +36,7 @@ export class ProductControllers {
       quantity: quantity,
     });
     ProductPublisher.new(product!);
-    const convertProduct = Convert.product(product!, type);
+    const convertProduct = Convert.product(product!);
     res.status(201).send({
       message: 'POST: product create successfully',
       convertProduct,
@@ -43,28 +44,36 @@ export class ProductControllers {
   }
   static async readAll(req: Request, res: Response) {
     const { pages = 1, active, sortBy } = req.query;
-    const { type } = req.currentUser!;
-    const response = await ProductService.readAll(
-      parseInt(pages as string),
-      sortBy as string
-    );
-    const products = response.products;
-    const totalItems = response.totalItems;
-    const convertProducts = Convert.products(products!, type);
-    res.status(200).send({
-      message: 'GET: Products successfully',
-      products: convertProducts,
-      totalItems,
-    });
+    const { type, permissions } = req.currentUser!;
+    const isManager = Check.isManager(type, permissions, [
+      ListPermission.ProductRead,
+    ]);
+    try {
+      const { products, totalItems } = await ProductService.readAll(
+        pages as string,
+        sortBy as string,
+        isManager
+      );
+      const convertProducts = Convert.products(products);
+      res.status(200).send({
+        message: 'GET: Products successfully',
+        products: convertProducts,
+        totalItems,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
   static async readOne(req: Request, res: Response) {
     const { id } = req.params;
-    const { type } = req.currentUser!;
-    const product = await ProductService.readOne(id);
-    const convertProduct = Convert.product(product, type);
+    const { type, permissions } = req.currentUser!;
+    const isManager = Check.isManager(type, permissions, [
+      ListPermission.ProductRead,
+    ]);
+    const product = await ProductService.readOne(id, isManager);
     res.status(200).send({
       message: 'GET: product information successfully',
-      product: convertProduct,
+      product,
     });
   }
   static async update(req: Request, res: Response) {
@@ -91,7 +100,7 @@ export class ProductControllers {
       file,
     });
     ProductPublisher.update(updateProduct);
-    const convertProduct = Convert.product(updateProduct, type);
+    const convertProduct = Convert.product(updateProduct);
     res.status(200).send({
       message: 'PATCH: update product successfully',
       product: convertProduct,
@@ -106,14 +115,18 @@ export class ProductControllers {
   static async sortByCategoryOrSuplier(req: Request, res: Response) {
     const { id } = req.params;
     const { pages, sortBy } = req.query;
-    const { type } = req.currentUser!;
+    const { type, permissions } = req.currentUser!;
+    const isManager = Check.isManager(type, permissions, [
+      ListPermission.ProductRead,
+    ]);
     const { products, totalItems } =
       await ProductService.sortByCategoryOrSuplier(
         id,
         sortBy as string,
-        parseInt(pages as string)
+        pages as string,
+        isManager
       );
-    const convertProducts = Convert.products(products, type);
+    const convertProducts = Convert.products(products);
     res.status(200).send({
       message: 'GET: Sort by successfully',
       products: convertProducts,
@@ -121,19 +134,22 @@ export class ProductControllers {
     });
   }
   static async readAllByName(req: Request, res: Response) {
-    const { pages = 1, sortBy } = req.query;
-    const { name } = req.body;
-    const { type } = req.currentUser!;
     try {
-      const response = await ProductService.readAllByName(
-        name,
+      const { pages = 1, sortBy, name } = req.query;
+      const { type, permissions } = req.currentUser!;
+      const isManager = Check.isManager(type, permissions, [
+        ListPermission.ProductRead,
+      ]);
+      const { products, totalItems } = await ProductService.readAllByName(
+        name as string,
         sortBy as string,
-        parseInt(pages as string)
+        pages as string,
+        isManager
       );
-      const convertProducts = Convert.products(response.products!, type);
       res.status(200).json({
         message: 'GET: product by name successfully',
-        products: convertProducts,
+        products,
+        totalItems,
       });
     } catch (error) {
       console.log(error);
@@ -147,13 +163,11 @@ export class ProductControllers {
         parseInt(pages as string),
         sortBy as String
       );
-    const convertProducts = Convert.products(products, type);
-    res
-      .status(200)
-      .send({
-        message: 'GET: List product unactive successfully',
-        products: convertProducts,
-        totalItems,
-      });
+    const convertProducts = Convert.products(products);
+    res.status(200).send({
+      message: 'GET: List product unactive successfully',
+      products: convertProducts,
+      totalItems,
+    });
   }
 }

@@ -24,6 +24,7 @@ export class CategoriesPublisher {
     new CategoryDeletedPublisher(natsWrapper.client).publish({
       id: category.id,
       version: category.version,
+      isDeleted: category.isDeleted!,
     });
   }
 }
