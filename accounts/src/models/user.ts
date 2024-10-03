@@ -10,6 +10,7 @@ interface AttrsUser {
   address: string;
   avatar?: string;
   account?: AccountDoc;
+  isDeleted?: boolean;
 }
 // property model build has
 interface UserModel extends mongoose.Model<UserDoc> {
@@ -31,6 +32,7 @@ export interface UserDoc extends mongoose.Document {
   avatar?: string;
   account?: AccountDoc;
   version: number;
+  isDeleted?: boolean;
 }
 const userSchema = new mongoose.Schema(
   {
@@ -56,6 +58,10 @@ const userSchema = new mongoose.Schema(
     account: {
       type: mongoose.Types.ObjectId,
       ref: 'Account',
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

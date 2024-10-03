@@ -55,7 +55,6 @@ router.get(
 );
 router.get(
   '/accounts/manage/find',
-  [body('name').notEmpty().withMessage(`User ${NAME_MESSAGE}`)],
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),

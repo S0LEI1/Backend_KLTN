@@ -26,7 +26,7 @@ export class ServiceControllers {
       .send({ message: 'POST: Add new services successfully', service });
   }
   static async readAll(req: Request, res: Response) {
-    const { pages = 1, sortBy } = req.query;
+    const { pages = 1, sortBy, filter } = req.query;
     const { type, permissions } = req.currentUser!;
     const isManager = Check.isManager(type, permissions, [
       ListPermission.ServiceRead,

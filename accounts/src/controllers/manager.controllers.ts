@@ -41,20 +41,14 @@ export class ManagerControllers {
       .send({ message: 'PATCH: update user profile successfully', user });
   }
   static async readUserProfiles(req: Request, res: Response) {
-    const { type, pages = 1 } = req.query;
-    const perPage = 25;
-    const query: Record<string, any> = {};
-    query.type = { $eq: type };
+    const { pages = 1, type, sortBy } = req.query;
     try {
-      const totalItems = await User.find(query).countDocuments();
-      const users = await AccountService.pagination(
-        totalItems,
-        parseInt(pages as string)
+      const users = await AccountService.readAllUserProfile(
+        type as string,
+        sortBy as string,
+        pages as string
       );
-      // const userFilter = users.filter((user) => user.account!.type === type);
-      res
-        .status(200)
-        .send({ message: 'GET: user successfully', users, totalItems });
+      res.status(200).send({ message: 'GET: user successfully', users });
     } catch (error) {
       console.log(error);
     }
@@ -93,16 +87,15 @@ export class ManagerControllers {
     });
   }
   static async readByName(req: Request, res: Response) {
-    const { name } = req.body;
-    const { pages = 1, sortBy } = req.query;
+    const { pages = 1, sortBy, name } = req.query;
     const { users, totalItems } = await AccountService.readByName(
-      name,
+      name as string,
       parseInt(pages as string),
       sortBy as string
     );
     const convertUsers = Convert.users(users);
     res
       .status(200)
-      .json({ message: 'GET: user by name successfully', users: convertUsers });
+      .json({ message: 'GET: user by name successfully', users, convertUsers });
   }
 }
