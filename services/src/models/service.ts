@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+import { calcSalePrice } from '../utils/calcSalePrice';
 
-interface ServiceAttrs {
+export interface ServiceAttrs {
   name: string;
   imageUrl: string;
   costPrice: number;
@@ -48,6 +49,7 @@ const serviceSchema = new mongoose.Schema(
     },
     discount: {
       type: Number,
+      default: 0,
     },
     active: {
       type: Boolean,
@@ -73,11 +75,18 @@ const serviceSchema = new mongoose.Schema(
 );
 
 serviceSchema.set('versionKey', 'version');
+serviceSchema.index({ name: 1 });
 serviceSchema.plugin(updateIfCurrentPlugin);
 serviceSchema.statics.build = (attrs: ServiceAttrs) => {
   return new Service(attrs);
 };
-
+serviceSchema.pre('save', async function (done) {
+  if (this.isModified('salePrice')) {
+    const salePrice = calcSalePrice(this.costPrice, this.discount!);
+    this.set('salePrice', salePrice);
+  }
+  done();
+});
 const Service = mongoose.model<ServiceDoc, ServiceModel>(
   'Service',
   serviceSchema

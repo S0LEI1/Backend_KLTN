@@ -1,4 +1,6 @@
 import { ServiceCreatedPublisher } from '../events/publishers/service-events/service-created-publisher';
+import { ServiceDeletedPublisher } from '../events/publishers/service-events/service-deleted-publisher';
+import { ServiceUpdatedPublisher } from '../events/publishers/service-events/service-updated-publisher';
 import { ServiceDoc } from '../models/service';
 import { natsWrapper } from '../nats-wrapper';
 
@@ -8,10 +10,25 @@ export class ServicePublishers {
       id: serviceDoc.id,
       name: serviceDoc.name,
       imageUrl: serviceDoc.imageUrl,
-      price: serviceDoc.price,
-      active: serviceDoc.active!,
+      salePrice: serviceDoc.salePrice,
       description: serviceDoc.description,
     });
   }
-  static async readAll(pages: number, sortBy: string) {}
+  static async updateService(serviceDoc: ServiceDoc) {
+    new ServiceUpdatedPublisher(natsWrapper.client).publish({
+      id: serviceDoc.id,
+      name: serviceDoc.name,
+      imageUrl: serviceDoc.imageUrl,
+      salePrice: serviceDoc.salePrice,
+      description: serviceDoc.description,
+      version: serviceDoc.version,
+    });
+  }
+  static async deleteService(serviceDoc: ServiceDoc) {
+    new ServiceDeletedPublisher(natsWrapper.client).publish({
+      id: serviceDoc.id,
+      isDeleted: serviceDoc.isDeleted!,
+      version: serviceDoc.version,
+    });
+  }
 }

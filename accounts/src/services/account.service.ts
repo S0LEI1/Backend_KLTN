@@ -82,6 +82,7 @@ export class AccountService {
       {
         $match: {
           'account.type': type,
+          isDeleted: false,
         },
       },
       {
