@@ -4,6 +4,7 @@ import { Account, AccountDoc } from '../models/account';
 import { User, UserDoc } from '../models/user';
 import { natsWrapper } from '../nats-wrapper';
 import { compareType } from '../utils/type';
+import { Convert } from '../utils/convert';
 const PER_PAGE = process.env.PER_PAGE!;
 export class AccountService {
   static async readAllUserProfile(type: string, sortBy: string, pages: string) {
@@ -11,16 +12,20 @@ export class AccountService {
     query.isDeleted = false;
     const totalItems = await Account.find(query).countDocuments();
     const options = Pagination.options(pages, PER_PAGE, sortBy);
-    let users = [];
+
     if (type) {
-      users = await this.readByType(
+      const usersByType = await this.readByType(
         type as string,
         sortBy,
         parseInt(pages as string)
       );
+      return usersByType;
     }
-    users = await User.find(query, null, options).populate('account').exec();
-    return users;
+    const users = await User.find(query, null, options)
+      .populate('account')
+      .exec();
+    const convert = Convert.users(users);
+    return convert;
   }
   static async pagination(total: number, pages: number) {
     const users = await User.find({})

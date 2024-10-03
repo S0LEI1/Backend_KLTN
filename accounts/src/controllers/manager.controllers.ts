@@ -48,7 +48,7 @@ export class ManagerControllers {
         sortBy as string,
         pages as string
       );
-      res.status(200).send({ message: 'GET: user successfully', users });
+      res.status(200).send({ message: 'GET: users successfully', users });
     } catch (error) {
       console.log(error);
     }
