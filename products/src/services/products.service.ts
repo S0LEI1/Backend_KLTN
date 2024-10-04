@@ -1,4 +1,4 @@
-import { NotFoundError, Pagination, UserType } from '@share-package/common';
+import { NotFoundError, Pagination } from '@share-package/common';
 import { Category } from '../models/category';
 import { Product, ProductDoc } from '../models/product';
 import { Suplier } from '../models/suplier';
@@ -6,6 +6,7 @@ import { checkImage } from '../utils/check-image';
 import { AwsServices } from './aws.service';
 import { Convert } from '../utils/convert';
 import { Check } from '../utils/check-type';
+import { String } from 'aws-sdk/clients/cloudhsm';
 interface ProductAttrs {
   name: string;
   description: string;
@@ -46,15 +47,23 @@ export class ProductService {
       console.log(error);
     }
   }
-  static async readAll(pages: string, sortBy: string, isManager: boolean) {
+  static async readAll(
+    pages: string,
+    sortBy: string,
+    isManager: boolean,
+    category: string,
+    suplier: string
+  ) {
     const query = Pagination.query();
     query.isDeleted = false;
+    if (category) query.category = category;
+    if (suplier) query.suplier = suplier;
     const options = Pagination.options(pages, PER_PAGE!, sortBy);
     const totalItems = await Product.find(query).countDocuments();
     const products = await Product.find(
       query,
-      isManager ? null : { costPrice: 0 },
-      options
+      isManager ? null : { costPrice: 0, version: 0, active: 0 },
+      { options, sort: { featured: -1 } }
     )
       .populate({
         path: 'category',
@@ -65,8 +74,7 @@ export class ProductService {
         path: 'suplier',
         match: { isDeleted: false },
         select: 'id name description',
-      })
-      .exec();
+      });
     if (!products) throw new NotFoundError('Products');
     // const convertProduct = Convert.products(products);
     return { products, totalItems };
@@ -83,7 +91,7 @@ export class ProductService {
     query.isDeleted = false;
     const product = await Product.findOne(
       query,
-      isManager ? null : { costPrice: 0 },
+      isManager ? null : { costPrice: 0, version: 0, active: 0 },
       null
     )
       .populate('category')
@@ -147,7 +155,7 @@ export class ProductService {
         ],
       },
       isManager ? null : { costPrice: 0 },
-      options
+      { options, sort: { featured: -1 } }
     )
       .populate({
         path: 'category',
@@ -176,7 +184,7 @@ export class ProductService {
     const products = await Product.find(
       query,
       isManager ? null : { costPrice: 0 },
-      options
+      { options, sort: { featured: -1 } }
     )
       .populate({
         path: 'category',

@@ -38,12 +38,15 @@ export class CategoriesControllers {
   }
   static async readOne(req: Request, res: Response) {
     const { id } = req.params;
-    const { pages = 1, sortBy } = req.query;
-    const { type, permissions } = req.currentUser!;
-    const isManager = Check.isManager(type, permissions, [
-      ListPermission.ProductRead,
-    ]);
+    const { pages = 1, sortBy, name } = req.query;
+    let isManager = false;
     try {
+      if (req.currentUser) {
+        const { type, permissions } = req.currentUser!;
+        isManager = Check.isManager(type, permissions, [
+          ListPermission.ProductRead,
+        ]);
+      }
       const { category, products, totalItems } =
         await CategoriesServices.readOne(
           id,
@@ -51,7 +54,7 @@ export class CategoriesControllers {
           sortBy as string,
           isManager
         );
-      res.status(200).send({
+      return res.status(200).send({
         message: 'GET:Category successfully',
         category,
         products,

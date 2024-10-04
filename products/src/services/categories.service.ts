@@ -58,7 +58,7 @@ export class CategoriesServices {
     query.name = new RegExp(name, 'i');
     query.isDeleted = false;
     const options = Pagination.options(pages, PER_PAGE!, sortBy);
-    const category = await Category.find(query, null, options);
+    const category = await Category.find(query, options);
     if (!category) throw new NotFoundError('Category by name');
     return category;
   }

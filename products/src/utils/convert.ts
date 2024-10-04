@@ -1,7 +1,5 @@
-import { UserType } from '@share-package/common';
 import { ProductDoc } from '../models/product';
-import { AwsServices } from '../services/aws.service';
-import { checkImage } from './check-image';
+
 interface ConvertProduct {
   id: string;
   name: string;
@@ -13,6 +11,7 @@ interface ConvertProduct {
   imageUrl: string;
   expire: Date;
   costPrice?: number;
+  featured: boolean;
   salePrice: number;
   quantity: number;
   active: boolean;
@@ -35,6 +34,7 @@ export class Convert {
       quantity: productDoc.quantity,
       active: productDoc.active!,
       version: productDoc.version,
+      featured: productDoc.featured!,
     };
     return convertProduct;
   }

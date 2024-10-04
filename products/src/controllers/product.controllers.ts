@@ -1,8 +1,4 @@
-import {
-  BadRequestError,
-  ListPermission,
-  UserType,
-} from '@share-package/common';
+import { BadRequestError, ListPermission } from '@share-package/common';
 import { ProductPublisher } from '../services/product.publisher.service';
 import { ProductService } from '../services/products.service';
 import { Request, Response } from 'express';
@@ -43,16 +39,21 @@ export class ProductControllers {
     });
   }
   static async readAll(req: Request, res: Response) {
-    const { pages = 1, active, sortBy } = req.query;
-    const { type, permissions } = req.currentUser!;
-    const isManager = Check.isManager(type, permissions, [
-      ListPermission.ProductRead,
-    ]);
+    const { pages = 1, active, sortBy, category, suplier } = req.query;
+    let isManager = false;
+    if (req.currentUser) {
+      const { type, permissions } = req.currentUser;
+      isManager = Check.isManager(type, permissions, [
+        ListPermission.ProductRead,
+      ]);
+    }
     try {
       const { products, totalItems } = await ProductService.readAll(
         pages as string,
         sortBy as string,
-        isManager
+        isManager,
+        category as string,
+        suplier as string
       );
       const convertProducts = Convert.products(products);
       res.status(200).send({
@@ -66,10 +67,13 @@ export class ProductControllers {
   }
   static async readOne(req: Request, res: Response) {
     const { id } = req.params;
-    const { type, permissions } = req.currentUser!;
-    const isManager = Check.isManager(type, permissions, [
-      ListPermission.ProductRead,
-    ]);
+    let isManager = false;
+    if (req.currentUser) {
+      const { type, permissions } = req.currentUser;
+      isManager = Check.isManager(type, permissions, [
+        ListPermission.ProductRead,
+      ]);
+    }
     const product = await ProductService.readOne(id, isManager);
     res.status(200).send({
       message: 'GET: product information successfully',

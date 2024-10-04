@@ -20,27 +20,9 @@ router.post(
   requirePermission([ListPermission.ProductCreate]),
   SuplierControllers.new
 );
-router.get(
-  '/products/supliers',
-  requireAuth,
-  requireType([UserType.Employee, UserType.Manager]),
-  requirePermission([ListPermission.ProductRead]),
-  SuplierControllers.readAll
-);
-router.get(
-  '/products/suplier/:id',
-  requireAuth,
-  requireType([UserType.Manager]),
-  requirePermission([ListPermission.ProductRead]),
-  SuplierControllers.readOne
-);
-router.get(
-  '/products/suplier',
-  requireAuth,
-  requireType([UserType.Manager]),
-  requirePermission([ListPermission.ProductRead]),
-  SuplierControllers.findByName
-);
+router.get('/products/supliers', SuplierControllers.readAll);
+router.get('/products/suplier/:id', SuplierControllers.readOne);
+router.get('/products/suplier', SuplierControllers.findByName);
 router.patch(
   '/products/suplier/:id',
   [body('name').not().isEmpty().withMessage(`Suplier ${NAME_MESSAGE}`)],

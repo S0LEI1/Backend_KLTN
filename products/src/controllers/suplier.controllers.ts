@@ -14,7 +14,7 @@ export class SuplierControllers {
       .send({ message: 'POST: create suplier successfully', category });
   }
   static async readAll(req: Request, res: Response) {
-    const { pages = 1, sortBy } = req.query;
+    const { pages = 1, sortBy, name } = req.query;
     const { supliers, totalItems } = await SuplierServices.readAll(
       pages as string,
       sortBy as string
@@ -28,10 +28,13 @@ export class SuplierControllers {
   static async readOne(req: Request, res: Response) {
     const { id } = req.params;
     const { pages = 1, sortBy } = req.query;
-    const { type, permissions } = req.currentUser!;
-    const isManager = Check.isManager(type, permissions, [
-      ListPermission.ProductRead,
-    ]);
+    let isManager = false;
+    if (req.currentUser) {
+      const { type, permissions } = req.currentUser!;
+      isManager = Check.isManager(type, permissions, [
+        ListPermission.ProductRead,
+      ]);
+    }
     const suplier = await SuplierServices.readOne(
       id,
       isManager,

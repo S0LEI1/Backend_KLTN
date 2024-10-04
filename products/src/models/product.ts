@@ -15,6 +15,7 @@ export interface ProductAttrs {
   salePrice?: number;
   quantity: number;
   discount?: number;
+  featured?: boolean;
   active?: boolean;
   isDeleted?: boolean;
 }
@@ -28,6 +29,7 @@ export interface ProductDoc extends mongoose.Document {
   costPrice: number;
   salePrice?: number;
   quantity: number;
+  featured?: boolean;
   discount?: number;
   active?: boolean;
   version: number;
@@ -80,6 +82,10 @@ const productSchema = new mongoose.Schema(
     discount: {
       type: Number,
       default: 0,
+    },
+    featured: {
+      type: Boolean,
+      default: false,
     },
     active: {
       type: Boolean,

@@ -20,13 +20,9 @@ router.post(
   requirePermission([ListPermission.ProductCreate]),
   CategoriesControllers.new
 );
-router.get('/products/categories', requireAuth, CategoriesControllers.readAll);
-router.get(
-  '/products/category/:id',
-  requireAuth,
-  CategoriesControllers.readOne
-);
-router.get('/products/category', requireAuth, CategoriesControllers.findByName);
+router.get('/products/categories', CategoriesControllers.readAll);
+router.get('/products/category/:id', CategoriesControllers.readOne);
+router.get('/products/category', CategoriesControllers.findByName);
 router.patch(
   '/products/category/:id',
   [body('name').not().isEmpty().withMessage(`Category ${NAME_MESSAGE}`)],

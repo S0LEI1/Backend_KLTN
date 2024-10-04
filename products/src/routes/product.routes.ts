@@ -29,10 +29,9 @@ router.post(
   requirePermission([ListPermission.ProductCreate]),
   ProductControllers.new
 );
-router.get('/products/', requireAuth, ProductControllers.readAll);
+router.get('/products/', ProductControllers.readAll);
 router.get(
   '/products/:id',
-  requireAuth,
   // requireType([UserType.Manager, UserType.Employee]),
   // requirePermission(ListPermission.ProductRead),
   ProductControllers.readOne
