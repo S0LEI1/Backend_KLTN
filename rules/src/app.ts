@@ -13,11 +13,9 @@ import {
 // import { updatePermissionRouter } from './routes/permissions/update';
 // import { deletePermissionRouter } from './routes/permissions/disable';
 import { indexRolesRouter } from './routes/roles';
-import { newRoleIndex } from './routes/roles/new';
-import { updateRoleRouter } from './routes/roles/update';
-import { deleteRoleRouter } from './routes/roles/disable';
 import { addRolePermissionRouter } from './routes/role-permission/add';
 import { deleteRolePermissionRouter } from './routes/role-permission/remove';
+import { roleRouter } from './routes/role.routes';
 
 const app = express();
 app.use(json());
@@ -32,16 +30,10 @@ app.use(
 
 app.use(cors());
 app.use(currentUser);
-// permission routes
-// app.use(indexPerRouter);
-// app.use(newPerIndex);
-// app.use(updatePermissionRouter);
-// app.use(deletePermissionRouter);
-
+app.use(roleRouter);
 app.use(indexRolesRouter);
-app.use(newRoleIndex);
-app.use(updateRoleRouter);
-app.use(deleteRoleRouter);
+// app.use(updateRoleRouter);
+// app.use(deleteRoleRouter);
 // role permission
 app.use(addRolePermissionRouter);
 app.use(deleteRolePermissionRouter);

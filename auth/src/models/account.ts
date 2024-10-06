@@ -65,7 +65,7 @@ accountSchema.statics.build = (attrs: AccountAttrs) => {
 };
 
 accountSchema.statics.findAccount = async (id: string) => {
-  const account = await Account.findById(id);
+  const account = await Account.findOne({ _id: id, isDeleted: false });
   if (!account) throw new NotFoundError('Account');
   return account;
 };

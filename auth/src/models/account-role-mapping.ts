@@ -4,18 +4,10 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { RoleDoc } from './role';
 import { AccountDoc } from './account';
 interface AccountRoleAttrs {
-  id: string;
   account: AccountDoc;
   role: RoleDoc;
 }
-interface PopulateDoc {
-  id: string;
-  account: string;
-  roleId: string;
-  role: string;
-}
-interface AccountRoleDoc extends mongoose.Document {
-  id: string;
+export interface AccountRoleDoc extends mongoose.Document {
   account: AccountDoc;
   role: RoleDoc;
   version: number;
@@ -23,7 +15,8 @@ interface AccountRoleDoc extends mongoose.Document {
 
 interface AccountRoleModel extends mongoose.Model<AccountRoleDoc> {
   build(attrs: AccountRoleAttrs): AccountRoleDoc;
-  checkRoleByAccountId(id: string): Promise<AccountRoleAttrs | null>;
+  checkRoleByAccountId(id: string): Promise<AccountRoleDoc | null>;
+  findACR(id: string): Promise<AccountRoleDoc | null>;
 }
 
 const accountRoleSchema = new mongoose.Schema(
@@ -36,7 +29,7 @@ const accountRoleSchema = new mongoose.Schema(
     role: {
       type: mongoose.Types.ObjectId,
       ref: 'Role',
-      reqiored: true,
+      required: true,
     },
   },
   {
@@ -46,6 +39,7 @@ const accountRoleSchema = new mongoose.Schema(
         delete ret._id;
       },
     },
+    timestamps: true,
   }
 );
 
@@ -53,18 +47,19 @@ accountRoleSchema.set('versionKey', 'version');
 accountRoleSchema.plugin(updateIfCurrentPlugin);
 
 accountRoleSchema.statics.build = (attrs: AccountRoleAttrs) => {
-  return new AccountRole({
-    _id: attrs.id,
-    account: attrs.account,
-    role: attrs.role,
-  });
+  return new AccountRole(attrs);
 };
 accountRoleSchema.statics.checkRoleByAccountId = async (id: string) => {
-  const accountRole = await AccountRole.findOne({ account: id })
+  const accountRole = await AccountRole.find({ account: id })
     // .lean()
     .populate('role', 'name');
   if (!accountRole)
     throw new BadRequestError('You dont have permission or not verified otp');
+  return accountRole;
+};
+accountRoleSchema.statics.findACR = async (id: string) => {
+  const accountRole = await AccountRole.findOne({ _id: id, isDeleted: false });
+  if (!accountRole) throw new NotFoundError('Account Role');
   return accountRole;
 };
 const AccountRole = mongoose.model<AccountRoleDoc, AccountRoleModel>(

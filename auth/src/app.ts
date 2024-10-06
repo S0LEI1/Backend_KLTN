@@ -6,7 +6,16 @@ import cors from 'cors';
 import { currentUserRouter } from './routes/current-user';
 import { signinRouter } from './routes/signin';
 import { signoutRouter } from './routes/signout';
-import { errorHandler, NotFoundError } from '@share-package/common';
+import {
+  BadRequestError,
+  currentUser,
+  errorHandler,
+  NotFoundError,
+} from '@share-package/common';
+import { accountRoleRouter } from './routes/account-role.routes';
+import { permissionRouter } from './routes/permission.routes';
+import { roleRouter } from './routes/role.routes';
+import { rolePermissionRouter } from './routes/role-permission.routes';
 
 const app = express();
 app.use(json());
@@ -20,12 +29,15 @@ app.use(
 );
 
 app.use(cors());
-app.use(currentUserRouter);
+app.use(currentUser);
 app.use(signinRouter);
 app.use(signoutRouter);
-
+app.use(accountRoleRouter);
+app.use(permissionRouter);
+app.use(roleRouter);
+app.use(rolePermissionRouter);
 app.all('*', async (req, res) => {
-  throw new NotFoundError('Route');
+  throw new BadRequestError('Route must be define');
 });
 app.use(errorHandler);
 export { app };

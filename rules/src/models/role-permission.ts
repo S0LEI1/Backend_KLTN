@@ -19,18 +19,29 @@ interface RolePermissionModel extends mongoose.Model<RolePermissionDoc> {
   checkPermissionByRoleId(id: string): Promise<RolePermissionDoc | null>;
 }
 
-const rolePermissionSchema = new mongoose.Schema({
-  permission: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Permission',
-    required: true,
+const rolePermissionSchema = new mongoose.Schema(
+  {
+    permission: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Permission',
+      required: true,
+    },
+    role: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Role',
+      required: true,
+    },
   },
-  role: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Role',
-    required: true,
-  },
-});
+  {
+    toJSON: {
+      transform(doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+      },
+    },
+    timestamps: true,
+  }
+);
 
 rolePermissionSchema.set('versionKey', 'version');
 rolePermissionSchema.plugin(updateIfCurrentPlugin);

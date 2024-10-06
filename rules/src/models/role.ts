@@ -2,19 +2,23 @@ import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 interface RoleAttrs {
   name: string;
-  active: boolean;
+  systemName: string;
+  isDeleted?: boolean;
   description: string;
 }
 
 export interface RoleDoc extends mongoose.Document {
   name: string;
   active: boolean;
+  systemName: string;
+  isDeleted?: boolean;
   description: string;
   version: number;
 }
 
 interface RoleModel extends mongoose.Model<RoleDoc> {
   build(attrs: RoleAttrs): RoleDoc;
+  findRole(id: string): Promise<RoleDoc | null>;
 }
 
 const roleSchema = new mongoose.Schema(
@@ -23,10 +27,13 @@ const roleSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    active: {
+    systemName: {
+      type: String,
+      required: true,
+    },
+    isDeleted: {
       type: Boolean,
-      require: true,
-      default: true,
+      default: false,
     },
     description: {
       type: String,
@@ -39,11 +46,16 @@ const roleSchema = new mongoose.Schema(
         delete ret._id;
       },
     },
+    timestamps: true,
   }
 );
 
 roleSchema.set('versionKey', 'version');
 roleSchema.plugin(updateIfCurrentPlugin);
+roleSchema.statics.findRole = async (id: string) => {
+  const role = await Role.findOne({ _id: id, isDeleted: false });
+  return role;
+};
 
 roleSchema.statics.build = (attrs: RoleAttrs) => {
   return new Role(attrs);

@@ -2,7 +2,6 @@ import { NotFoundError } from '@share-package/common';
 import mongoose, { mongo } from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 interface PermissionAttrs {
-  id: string;
   name: string;
   active: boolean;
   systemName: string;
@@ -35,10 +34,6 @@ const permissionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    active: {
-      type: Boolean,
-      default: true,
-    },
     description: {
       type: String,
     },
@@ -49,18 +44,14 @@ const permissionSchema = new mongoose.Schema(
         (ret.id = ret._id), delete ret._id;
       },
     },
+    timestamps: true,
   }
 );
 
 permissionSchema.set('versionKey', 'version');
 permissionSchema.plugin(updateIfCurrentPlugin);
 permissionSchema.statics.build = (attrs: PermissionAttrs) => {
-  return new Permission({
-    _id: attrs.id,
-    name: attrs.name,
-    systemName: attrs.systemName,
-    description: attrs.description,
-  });
+  return new Permission(attrs);
 };
 permissionSchema.statics.findByEvent = async (event: {
   id: string;

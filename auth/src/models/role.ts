@@ -2,15 +2,16 @@ import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { NotFoundError } from '@share-package/common';
 interface RoleAttrs {
-  id: string;
   name: string;
-  active: boolean;
+  systemName: string;
+  isDeleted?: boolean;
   description: string;
 }
 
 export interface RoleDoc extends mongoose.Document {
   name: string;
-  active: boolean;
+  systemName: string;
+  isDeleted?: boolean;
   description: string;
   version: number;
 }
@@ -27,9 +28,13 @@ const roleSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    active: {
+    systemName: {
+      type: String,
+      required: true,
+    },
+    isDeleted: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     description: {
       type: String,
@@ -42,6 +47,7 @@ const roleSchema = new mongoose.Schema(
         delete ret._id;
       },
     },
+    timestamps: true,
   }
 );
 
@@ -49,12 +55,7 @@ roleSchema.set('versionKey', 'version');
 roleSchema.plugin(updateIfCurrentPlugin);
 
 roleSchema.statics.build = (attrs: RoleAttrs) => {
-  return new Role({
-    _id: attrs.id,
-    name: attrs.name,
-    active: attrs.active,
-    description: attrs.description,
-  });
+  return new Role(attrs);
 };
 roleSchema.statics.findByEvent = async (event: {
   id: string;
@@ -67,7 +68,7 @@ roleSchema.statics.findByEvent = async (event: {
   return role;
 };
 roleSchema.statics.findRole = async (id: string) => {
-  const userRole = await Role.findById(id);
+  const userRole = await Role.findOne({ _id: id, isDeleted: false });
   if (!Role) throw new NotFoundError('User-Role');
   return userRole;
 };

@@ -25,8 +25,8 @@ router.post(
   ],
   validationRequest,
   requireAuth,
-  requireType([UserType.Manager]),
-  requirePermission([ListPermission.RolePermissionCreate]),
+  // requireType([UserType.Manager]),
+  // requirePermission([ListPermission.RolePermissionCreate]),
   async (req: Request, res: Response) => {
     const { permissionId, roleId } = req.body;
     const permission = await Permission.findById(permissionId);

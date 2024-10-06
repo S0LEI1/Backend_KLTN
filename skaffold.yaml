@@ -16,14 +16,14 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    - image: vannggoc/rules
-      context: rules
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          - src: 'src/**/*.ts'
-            dest: .
+    # - image: vannggoc/rules
+    #   context: rules
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       - src: 'src/**/*.ts'
+    #         dest: .
     - image: vannggoc/accounts
       context: accounts
       docker:

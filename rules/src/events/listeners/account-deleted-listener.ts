@@ -10,9 +10,9 @@ import { Message } from 'node-nats-streaming';
 import { AccountRole } from '../../models/account-role-mapping';
 import { AccountRolePublisherServices } from '../../services/account-role.publisher.service';
 import { Role } from '../../models/role';
-import { RolePublisherServices } from '../../services/role.publisher.service';
 import { RolePermission } from '../../models/role-permission';
 import { RolePermissionPublisherServices } from '../../services/role-permission.publisher.service';
+import { RolePublisher } from '../../services/role.publisher.service';
 
 export class AccountDeletedListener extends Listener<AccountDeletedEvent> {
   subject: Subjects.AccountDeleted = Subjects.AccountDeleted;
@@ -26,7 +26,7 @@ export class AccountDeletedListener extends Listener<AccountDeletedEvent> {
     await AccountRole.deleteOne({ _id: accountRole.id });
     const role = await Role.findById(accountRole.role);
     if (!role) throw new NotFoundError('Role');
-    RolePublisherServices.deleteRole(role);
+    RolePublisher.deleteRole(role);
     await Role.deleteOne({ _id: role.id });
     const rolePermissions = await RolePermission.find({ role: role.id });
     if (!rolePermissions) throw new NotFoundError('Role-Permission');

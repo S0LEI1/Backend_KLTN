@@ -3,12 +3,11 @@ import mongoose, { mongo } from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { PermissionDoc } from './permission';
 import { RoleDoc } from './role';
-interface RolePermissionAttrs {
-  id: string;
+export interface RolePermissionAttrs {
   permission: PermissionDoc;
   role: RoleDoc;
 }
-interface RolePermissionDoc extends mongoose.Document {
+export interface RolePermissionDoc extends mongoose.Document {
   permission: PermissionDoc;
   role: RoleDoc;
   version: number;
@@ -23,27 +22,33 @@ interface RolePermissionModel extends mongoose.Model<RolePermissionDoc> {
   }): Promise<RolePermissionDoc | null>;
 }
 
-const rolePermissionSchema = new mongoose.Schema({
-  permission: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Permission',
-    required: true,
+const rolePermissionSchema = new mongoose.Schema(
+  {
+    permission: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Permission',
+      required: true,
+    },
+    role: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Role',
+      required: true,
+    },
   },
-  role: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Role',
-    required: true,
-  },
-});
+  {
+    toJSON: {
+      transform(doc, ret) {
+        (ret.id = ret._id), delete ret._id;
+      },
+    },
+    timestamps: true,
+  }
+);
 
 rolePermissionSchema.set('versionKey', 'version');
 rolePermissionSchema.plugin(updateIfCurrentPlugin);
 rolePermissionSchema.statics.build = (attrs: RolePermissionAttrs) => {
-  return new RolePermission({
-    _id: attrs.id,
-    permission: attrs.permission,
-    role: attrs.role,
-  });
+  return new RolePermission(attrs);
 };
 
 rolePermissionSchema.statics.checkPermissionByRoleId = async (id: string) => {
@@ -52,10 +57,11 @@ rolePermissionSchema.statics.checkPermissionByRoleId = async (id: string) => {
     // return data
     'name systemName'
   );
-  if (!rolePS) return [];
-  const pers: any = [];
-  rolePS.forEach((rp) => pers.push(rp.permission.systemName));
-  return pers;
+  return rolePS;
+  // if (!rolePS) return [];
+  // const pers: any = [];
+  // rolePS.forEach((rp) => pers.push(rp.permission.systemName));
+  // return pers;
 };
 rolePermissionSchema.statics.findByEvent = async (event: {
   id: string;
