@@ -3,11 +3,12 @@ import {
   NotFoundError,
   Pagination,
 } from '@share-package/common';
-import { Role } from '../models/role';
+import { Role, RoleDoc } from '../models/role';
 import { RolePermission } from '../models/role-permission';
-import { AccountRoleDoc } from '../models/account-role-mapping';
-import { Permission } from '../models/permission';
+import { AccountRole, AccountRoleDoc } from '../models/account-role-mapping';
+import { Permission, PermissionDoc } from '../models/permission';
 import mongoose from 'mongoose';
+import { Account } from '../models/account';
 const PER_PAGE = process.env.PER_PAGE;
 interface Lookup {
   id: string;
@@ -48,7 +49,23 @@ export class RoleServices {
       sortBy,
       isManager
     );
-    return { role, permissions };
+    const notInPermission = await this.readPermssionNotInRole(id, isManager);
+    return { role, permissions, notInPermission };
+  }
+  static async readPermssionNotInRole(roleId: string, isManager: boolean) {
+    if (isManager === false) return null;
+    const rolePermissions = await RolePermission.find(
+      { role: roleId },
+      { permission: 1 }
+    ).populate('permission');
+    const existPermissions: PermissionDoc[] = [];
+    for (const rp of rolePermissions) {
+      existPermissions.push(rp.permission);
+    }
+    const permissions = await Permission.find({
+      _id: { $nin: existPermissions },
+    });
+    return permissions;
   }
   static async readPermissionsOfRole(
     id: string,
@@ -83,5 +100,21 @@ export class RoleServices {
     await role.save();
     // publish permission delete event
     return role;
+  }
+  static async readRoleOfAccount(accountRoles: AccountRoleDoc[]) {
+    const roleIds: mongoose.Types.ObjectId[] = [];
+    for (const acr of accountRoles) {
+      roleIds.push(new mongoose.Types.ObjectId(acr.role.id));
+    }
+    const roles = await Role.find({ _id: { $in: roleIds } });
+    return roles;
+  }
+  static async readRoleNotInAccount(accountRoles: AccountRoleDoc[]) {
+    const roleIds: mongoose.Types.ObjectId[] = [];
+    for (const acr of accountRoles) {
+      roleIds.push(new mongoose.Types.ObjectId(acr.role.id));
+    }
+    const roles = await Role.find({ _id: { $nin: roleIds } });
+    return roles;
   }
 }

@@ -94,6 +94,8 @@ router.post(
           id: existingAccount.id,
           email: existingAccount.email,
           type: existingAccount.type,
+          roles: roles,
+          permissions: permissions,
         },
         process.env.JWT_KEY!,
         { expiresIn: '3h' }

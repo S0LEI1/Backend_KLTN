@@ -50,4 +50,9 @@ router.patch(
   requirePermission([ListPermission.RoleDelete]),
   RoleControllers.deleteRole
 );
+router.get(
+  '/users/account-role/:accountId',
+  requireAuth,
+  RoleControllers.readRoleOfAccount
+);
 export { router as roleRouter };
