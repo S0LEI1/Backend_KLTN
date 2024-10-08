@@ -9,6 +9,8 @@ import {
   NotFoundError,
 } from '@share-package/common';
 import { servicesRouter } from './routes/services.routes';
+import { packageRouter } from './routes/package.routes';
+import { packageServiceRouter } from './routes/package-service.routes';
 
 const app = express();
 app.use(json());
@@ -24,7 +26,8 @@ app.use(
 app.use(cors());
 app.use(currentUser);
 app.use(servicesRouter);
-
+app.use(packageRouter);
+app.use(packageServiceRouter);
 app.all('*', async (req, res) => {
   throw new NotFoundError('Route');
 });

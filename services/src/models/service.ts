@@ -6,7 +6,7 @@ export interface ServiceAttrs {
   name: string;
   imageUrl: string;
   costPrice: number;
-  salePrice: number;
+  salePrice?: number;
   discount?: number;
   isDeleted?: boolean;
   active?: boolean;
@@ -27,6 +27,7 @@ export interface ServiceDoc extends mongoose.Document {
 
 interface ServiceModel extends mongoose.Model<ServiceDoc> {
   build(attrs: ServiceAttrs): ServiceDoc;
+  findService(id: string): Promise<ServiceDoc | null>;
 }
 
 const serviceSchema = new mongoose.Schema(
@@ -80,11 +81,13 @@ serviceSchema.plugin(updateIfCurrentPlugin);
 serviceSchema.statics.build = (attrs: ServiceAttrs) => {
   return new Service(attrs);
 };
+serviceSchema.statics.findService = async (id: string) => {
+  const service = await Service.findOne({ _id: id, isDeleted: false });
+  return service;
+};
 serviceSchema.pre('save', async function (done) {
-  if (this.isModified('salePrice')) {
-    const salePrice = calcSalePrice(this.costPrice, this.discount!);
-    this.set('salePrice', salePrice);
-  }
+  const salePrice = calcSalePrice(this.costPrice, this.discount!);
+  this.set('salePrice', salePrice);
   done();
 });
 const Service = mongoose.model<ServiceDoc, ServiceModel>(

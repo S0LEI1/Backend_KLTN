@@ -26,14 +26,29 @@ export class ServiceServices {
       active: true,
       description: description,
       costPrice: costPrice,
-      salePrice: costPrice + (costPrice * 90) / 100,
     });
     await service.save();
     return service;
   }
-  static async readAll(pages: string, sortBy: string, isManager: boolean) {
+  static async readAll(
+    pages: string,
+    sortBy: string,
+    isManager: boolean,
+    lteDiscount: number,
+    gteDiscount: number,
+    ltePrice: number,
+    gtePrice: number
+  ) {
     const query = Pagination.query();
     query.isDeleted = false;
+    if (gteDiscount) query.discount = { $gte: gteDiscount };
+    if (lteDiscount) query.discount = { $lte: lteDiscount };
+    if (gteDiscount && lteDiscount)
+      query.discount = { $gte: gteDiscount, $lte: lteDiscount };
+    if (gtePrice) query.salePrice = { $gte: gtePrice };
+    if (ltePrice) query.salePrice = { $lte: ltePrice };
+    if (gtePrice && ltePrice)
+      query.salePrice = { $gte: gtePrice, $lte: ltePrice };
     const select = {
       _id: 1,
       name: 1,

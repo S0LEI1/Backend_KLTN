@@ -27,7 +27,14 @@ export class ServiceControllers {
       .send({ message: 'POST: Add new services successfully', service });
   }
   static async readAll(req: Request, res: Response) {
-    const { pages = 1, sortBy, filter } = req.query;
+    const {
+      pages = 1,
+      sortBy,
+      lteDiscount,
+      gteDiscount,
+      ltePrice,
+      gtePrice,
+    } = req.query;
     const { type, permissions } = req.currentUser!;
     const isManager = Check.isManager(type, permissions, [
       ListPermission.ServiceRead,
@@ -35,7 +42,11 @@ export class ServiceControllers {
     const { services, totalItems } = await ServiceServices.readAll(
       pages as string,
       sortBy as string,
-      isManager
+      isManager,
+      parseInt(lteDiscount as string),
+      parseInt(gteDiscount as string),
+      parseInt(ltePrice as string),
+      parseInt(gtePrice as string)
     );
     res
       .status(200)
