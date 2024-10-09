@@ -8,8 +8,8 @@ import {
   ListPermission,
   NotFoundError,
 } from '@share-package/common';
-import { AccountRole } from '../models/account-role-mapping';
 import mongoose from 'mongoose';
+import { UserRole } from '../models/user-role-mapping';
 export class RoleControllers {
   static async newRole(req: Request, res: Response) {
     try {
@@ -41,8 +41,8 @@ export class RoleControllers {
       const isManager = Check.isManager(type, permissions, [
         ListPermission.RoleRead,
       ]);
-      const accountRole = await AccountRole.findOne({ account: id });
-      if (!accountRole && isManager === false)
+      const userRole = await UserRole.findOne({ account: id });
+      if (!userRole && isManager === false)
         throw new BadRequestError('Required type manager or own role');
       const response = await RoleServices.readOne(
         roleId,
@@ -85,16 +85,16 @@ export class RoleControllers {
     const isManager = Check.isManager(type, permissions, [
       ListPermission.RoleRead,
     ]);
-    const accountRoles = await AccountRole.find({
+    const userRoles = await UserRole.find({
       account: new mongoose.Types.ObjectId(accountId),
     });
     if (accountId !== id && isManager === false)
       throw new BadRequestError('Not permission');
     // if (accountRoles.length === 0)
     //   throw new BadRequestError('Required type manager or own role');
-    const roles = await RoleServices.readRoleOfAccount(accountRoles);
+    const roles = await RoleServices.readRoleOfAccount(userRoles);
     if (isManager === true) {
-      const notInRole = await RoleServices.readRoleNotInAccount(accountRoles);
+      const notInRole = await RoleServices.readRoleNotInAccount(userRoles);
       return res.status(200).send({
         message: 'GET: Role of account successfully',
         roles,

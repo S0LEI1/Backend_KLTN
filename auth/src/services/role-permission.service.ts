@@ -1,11 +1,10 @@
 import { BadRequestError, NotFoundError } from '@share-package/common';
-import { AccountRole, AccountRoleDoc } from '../models/account-role-mapping';
 import { Role } from '../models/role';
 import { RolePermission, RolePermissionAttrs } from '../models/role-permission';
 import { Convert } from '../utils/convert';
-import { AccountDoc } from '../models/account';
 import mongoose from 'mongoose';
 import { Permission } from '../models/permission';
+import { UserRole, UserRoleDoc } from '../models/user-role-mapping';
 const ObjectId = mongoose.Types.ObjectId;
 export class RolePermissionServices {
   static async addPermissionForRole(roleId: string, permissionIds: string[]) {
@@ -38,7 +37,7 @@ export class RolePermissionServices {
       permission: { $in: permissions },
     });
   }
-  static async readPermissionByAccountRole(acr: AccountRoleDoc) {
+  static async readPermissionByAccountRole(acr: UserRoleDoc) {
     const role = await Role.findOne({ _id: acr.role });
     if (!role) throw new NotFoundError('Role');
     const rolePer = await RolePermission.find({ role: role.id }).populate(
@@ -50,7 +49,7 @@ export class RolePermissionServices {
     return { role, systemNames };
   }
   static async readPermissionByAccount(id: string) {
-    const permissions = await AccountRole.aggregate([
+    const permissions = await UserRole.aggregate([
       {
         $match: { account: new ObjectId(id) },
       },

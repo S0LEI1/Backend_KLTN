@@ -5,10 +5,9 @@ import {
 } from '@share-package/common';
 import { Role, RoleDoc } from '../models/role';
 import { RolePermission } from '../models/role-permission';
-import { AccountRole, AccountRoleDoc } from '../models/account-role-mapping';
 import { Permission, PermissionDoc } from '../models/permission';
 import mongoose from 'mongoose';
-import { Account } from '../models/account';
+import { UserRoleDoc } from '../models/user-role-mapping';
 const PER_PAGE = process.env.PER_PAGE;
 interface Lookup {
   id: string;
@@ -101,7 +100,7 @@ export class RoleServices {
     // publish permission delete event
     return role;
   }
-  static async readRoleOfAccount(accountRoles: AccountRoleDoc[]) {
+  static async readRoleOfAccount(accountRoles: UserRoleDoc[]) {
     const roleIds: mongoose.Types.ObjectId[] = [];
     for (const acr of accountRoles) {
       roleIds.push(new mongoose.Types.ObjectId(acr.role.id));
@@ -109,7 +108,7 @@ export class RoleServices {
     const roles = await Role.find({ _id: { $in: roleIds } });
     return roles;
   }
-  static async readRoleNotInAccount(accountRoles: AccountRoleDoc[]) {
+  static async readRoleNotInAccount(accountRoles: UserRoleDoc[]) {
     const roleIds: mongoose.Types.ObjectId[] = [];
     for (const acr of accountRoles) {
       roleIds.push(new mongoose.Types.ObjectId(acr.role.id));

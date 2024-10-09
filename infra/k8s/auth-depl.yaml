@@ -38,6 +38,36 @@ spec:
                 secretKeyRef:
                   name: otp-time
                   key: OTP_TIME
+            - name: AUTH_MAIL
+              valueFrom:
+                secretKeyRef:
+                  name: auth-mail
+                  key: AUTH_MAIL
+            - name: AUTH_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: auth-pass
+                  key: AUTH_PASS
+            - name: BUCKET_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: bucket-name
+                  key: BUCKET_NAME
+            - name: ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: access-key-id
+                  key: ACCESS_KEY_ID
+            - name: SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secret-access-key
+                  key: SECRET_ACCESS_KEY
+            - name: REGION
+              valueFrom:
+                secretKeyRef:
+                  name: region
+                  key: REGION
             - name: PER_PAGE
               valueFrom:
                 secretKeyRef:

@@ -1,0 +1,14 @@
+{
+    "name": "@types/generate-password",
+    "version": "1.5.1",
+    "typings": null,
+    "description": "Stub TypeScript definitions entry for generate-password, which provides its own types definitions",
+    "main": "",
+    "scripts": {},
+    "author": "",
+    "repository": "https://github.com/brendanashworth/generate-password.git",
+    "license": "MIT",
+    "dependencies": {
+        "generate-password": "*"
+    }
+}
