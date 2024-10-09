@@ -47,18 +47,15 @@ export class CategoriesControllers {
           ListPermission.ProductRead,
         ]);
       }
-      const { category, products, totalItems } =
-        await CategoriesServices.readOne(
-          id,
-          pages as string,
-          sortBy as string,
-          isManager
-        );
+      const category = await CategoriesServices.readOne(
+        id,
+        pages as string,
+        sortBy as string,
+        isManager
+      );
       return res.status(200).send({
         message: 'GET:Category successfully',
         category,
-        products,
-        totalItems,
       });
     } catch (error) {
       console.log(error);

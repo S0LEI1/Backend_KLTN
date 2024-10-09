@@ -35,7 +35,7 @@ export class ManagerControllers {
         type as string,
         sortBy as string,
         pages as string,
-        gender === 'true' ? true : false
+        gender as string
       );
       res
         .status(200)
@@ -56,10 +56,8 @@ export class ManagerControllers {
         avatar: user.avatar,
         gender: user.gender,
         address: user.address,
-        account: {
-          email: user.email,
-          type: user.type,
-        },
+        email: user.email,
+        type: user.type,
       },
     });
   }

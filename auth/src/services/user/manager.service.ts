@@ -8,12 +8,13 @@ export class ManagerService {
     type: string,
     sortBy: string,
     pages: string,
-    gender: boolean
+    gender: string
   ) {
     const query = Pagination.query();
     query.isDeleted = false;
     if (type) query.type = type;
-    if (gender) query.gender = gender;
+    const isMale = gender === 'true' ? true : false;
+    if (gender) query.gender = isMale;
     const totalItems = await User.find(query).countDocuments();
     const options = Pagination.options(pages, PER_PAGE, sortBy);
     const users = await User.find(query, { password: 0 }, options);

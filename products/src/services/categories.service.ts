@@ -43,15 +43,7 @@ export class CategoriesServices {
     const pOptions = Pagination.options(pages, PER_PAGE!, sortBy);
     const category = await Category.findOne(query);
     if (!category) throw new NotFoundError('Category');
-    const { products, totalItems } =
-      await ProductService.sortByCategoryOrSuplier(
-        id,
-        sortBy as string,
-        pages as string,
-        isManager
-      );
-    const convertProducts = Convert.products(products);
-    return { category, products: convertProducts, totalItems };
+    return category;
   }
   static async findByName(name: string, pages: string, sortBy: string) {
     const query = Pagination.query();

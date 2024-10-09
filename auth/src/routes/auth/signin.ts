@@ -56,7 +56,6 @@ router.post(
       const userRoles = await UserRole.find({
         user: existUser.id,
       });
-      console.log(userRoles);
 
       const roles: string[] = [];
       const permissions: string[] = [];

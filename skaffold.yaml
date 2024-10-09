@@ -24,22 +24,6 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    # - image: vannggoc/rules
-    #   context: rules
-    #   docker:
-    #     dockerfile: Dockerfile
-    #   sync:
-    #     manual:
-    #       - src: 'src/**/*.ts'
-    #         dest: .
-    # - image: vannggoc/accounts
-    #   context: accounts
-    #   docker:
-    #     dockerfile: Dockerfile
-    #   sync:
-    #     manual:
-    #       - src: 'src/**/*.ts'
-    #         dest: .
     - image: vannggoc/products
       context: products
       docker:
@@ -56,19 +40,3 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    # - image: vannggoc/client
-    #   context: client
-    #   docker:
-    #     dockerfile: Dockerfile
-    #   sync:
-    #     manual:
-    #       - src: '**/*.tsx'
-    #         dest: .
-    # - image: vannggoc/expiration
-    #   context: expiration
-    #   docker:
-    #     dockerfile: Dockerfile
-    #   sync:
-    #     manual:
-    #       - src: '**/*.tsx'
-    #         dest: .

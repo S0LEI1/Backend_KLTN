@@ -38,15 +38,7 @@ export class SuplierServices {
     query.isDeleted = false;
     const suplier = await Suplier.findOne(query);
     if (!suplier) throw new NotFoundError('Suplier');
-    const { products, totalItems } =
-      await ProductService.sortByCategoryOrSuplier(
-        id,
-        sortBy as string,
-        pages as string,
-        isManager
-      );
-    const convertProducts = Convert.products(products);
-    return { suplier, products: convertProducts, totalItems };
+    return suplier;
   }
   static async findByName(name: string, pages: string, sortBy: string) {
     const query = Pagination.query();
