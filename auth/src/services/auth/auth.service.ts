@@ -1,6 +1,7 @@
 import {
   BadRequestError,
   NotFoundError,
+  Publisher,
   UserType,
   getOtp,
   templateOtp,
@@ -12,6 +13,8 @@ import { Password } from '../password';
 import { UserPublisher } from '../publishers/user.publisher.service';
 import { getValue, redisClient } from '../../utils/redis';
 import { UserRole } from '../../models/user-role-mapping';
+import { Role } from '../../models/role';
+import { UserRoleService } from '../user-role.service';
 const SUBJECT = 'Đây là mã OTP của bạn';
 export class AuthService {
   static async createCustomer(attrs: UserAttrs) {
@@ -58,6 +61,9 @@ export class AuthService {
     });
     await user.save();
     UserPublisher.newUser(user);
+    const role = await Role.findOne({ systemName: new RegExp('shift', 'i') });
+    if (!role) throw new NotFoundError('Role');
+    const userRole = await UserRoleService.newUR(user.id, [role.id]);
     const html = templatePassword.getOtpHtml(password);
     await Mail.send(
       email,
@@ -78,6 +84,7 @@ export class AuthService {
     }
     user.set({ password: password });
     await user.save();
+    UserPublisher.updateUser(user);
   }
   static async verifyOtp(email: string, otp: string) {
     const user = await User.findOne({ email: email });

@@ -13,15 +13,18 @@ export class UserPublisher {
       gender: userDoc.gender,
       address: userDoc.address,
       type: userDoc.type,
+      email: userDoc.email,
     });
   }
   static async updateUser(userDoc: UserDoc) {
     new UserUpdatedPublisher(natsWrapper.client).publish({
       id: userDoc.id,
       fullName: userDoc.fullName,
+      phoneNumber: userDoc.phoneNumber,
       gender: userDoc.gender,
       address: userDoc.address,
-      avatar: userDoc.avatar,
+      type: userDoc.type,
+      email: userDoc.email,
       version: userDoc.version,
     });
   }
@@ -30,6 +33,7 @@ export class UserPublisher {
       id: userDoc.id,
       isDeleted: userDoc.isDeleted,
       version: userDoc.version,
+      type: userDoc.type,
     });
   }
 }

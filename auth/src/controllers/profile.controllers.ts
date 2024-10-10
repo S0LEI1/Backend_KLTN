@@ -32,15 +32,19 @@ export class ProfileController {
     }
   }
   static async updateInformation(req: Request, res: Response) {
-    const { fullName, gender, phoneNumber, address } = req.body;
-    const { id } = req.currentUser!;
-    const user = await ProfileServices.updateInformation(
-      id,
-      fullName,
-      gender,
-      phoneNumber,
-      address
-    );
-    res.status(204).send({ update: 'success', user });
+    try {
+      const { fullName, gender, phoneNumber, address } = req.body;
+      const { id } = req.currentUser!;
+      const user = await ProfileServices.updateInformation(
+        id,
+        fullName,
+        phoneNumber,
+        gender,
+        address
+      );
+      res.status(200).send({ update: 'success', user });
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

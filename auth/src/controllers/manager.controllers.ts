@@ -3,6 +3,7 @@ import { User } from '../models/user';
 import { NotFoundError, UserType } from '@share-package/common';
 import { Convert } from '../utils/convert';
 import { ManagerService } from '../services/user/manager.service';
+import { UserPublisher } from '../services/publishers/user.publisher.service';
 export class ManagerControllers {
   static async deleteUser(req: Request, res: Response) {
     const { id } = req.params;
@@ -24,6 +25,7 @@ export class ManagerControllers {
       address: address,
     });
     await user!.save();
+    UserPublisher.updateUser(user!);
     res
       .status(200)
       .send({ message: 'PATCH: update user profile successfully', user });
