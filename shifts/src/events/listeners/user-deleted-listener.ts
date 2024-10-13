@@ -19,7 +19,7 @@ export class UserDeletedListenr extends Listener<UserDeletedEvent> {
         version: data.version,
       });
       if (!user) throw new NotFoundError('User');
-      user.set({ isDeleted: false });
+      user.set({ isDeleted: data.isDeleted });
       await user.save();
     }
     msg.ack();

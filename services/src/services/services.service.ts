@@ -9,6 +9,7 @@ import { AwsServices } from './aws.service';
 import { Pagination } from '../utils/pagination';
 import { Check } from '../utils/check-type';
 import { calcSalePrice } from '../utils/calcSalePrice';
+import { ServicePublishers } from './services.publisher.service';
 const PER_PAGES = process.env.PER_PAGES;
 export class ServiceServices {
   static async new(
@@ -23,11 +24,11 @@ export class ServiceServices {
     const service = Service.build({
       name: name,
       imageUrl: imageUrl,
-      active: true,
       description: description,
       costPrice: costPrice,
     });
     await service.save();
+    ServicePublishers.new(service);
     return service;
   }
   static async readAll(
@@ -88,7 +89,8 @@ export class ServiceServices {
     name: string,
     costPrice: number,
     description: string,
-    discount: number
+    discount: number,
+    featured: boolean
   ) {
     const query = Pagination.query();
     query._id = id;
@@ -109,6 +111,7 @@ export class ServiceServices {
       discount: discount,
       salePrice: salePrice,
       imageUrl: imageUrl,
+      featured: featured,
     });
     await service.save();
     return service;

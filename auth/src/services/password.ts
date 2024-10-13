@@ -15,11 +15,9 @@ export class Password {
   }
   static generate() {
     const password = generator.generate({
-      length: 10,
+      length: 5,
       numbers: true,
-      lowercase: true,
-      uppercase: true,
-      symbols: true,
+      symbols: false,
     });
     return password;
   }

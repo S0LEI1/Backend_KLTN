@@ -21,7 +21,7 @@ export class ProductPublisher {
     new ProductUpdatedPublisher(natsWrapper.client).publish({
       id: productDoc.id,
       name: productDoc.name,
-      imageUrl: productDoc.name,
+      imageUrl: productDoc.imageUrl,
       description: productDoc.description,
       suplierId: productDoc.suplier.id,
       categoryId: productDoc.category.id,
@@ -29,6 +29,9 @@ export class ProductPublisher {
       salePrice: productDoc.salePrice!,
       quantity: productDoc.quantity,
       version: productDoc.version,
+      featured: productDoc.featured,
+      discount: productDoc.discount,
+      active: productDoc.active,
     });
   }
   static delete(productDoc: ProductDoc) {

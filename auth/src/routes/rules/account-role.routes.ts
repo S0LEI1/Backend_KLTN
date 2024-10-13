@@ -25,7 +25,7 @@ router.post(
   '/users/account-role/delete',
   [
     body('accountId').isMongoId().withMessage('Account Id must be valid'),
-    body('roleIds').isMongoId().withMessage('Role Id must be valid'),
+    // body('roleIds').isMongoId().withMessage('Role Id must be valid'),
   ],
   requireAuth,
   requireType([UserType.Manager]),

@@ -26,6 +26,7 @@ export class UserPublisher {
       type: userDoc.type,
       email: userDoc.email,
       version: userDoc.version,
+      avatar: userDoc.avatar,
     });
   }
   static async deleteUser(userDoc: UserDoc) {

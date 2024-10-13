@@ -100,7 +100,13 @@ export class ProductService {
     const convertProduct = Convert.product(product);
     return convertProduct;
   }
-  static async update(id: string, productAttrs: ProductAttrs) {
+  static async update(
+    id: string,
+    productAttrs: ProductAttrs,
+    featured: boolean,
+    discount: number,
+    active: boolean
+  ) {
     const query = Pagination.query();
     query._id = id;
     query.isDeleted = false;
@@ -123,6 +129,9 @@ export class ProductService {
       expire: productAttrs.expire,
       costPrice: productAttrs.costPrice,
       quantity: productAttrs.quantity,
+      featured: featured,
+      discount: discount,
+      active: active,
     });
     await product.save();
     return product;
@@ -130,7 +139,7 @@ export class ProductService {
   static async disable(id: string) {
     const product = await Product.findProduct(id);
     if (!product) throw new NotFoundError('Product');
-    product.set({ active: !product.active });
+    product.set({ isDeleted: !product.isDeleted });
     await product.save();
     return product;
   }

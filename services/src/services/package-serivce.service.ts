@@ -1,36 +1,55 @@
 import { BadRequestError, NotFoundError } from '@share-package/common';
 import { Service } from '../models/service';
 import { Package } from '../models/package';
-import { PackageService } from '../models/package-service';
+import { PackageService, PackageServiceDoc } from '../models/package-service';
 import { PackageServicePublisher } from './package-service.publisher.service';
 
 export class PackageServiceServices {
-  static async newPackageService(serviceId: string, packageId: string) {
-    const service = await Service.findService(serviceId);
-    if (!service) throw new NotFoundError('Service');
+  static async newPackageService(serviceIds: string[], packageId: string) {
+    const services = await Service.find({
+      _id: { $in: serviceIds },
+      isDeleted: false,
+    });
+    if (!services) throw new NotFoundError('Services');
     const existPackage = await Package.findPackage(packageId);
     if (!existPackage) throw new NotFoundError('Package');
-    const existPS = await PackageService.findByServiceAndPackage(
-      serviceId,
-      packageId
-    );
-    if (existPS) throw new BadRequestError('Package Service is exist');
-    const newPS = PackageService.build({
-      service: service,
-      package: existPackage,
+    const existPSs = await PackageService.find({
+      service: { $in: serviceIds },
+      package: packageId,
     });
-    await newPS.save();
+    console.log(services);
+
+    if (existPSs.length > 0)
+      throw new BadRequestError('Package Service is exist');
+    const packageServices: PackageServiceDoc[] = [];
+    for (const service of services) {
+      const newPS = PackageService.build({
+        service: service,
+        package: existPackage,
+      });
+      await newPS.save();
+      PackageServicePublisher.newPackageService(newPS);
+      packageServices.push(newPS);
+    }
     // publish create event
-    PackageServicePublisher.newPackageService(newPS);
-    return newPS;
+    return packageServices;
   }
-  static async deletePackageSevice(id: string) {
+  static async deletePackageSevice(attrs: {
+    serviceIds: string[];
+    packageId: string;
+  }) {
     try {
-      const existPS = await PackageService.findPackageService(id);
-      if (!existPS) throw new BadRequestError('Package Service do not exist');
+      const existPSs = await PackageService.find({
+        package: attrs.packageId,
+        service: { $in: attrs.serviceIds },
+      });
+      if (existPSs.length <= 0)
+        throw new BadRequestError('Package Service do not exist');
       // publish deleted event
-      PackageServicePublisher.deletePackageService(existPS);
-      await PackageService.deleteOne({ _id: existPS.id });
+      for (const ps of existPSs) {
+        PackageServicePublisher.deletePackageService(ps);
+        await PackageService.deleteOne({ _id: ps.id });
+      }
     } catch (error) {
       console.log(error);
     }

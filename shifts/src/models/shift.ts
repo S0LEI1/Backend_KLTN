@@ -2,10 +2,9 @@ import { Pagination } from '@share-package/common';
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 const PER_PAGE = process.env.PER_PAGE!;
-interface ShiftAttrs {
+export interface ShiftAttrs {
   begin: Date;
   end: Date;
-  isDeleted: false;
   description: string;
 }
 export interface ShiftDoc extends mongoose.Document {
@@ -51,6 +50,7 @@ const shiftSchema = new mongoose.Schema(
 );
 shiftSchema.set('versionKey', 'version');
 shiftSchema.plugin(updateIfCurrentPlugin);
+shiftSchema.index({ begin: 1, end: 1 });
 shiftSchema.statics.build = (attrs: ShiftAttrs) => {
   return new Shift(attrs);
 };

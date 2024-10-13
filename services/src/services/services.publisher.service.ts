@@ -21,6 +21,8 @@ export class ServicePublishers {
       imageUrl: serviceDoc.imageUrl,
       salePrice: serviceDoc.salePrice,
       description: serviceDoc.description,
+      featured: serviceDoc.featured,
+      discount: serviceDoc.discount,
       version: serviceDoc.version,
     });
   }

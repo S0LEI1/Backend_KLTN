@@ -18,7 +18,10 @@ import { UserRoleService } from '../user-role.service';
 const SUBJECT = 'Đây là mã OTP của bạn';
 export class AuthService {
   static async createCustomer(attrs: UserAttrs) {
-    const existUser = await User.findOne({ email: attrs.email });
+    const existUser = await User.findOne({
+      email: attrs.email,
+      isDeleted: false,
+    });
     if (existUser) throw new BadRequestError('Email is used');
     const existsUser = await User.findOne({ phoneNumber: attrs.phoneNumber });
     if (existsUser) {
@@ -49,7 +52,8 @@ export class AuthService {
     if (existsUser) {
       throw new BadRequestError('Phone number is used');
     }
-    const password = Password.generate();
+    const generatePassword = Password.generate();
+    const password = 'employee@1' + generatePassword;
     const user = User.build({
       email: email,
       password: password,

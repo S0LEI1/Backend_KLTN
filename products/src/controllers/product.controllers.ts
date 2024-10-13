@@ -90,19 +90,29 @@ export class ProductControllers {
       expire,
       costPrice,
       quantity,
+      featured,
+      discount,
+      active,
     } = req.body;
     const { type } = req.currentUser!;
     const { file } = req;
-    const updateProduct = await ProductService.update(id, {
-      name,
-      description,
-      categoryId,
-      suplierId,
-      expire,
-      costPrice,
-      quantity,
-      file,
-    });
+    const isFeatured = featured === 'true' ? true : false;
+    const isActive = active === 'true' ? true : false;
+    const updateProduct = await ProductService.update(
+      id,
+      {
+        name: name,
+        description: description,
+        categoryId: categoryId,
+        suplierId: suplierId,
+        expire: expire,
+        costPrice: costPrice,
+        quantity: quantity,
+      },
+      isFeatured,
+      parseInt(discount as string),
+      isActive
+    );
     ProductPublisher.update(updateProduct);
     const convertProduct = Convert.product(updateProduct);
     res.status(200).send({

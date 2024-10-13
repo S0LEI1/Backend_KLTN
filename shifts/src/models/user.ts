@@ -71,7 +71,7 @@ userSchema.statics.build = (attrs: UserAttrs) => {
     _id: attrs.id,
     fullName: attrs.fullName,
     gender: attrs.gender,
-    phoneNumber: attrs.gender,
+    phoneNumber: attrs.phoneNumber,
     type: attrs.type,
   });
 };

@@ -19,9 +19,9 @@ router.post(
   '/users/role-permission/delete',
   [
     body('roleId').isMongoId().withMessage('Role Id must be mongoId'),
-    body('permissionIds')
-      .isMongoId()
-      .withMessage('Permission Id must be mongoId'),
+    // body('permissionIds')
+    //   .isMongoId()
+    //   .withMessage('Permission Id must be mongoId'),
   ],
   validationRequest,
   requireAuth,

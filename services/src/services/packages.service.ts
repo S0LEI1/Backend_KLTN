@@ -53,7 +53,6 @@ export class PackageServices {
   static async readAll(
     pages: string,
     sortBy: string,
-    featured: string,
     lteDiscount: number,
     gteDiscount: number,
     ltePrice: number,

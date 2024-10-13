@@ -12,21 +12,20 @@ import { body } from 'express-validator';
 const router = express.Router();
 router.post(
   '/services/package-service/new',
-  [
-    body('serviceId').isMongoId().withMessage('Service Id must be MongoId'),
-    body('packageId').isMongoId().withMessage('Package Id must be MongoId'),
-  ],
+  [body('packageId').isMongoId().withMessage('Package Id must be MongoId')],
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
   requirePermission([ListPermission.PackageCreate]),
   PackageServiceControllers.newPackageService
 );
-router.delete(
-  '/services/package-service/:id',
+router.post(
+  '/services/package-service/delete',
+  [body('packageId').isMongoId().withMessage('Package Id must be mongoId')],
+  validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
-  requirePermission([ListPermission.PackageCreate]),
+  requirePermission([ListPermission.PackageDelete]),
   PackageServiceControllers.deletePackageService
 );
 export { router as packageServiceRouter };

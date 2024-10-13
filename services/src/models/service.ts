@@ -6,10 +6,6 @@ export interface ServiceAttrs {
   name: string;
   imageUrl: string;
   costPrice: number;
-  salePrice?: number;
-  discount?: number;
-  isDeleted?: boolean;
-  active?: boolean;
   description: string;
 }
 export interface ServiceDoc extends mongoose.Document {
@@ -18,9 +14,10 @@ export interface ServiceDoc extends mongoose.Document {
   price: number;
   costPrice: number;
   salePrice: number;
-  discount?: number;
-  active?: boolean;
-  isDeleted?: boolean;
+  discount: number;
+  active: boolean;
+  featured: boolean;
+  isDeleted: boolean;
   description: string;
   version: number;
 }
@@ -46,7 +43,6 @@ const serviceSchema = new mongoose.Schema(
     },
     salePrice: {
       type: Number,
-      required: true,
     },
     discount: {
       type: Number,
@@ -62,6 +58,10 @@ const serviceSchema = new mongoose.Schema(
     },
     description: {
       type: String,
+    },
+    featured: {
+      type: Boolean,
+      default: false,
     },
   },
   {
