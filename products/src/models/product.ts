@@ -6,18 +6,17 @@ import { BadRequestError, NotFoundError } from '@share-package/common';
 
 export interface ProductAttrs {
   name: string;
-  description: string;
   category: CategoryDoc;
   suplier: SuplierDoc;
-  imageUrl: string;
-  expire: Date;
   costPrice: number;
   salePrice?: number;
+  imageUrl: string;
   quantity: number;
+  expire: Date;
   discount?: number;
   featured?: boolean;
-  active?: boolean;
   isDeleted?: boolean;
+  description: string;
 }
 export interface ProductDoc extends mongoose.Document {
   name: string;
@@ -31,9 +30,9 @@ export interface ProductDoc extends mongoose.Document {
   quantity: number;
   featured?: boolean;
   discount?: number;
-  active?: boolean;
   version: number;
   isDeleted?: boolean;
+  createdAt?: Date;
 }
 interface ProductModel extends mongoose.Model<ProductDoc> {
   build(attrs: ProductAttrs): ProductDoc;
@@ -86,10 +85,6 @@ const productSchema = new mongoose.Schema(
     featured: {
       type: Boolean,
       default: false,
-    },
-    active: {
-      type: Boolean,
-      default: true,
     },
     isDeleted: {
       type: Boolean,

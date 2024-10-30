@@ -3,8 +3,6 @@ import { ProductPublisher } from '../services/product.publisher.service';
 import { ProductService } from '../services/products.service';
 import { Request, Response } from 'express';
 import { Convert } from '../utils/convert';
-import { checkImage } from '../utils/check-image';
-import { ProductDoc } from '../models/product';
 import { String } from 'aws-sdk/clients/apigateway';
 import { Check } from '../utils/check-type';
 export class ProductControllers {
@@ -183,5 +181,38 @@ export class ProductControllers {
       products: convertProducts,
       totalItems,
     });
+  }
+  static async exportData(req: Request, res: Response) {
+    const { type } = req.query;
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="products.xlsx"`,
+    });
+    try {
+      if (type === 'suplier') {
+        const workbook = await ProductService.exportProductBySuplier();
+        return workbook.xlsx.write(res);
+      }
+      if (type === 'category') {
+        const workbook = await ProductService.exportProductByCategory();
+        return workbook.xlsx.write(res);
+      }
+      const workbook = await ProductService.exportProducts();
+      workbook.xlsx.write(res);
+      // res.status(200).send({ message: 'Export successfully' });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  static async importData(req: Request, res: Response) {
+    try {
+      const file = req.file;
+
+      const data = await ProductService.importData(file!);
+      res.status(201).send({ message: 'import data successfully', data });
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

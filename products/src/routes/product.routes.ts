@@ -79,4 +79,19 @@ router.get(
   requirePermission([ListPermission.ProductRead]),
   ProductControllers.readAllProductUnactive
 );
+router.get(
+  '/products/export/data',
+  // requireAuth,
+  // requireType([UserType.Manager]),
+  // requirePermission([ListPermission.ProductRead]),
+  ProductControllers.exportData
+);
+router.post(
+  '/products/import/data',
+  singleUploadMiddleware,
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.ProductCreate]),
+  ProductControllers.importData
+);
 export { router as productRouter };

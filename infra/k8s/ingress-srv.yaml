@@ -17,20 +17,6 @@ spec:
                 name: auth-srv
                 port:
                   number: 3000
-          # - path: /rules/?(.*)
-          #   pathType: ImplementationSpecific
-          #   backend:
-          #     service:
-          #       name: rules-srv
-          #       port:
-          #         number: 3000
-          # - path: /accounts/?(.*)
-          #   pathType: ImplementationSpecific
-          #   backend:
-          #     service:
-          #       name: accounts-srv
-          #       port:
-          #         number: 3000
           - path: /products/?(.*)
             pathType: ImplementationSpecific
             backend:

@@ -22,4 +22,12 @@ export class Check {
       throw new BadRequestError('Image invalid');
     }
   };
+  static checkExcel(file: Express.Multer.File) {
+    if (
+      file.mimetype !=
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ) {
+      throw new BadRequestError('File Excel invalid');
+    }
+  }
 }

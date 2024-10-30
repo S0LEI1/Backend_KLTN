@@ -6,7 +6,8 @@ import { checkImage } from '../utils/check-image';
 import { AwsServices } from './aws.service';
 import { Convert } from '../utils/convert';
 import { Check } from '../utils/check-type';
-import { String } from 'aws-sdk/clients/cloudhsm';
+import exceljs from 'exceljs';
+import mongoose, { ObjectId } from 'mongoose';
 interface ProductAttrs {
   name: string;
   description: string;
@@ -35,7 +36,6 @@ export class ProductService {
         category: category!,
         suplier: suplier!,
         imageUrl: imageUrl!,
-        active: true,
         expire: productAttrs.expire,
         costPrice: productAttrs.costPrice,
         salePrice: salePrice,
@@ -221,5 +221,173 @@ export class ProductService {
       .exec();
     if (!products) throw new NotFoundError('Products');
     return { products, totalItems };
+  }
+  static async exportData(
+    workbook: exceljs.Workbook,
+    worksheetName: string,
+    data: ProductDoc[]
+  ) {
+    const sheet = workbook.addWorksheet(worksheetName);
+    sheet.columns = [
+      { header: 'Mã sản phẩm', key: 'id', width: 25 },
+      { header: 'Tên sản phẩm', key: 'name', width: 50 },
+      {
+        header: 'Giá gốc',
+        key: 'costPrice',
+        width: 15,
+      },
+      {
+        header: 'Giá bán',
+        key: 'salePrice',
+        width: 15,
+      },
+      {
+        header: 'Mã nhà cung cấp',
+        key: 'suplierId',
+        width: 25,
+      },
+      {
+        header: 'Tên nhà cung cấp',
+        key: 'suplierName',
+        width: 20,
+      },
+      {
+        header: 'Mã loại sản phẩm',
+        key: 'categoryId',
+        width: 25,
+      },
+      {
+        header: 'Tên loại sản phẩm',
+        key: 'categoryName',
+        width: 20,
+      },
+      { header: 'Hình ảnh', key: 'imageUrl', width: 50 },
+      {
+        header: 'Số lượng',
+        key: 'quantity',
+        width: 10,
+      },
+      { header: 'Ngày hết hạn', key: 'expire', width: 15 },
+      {
+        header: 'Giảm giá',
+        key: 'discount',
+        width: 10,
+      },
+      {
+        header: 'Bán chạy',
+        key: 'featured',
+        width: 10,
+      },
+      { header: 'Mô tả', key: 'description', width: 50 },
+      { header: 'Đã xóa', key: 'isDeleted', width: 10 },
+      { header: 'Ngày tạo', key: 'createdAt', width: 20 },
+      { header: 'Phiên bản', key: 'version', width: 10 },
+    ];
+    data.map((value, index) => {
+      sheet.addRow({
+        id: value.id,
+        name: value.name,
+        costPrice: value.costPrice,
+        salePrice: value.salePrice,
+        suplierId: value.suplier.id,
+        suplierName: value.suplier.name,
+        categoryId: value.category.id,
+        categoryName: value.category.name,
+        imageUrl: value.imageUrl,
+        quantity: value.quantity,
+        expire: value.expire,
+        discount: value.discount,
+        featured: value.featured,
+        description: value.description,
+        isDeleted: value.isDeleted,
+        createdAt: value.createdAt,
+        version: value.version,
+      });
+      let rowIndex = 1;
+      for (rowIndex; rowIndex <= sheet.rowCount; rowIndex++) {
+        sheet.getRow(rowIndex).alignment = {
+          vertical: 'middle',
+          horizontal: 'left',
+          wrapText: true,
+        };
+      }
+    });
+    return workbook;
+  }
+  static async exportProducts() {
+    let workbook = new exceljs.Workbook();
+    const products = await Product.find({ isDeleted: false })
+      .populate('category')
+      .populate('suplier');
+    const workbookData = await this.exportData(workbook, 'Products', products);
+    return workbook;
+  }
+  static async exportProductBySuplier() {
+    let workbook = new exceljs.Workbook();
+    const supliers = await Suplier.find({ isDeleted: false });
+    for (const sup of supliers) {
+      const products = await Product.find({
+        suplier: sup.id,
+        isDeleted: false,
+      })
+        .populate('suplier')
+        .populate('category');
+      await this.exportData(workbook, sup.name, products);
+    }
+    return workbook;
+  }
+  static async exportProductByCategory() {
+    let workbook = new exceljs.Workbook();
+    const categories = await Category.find({ isDeleted: false });
+    for (const category of categories) {
+      const products = await Product.find({
+        category: category.id,
+        isDeleted: false,
+      })
+        .populate('suplier')
+        .populate('category');
+      await this.exportData(workbook, category.name, products);
+    }
+    return workbook;
+  }
+  static async getWorkSheets(file: Express.Multer.File) {
+    const workbook = new exceljs.Workbook();
+    await workbook.xlsx.readFile(file.path);
+    const worksheetNames: string[] = [];
+    workbook.eachSheet((worksheet, sheetId) => {
+      worksheetNames.push(worksheet.name);
+    });
+    return worksheetNames;
+  }
+  static async importData(file: Express.Multer.File) {
+    Check.checkExcel(file);
+    const workbook = new exceljs.Workbook();
+    await workbook.xlsx.readFile(file.path);
+    const data: ProductDoc[] = [];
+    workbook.eachSheet((worksheet, sheetId) => {
+      const rowNumber = worksheet.rowCount;
+      worksheet.getRows(2, rowNumber)?.forEach(async (row) => {
+        const category = await Category.findCategory(
+          row.getCell(4).value as string
+        );
+        const suplier = await Suplier.findSuplier(
+          row.getCell(5).value as string
+        );
+        const product = Product.build({
+          name: row.getCell(2).value as string,
+          description: row.getCell(9).value as string,
+          category: category!,
+          suplier: suplier!,
+          imageUrl: row.getCell(4).value as string,
+          expire: row.getCell(6).value as Date,
+          costPrice: row.getCell(2).value as number,
+          quantity: row.getCell(5).value as number,
+          discount: row.getCell(7).value as number,
+          featured: row.getCell(8).value as boolean,
+        });
+        data.push(product);
+      });
+    });
+    return data;
   }
 }

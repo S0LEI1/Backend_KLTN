@@ -31,7 +31,6 @@ export class ProductPublisher {
       version: productDoc.version,
       featured: productDoc.featured,
       discount: productDoc.discount,
-      active: productDoc.active,
     });
   }
   static delete(productDoc: ProductDoc) {

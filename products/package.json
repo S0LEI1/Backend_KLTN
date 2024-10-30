@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@share-package/common": "^1.0.112",
+    "@share-package/common": "^1.0.114",
     "@types/aws-sdk": "^2.7.0",
     "@types/cookie-session": "^2.0.49",
     "@types/cors": "^2.8.17",
@@ -13,9 +13,11 @@
     "aws-sdk": "^2.1691.0",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
+    "exceljs": "^4.4.0",
     "express": "^4.19.2",
     "express-async-errors": "^3.1.1",
     "express-validator": "^7.2.0",
+    "fast-csv": "^5.0.2",
     "generate-password": "^1.7.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.4",

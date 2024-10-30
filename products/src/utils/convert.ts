@@ -14,7 +14,6 @@ interface ConvertProduct {
   featured: boolean;
   salePrice: number;
   quantity: number;
-  active: boolean;
   version: number;
 }
 export class Convert {
@@ -32,7 +31,6 @@ export class Convert {
       costPrice: productDoc.costPrice,
       salePrice: productDoc.salePrice!,
       quantity: productDoc.quantity,
-      active: productDoc.active!,
       version: productDoc.version,
       featured: productDoc.featured!,
     };
