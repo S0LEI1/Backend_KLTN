@@ -4,6 +4,7 @@ import {
   requireAuth,
   requirePermission,
   requireType,
+  singleUploadMiddleware,
   validationRequest,
 } from '@share-package/common';
 import express, { Request, Response } from 'express';
@@ -45,9 +46,17 @@ router.patch(
 );
 router.get(
   '/products/supliers/export/data',
-  // requireAuth,
-  // requireType([UserType.Manager]),
-  // requirePermission([ListPermission.ProductRead]),
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.ProductRead]),
   SuplierControllers.exportSuplier
+);
+router.post(
+  '/products/supliers/import/data',
+  singleUploadMiddleware,
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.ProductRead]),
+  SuplierControllers.importSuplier
 );
 export { router as suplierRouter };

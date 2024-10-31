@@ -94,4 +94,9 @@ export class SuplierControllers {
     const workbook = await SuplierServices.exportSuplier();
     workbook.xlsx.write(res);
   }
+  static async importSuplier(req: Request, res: Response) {
+    const file = req.file;
+    const supliers = await SuplierServices.importSuplier(file!);
+    res.status(201).send({ message: 'import suplier successfully', supliers });
+  }
 }

@@ -81,9 +81,9 @@ router.get(
 );
 router.get(
   '/products/export/data',
-  // requireAuth,
-  // requireType([UserType.Manager]),
-  // requirePermission([ListPermission.ProductRead]),
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.ProductRead]),
   ProductControllers.exportData
 );
 router.post(

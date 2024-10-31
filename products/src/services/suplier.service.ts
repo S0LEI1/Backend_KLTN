@@ -3,10 +3,12 @@ import {
   NotFoundError,
   Pagination,
 } from '@share-package/common';
-import { Suplier } from '../models/suplier';
+import { Suplier, SuplierDoc } from '../models/suplier';
 import { ProductService } from './products.service';
 import { Convert } from '../utils/convert';
 import exceljs from 'exceljs';
+import { Check } from '../utils/check-type';
+import { SuplierPublisher } from './suplier.publiser.service';
 const PER_PAGE = process.env.PER_PAGE;
 export class SuplierServices {
   static async create(
@@ -99,7 +101,7 @@ export class SuplierServices {
     }
     sheet.columns = [
       { header: 'Mã nhà cung cấp', key: 'id', width: 25 },
-      { header: 'Tên nhà cung cấp', key: 'name', width: 50 },
+      { header: 'Tên nhà cung cấp', key: 'name', width: 35 },
       {
         header: 'Số điện thoại',
         key: 'phoneNumber',
@@ -118,7 +120,7 @@ export class SuplierServices {
       {
         header: 'Mô tả',
         key: 'description',
-        width: 20,
+        width: 50,
       },
     ];
     supliers.map((value, index) => {
@@ -133,5 +135,30 @@ export class SuplierServices {
       }
     });
     return workbook;
+  }
+  static async importSuplier(file: Express.Multer.File) {
+    Check.checkExcel(file!);
+    const workbook = new exceljs.Workbook();
+    await workbook.xlsx.readFile(file.path);
+    const supliers: SuplierDoc[] = [];
+    workbook.eachSheet((worksheet, sheetId) => {
+      const rowNumber = worksheet.rowCount;
+      worksheet.getRows(2, rowNumber)!.map(async (row, index) => {
+        if (!row.hasValues) {
+          return workbook.nextId;
+        }
+        const suplier = Suplier.build({
+          name: row.getCell(2).value as string,
+          phoneNumber: row.getCell(3).value as string,
+          email: row.getCell(4).value as string,
+          address: row.getCell(5).value as string,
+          description: row.getCell(6).value as string,
+        });
+        await suplier.save();
+        SuplierPublisher.new(suplier);
+        supliers.push(suplier);
+      });
+    });
+    return supliers;
   }
 }
