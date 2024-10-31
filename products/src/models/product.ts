@@ -3,6 +3,7 @@ import { CategoryDoc } from './category';
 import { SuplierDoc } from './suplier';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { BadRequestError, NotFoundError } from '@share-package/common';
+import { calcSalePrice } from '../utils/calcSalePrice';
 
 export interface ProductAttrs {
   name: string;
@@ -72,7 +73,6 @@ const productSchema = new mongoose.Schema(
     },
     salePrice: {
       type: Number,
-      required: true,
     },
     quantity: {
       type: Number,
@@ -109,7 +109,17 @@ productSchema.plugin(updateIfCurrentPlugin);
 productSchema.statics.build = (attrs: ProductAttrs) => {
   return new Product(attrs);
 };
-
+productSchema.pre('save', async function (done) {
+  const salePrice = calcSalePrice(this.costPrice, this.discount!);
+  this.set('salePrice', salePrice);
+  done();
+});
+// productSchema.pre('updateOne', async function (done) {
+//   const data = this.getUpdate();
+//   const salePrice = calcSalePrice(data!.costPrice, data!.discount!);
+//   this.set('salePrice', salePrice);
+//   done();
+// });
 productSchema.statics.findByName = async (name: string) => {
   const product = await Product.findOne({ name: name });
   if (product) throw new BadRequestError('Product existing');

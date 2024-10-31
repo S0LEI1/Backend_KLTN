@@ -23,6 +23,7 @@ export class Check {
     }
   };
   static checkExcel(file: Express.Multer.File) {
+    if (!file) throw new BadRequestError('File excel must be provided');
     if (
       file.mimetype !=
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

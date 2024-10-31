@@ -8,6 +8,7 @@ import { Convert } from '../utils/convert';
 import { Check } from '../utils/check-type';
 import exceljs from 'exceljs';
 import mongoose, { ObjectId } from 'mongoose';
+import { ProductPublisher } from './product.publisher.service';
 interface ProductAttrs {
   name: string;
   description: string;
@@ -310,7 +311,7 @@ export class ProductService {
         width: 10,
       },
       { header: 'Mô tả', key: 'description', width: 50 },
-      { header: 'Đã xóa', key: 'isDeleted', width: 10 },
+      // { header: 'Đã xóa', key: 'isDeleted', width: 10 },
       { header: 'Ngày tạo', key: 'createdAt', width: 20 },
       { header: 'Phiên bản', key: 'version', width: 10 },
     ];
@@ -328,9 +329,9 @@ export class ProductService {
         quantity: value.quantity,
         expire: value.expire,
         discount: value.discount,
-        featured: value.featured,
+        featured: value.featured === true ? 'có' : 'không',
         description: value.description,
-        isDeleted: value.isDeleted,
+        // isDeleted: value.isDeleted,
         createdAt: value.createdAt,
         version: value.version,
       });
@@ -394,31 +395,36 @@ export class ProductService {
     Check.checkExcel(file);
     const workbook = new exceljs.Workbook();
     await workbook.xlsx.readFile(file.path);
-    const data: ProductDoc[] = [];
+    const products: ProductDoc[] = [];
     workbook.eachSheet((worksheet, sheetId) => {
       const rowNumber = worksheet.rowCount;
-      worksheet.getRows(2, rowNumber)?.forEach(async (row) => {
+      worksheet.getRows(2, rowNumber)!.map(async (row, index) => {
+        if (!row.hasValues) {
+          return workbook.nextId;
+        }
         const category = await Category.findCategory(
-          row.getCell(4).value as string
+          row.getCell(7).value as string
         );
         const suplier = await Suplier.findSuplier(
           row.getCell(5).value as string
         );
         const product = Product.build({
           name: row.getCell(2).value as string,
-          description: row.getCell(9).value as string,
+          description: row.getCell(14).value as string,
           category: category!,
           suplier: suplier!,
-          imageUrl: row.getCell(4).value as string,
-          expire: row.getCell(6).value as Date,
-          costPrice: row.getCell(2).value as number,
-          quantity: row.getCell(5).value as number,
-          discount: row.getCell(7).value as number,
-          featured: row.getCell(8).value as boolean,
+          imageUrl: row.getCell(9).value as string,
+          expire: row.getCell(11).value as Date,
+          costPrice: row.getCell(3).value as number,
+          quantity: row.getCell(10).value as number,
+          discount: row.getCell(12).value as number,
+          featured: row.getCell(13).value === 'có' ? true : false,
         });
-        data.push(product);
+        await product.save();
+        ProductPublisher.new(product);
+        products.push(product);
       });
     });
-    return data;
+    return products;
   }
 }
