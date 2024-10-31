@@ -11,6 +11,9 @@ export class SuplierCreatedListener extends Listener<SuplierCreatedEvent> {
       id: data.id,
       name: data.name,
       description: data.description,
+      phoneNumber: data.phoneNumber,
+      email: data.email,
+      address: data.address,
     });
     await suplier.save();
     msg.ack();

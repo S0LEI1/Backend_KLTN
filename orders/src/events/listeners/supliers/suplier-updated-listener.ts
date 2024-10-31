@@ -17,7 +17,13 @@ export class SuplierUpdatedListener extends Listener<SuplierUpdatedEvent> {
       version: data.version,
     });
     if (!suplier) throw new NotFoundError('Suplier');
-    suplier.set({ name: data.name, description: data.description });
+    suplier.set({
+      name: data.name,
+      description: data.description,
+      phoneNumber: data.phoneNumber,
+      email: data.email,
+      address: data.address,
+    });
     await suplier.save();
     msg.ack();
   }

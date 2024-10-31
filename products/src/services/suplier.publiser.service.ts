@@ -10,6 +10,9 @@ export class SuplierPublisher {
       id: suplier.id,
       name: suplier.name,
       description: suplier.description,
+      phoneNumber: suplier.phoneNumber,
+      email: suplier.email,
+      address: suplier.address,
     });
   }
   static update(suplier: SuplierDoc) {
@@ -18,6 +21,9 @@ export class SuplierPublisher {
       name: suplier.name,
       description: suplier.description,
       version: suplier.version,
+      phoneNumber: suplier.phoneNumber,
+      email: suplier.email,
+      address: suplier.address,
     });
   }
   static delete(suplier: SuplierDoc) {

@@ -1,13 +1,21 @@
 import { Request, Response } from 'express';
 import { BadRequestError, ListPermission } from '@share-package/common';
 import { SuplierServices } from '../services/suplier.service';
-import { SuplierPublisher } from '../services/suplier.publiser.service';
 import { Check } from '../utils/check-type';
+import exceljs from 'exceljs';
+import { Suplier } from '../models/suplier';
+import { SuplierPublisher } from '../services/suplier.publiser.service';
 
 export class SuplierControllers {
   static async new(req: Request, res: Response) {
-    const { name, description } = req.body;
-    const category = await SuplierServices.create(name, description);
+    const { name, description, phoneNumber, email, address } = req.body;
+    const category = await SuplierServices.create(
+      name,
+      phoneNumber,
+      email,
+      address,
+      description
+    );
     SuplierPublisher.new(category);
     res
       .status(201)
@@ -55,9 +63,16 @@ export class SuplierControllers {
       .send({ message: 'GET: suplier by name successfully', suplier });
   }
   static async update(req: Request, res: Response) {
-    const { name, description } = req.body;
+    const { name, description, phoneNumber, email, address } = req.body;
     const { id } = req.params;
-    const existSuplier = await SuplierServices.update(id, name, description);
+    const existSuplier = await SuplierServices.update(
+      id,
+      name,
+      description,
+      phoneNumber,
+      email,
+      address
+    );
     SuplierPublisher.update(existSuplier);
     res.status(200).send({
       message: 'PATCH: update suplier successfully',
@@ -69,5 +84,14 @@ export class SuplierControllers {
     const suplier = await SuplierServices.delete(id);
     SuplierPublisher.delete(suplier);
     res.status(200).send({ message: 'PATCH: delete suplier successfully' });
+  }
+  static async exportSuplier(req: Request, res: Response) {
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="supliers.xlsx"`,
+    });
+    const workbook = await SuplierServices.exportSuplier();
+    workbook.xlsx.write(res);
   }
 }

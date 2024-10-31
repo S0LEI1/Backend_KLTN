@@ -6,14 +6,25 @@ import {
 import { Suplier } from '../models/suplier';
 import { ProductService } from './products.service';
 import { Convert } from '../utils/convert';
+import exceljs from 'exceljs';
 const PER_PAGE = process.env.PER_PAGE;
 export class SuplierServices {
-  static async create(name: string, description: string) {
+  static async create(
+    name: string,
+    phoneNumber: string,
+    email: string,
+    address: string,
+    description: string
+  ) {
     const existSuplier = await Suplier.findOne({ name: name });
     if (existSuplier) throw new BadRequestError('Suplier name existing');
     const suplier = Suplier.build({
       name: name,
+
       description: description,
+      phoneNumber: phoneNumber,
+      email: email,
+      address: address,
     });
     await suplier.save();
     return suplier;
@@ -49,10 +60,23 @@ export class SuplierServices {
     if (!suplier) throw new NotFoundError('Suplier by name');
     return suplier;
   }
-  static async update(id: string, name: string, description: string) {
+  static async update(
+    id: string,
+    name: string,
+    description: string,
+    phoneNumber: string,
+    email: string,
+    address: String
+  ) {
     const existSuplier = await Suplier.findById(id);
     if (!existSuplier) throw new NotFoundError('Suplier update');
-    existSuplier.set({ name: name, description: description });
+    existSuplier.set({
+      name: name,
+      description: description,
+      phoneNumber: phoneNumber,
+      email: email,
+      address: address,
+    });
     await existSuplier.save();
     return existSuplier;
   }
@@ -65,5 +89,49 @@ export class SuplierServices {
     existSuplier.set({ isDeleted: true });
     await existSuplier.save();
     return existSuplier;
+  }
+  static async exportSuplier() {
+    const workbook = new exceljs.Workbook();
+    const sheet = workbook.addWorksheet('Suplier');
+    const supliers = await Suplier.find({ isDeleted: false });
+    if (supliers.length <= 0) {
+      throw new BadRequestError('Supliers not found');
+    }
+    sheet.columns = [
+      { header: 'Mã nhà cung cấp', key: 'id', width: 25 },
+      { header: 'Tên nhà cung cấp', key: 'name', width: 50 },
+      {
+        header: 'Số điện thoại',
+        key: 'phoneNumber',
+        width: 15,
+      },
+      {
+        header: 'Email',
+        key: 'email',
+        width: 15,
+      },
+      {
+        header: 'Địa chỉ',
+        key: 'address',
+        width: 25,
+      },
+      {
+        header: 'Mô tả',
+        key: 'description',
+        width: 20,
+      },
+    ];
+    supliers.map((value, index) => {
+      sheet.addRow(value);
+      let rowIndex = 1;
+      for (rowIndex; rowIndex <= sheet.rowCount; rowIndex++) {
+        sheet.getRow(rowIndex).alignment = {
+          vertical: 'middle',
+          horizontal: 'left',
+          wrapText: true,
+        };
+      }
+    });
+    return workbook;
   }
 }

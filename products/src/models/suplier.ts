@@ -4,14 +4,19 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 interface SuplierAttrs {
   name: string;
+  phoneNumber: string;
+  email: string;
+  address: string;
   description: string;
-  isDeleted?: boolean;
 }
 export interface SuplierDoc extends mongoose.Document {
   name: string;
+  phoneNumber: string;
+  email: string;
+  address: string;
   description: string;
   version: number;
-  isDeleted?: boolean;
+  isDeleted: boolean;
 }
 
 interface SuplierModel extends mongoose.Model<SuplierDoc> {
@@ -24,6 +29,17 @@ const suplierSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    address: {
+      type: String,
     },
     description: {
       type: String,
