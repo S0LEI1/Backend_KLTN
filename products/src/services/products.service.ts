@@ -52,18 +52,49 @@ export class ProductService {
     sortBy: string,
     isManager: boolean,
     category: string,
-    suplier: string
+    suplier: string,
+    lteDiscount: number,
+    gteDiscount: number,
+    ltePrice: number,
+    gtePrice: number,
+    // createdAt: Date,
+    quantity: string,
+    expire: string,
+    name: string
   ) {
     const query = Pagination.query();
+    const sort = Pagination.query();
     query.isDeleted = false;
     if (category) query.category = category;
     if (suplier) query.suplier = suplier;
+    if (gteDiscount) query.discount = { $gte: gteDiscount };
+    if (lteDiscount) query.discount = { $lte: lteDiscount };
+    if (gteDiscount && lteDiscount)
+      query.discount = { $gte: gteDiscount, $lte: lteDiscount };
+    if (gtePrice) query.salePrice = { $gte: gtePrice };
+    if (ltePrice) query.salePrice = { $lte: ltePrice };
+    if (gtePrice && ltePrice)
+      query.salePrice = { $gte: gtePrice, $lte: ltePrice };
+
+    // if (createdAt) {
+    //   createdAt.setHours(0, 0, 0, 0);
+    //   query.createdAt = { $lte: createdAt };
+    // }
+    if (quantity === 'instock') query.quantity = { $gte: 10 };
+    if (quantity === 'outofstock') query.quantity = 0;
+    if (quantity === 'runninglow') query.quantity = { $lt: 10, $gte: 1 };
+
+    // sort
+    sort.featured = -1;
+    sort.name = 1;
+    if (expire === 'asc') sort.expire = 1;
+    if (expire === 'desc') sort.expire = -1;
     const options = Pagination.options(pages, PER_PAGE!, sortBy);
     const totalItems = await Product.find(query).countDocuments();
     const products = await Product.find(
       query,
       isManager ? null : { costPrice: 0, version: 0, active: 0 },
-      { options, sort: { featured: -1 } }
+      { options, sort: sort }
     )
       .populate({
         path: 'category',

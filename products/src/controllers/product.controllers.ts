@@ -37,7 +37,20 @@ export class ProductControllers {
     });
   }
   static async readAll(req: Request, res: Response) {
-    const { pages = 1, active, sortBy, category, suplier } = req.query;
+    const {
+      pages = 1,
+      sortBy,
+      category,
+      suplier,
+      lteDiscount,
+      gteDiscount,
+      ltePrice,
+      gtePrice,
+      createdAt,
+      quantity,
+      expire,
+      name,
+    } = req.query;
     let isManager = false;
     if (req.currentUser) {
       const { type, permissions } = req.currentUser;
@@ -51,7 +64,15 @@ export class ProductControllers {
         sortBy as string,
         isManager,
         category as string,
-        suplier as string
+        suplier as string,
+        parseInt(lteDiscount as string),
+        parseInt(gteDiscount as string),
+        parseInt(ltePrice as string),
+        parseInt(gtePrice as string),
+        // Date(createdAt as string),
+        quantity as string,
+        expire as string,
+        name as string
       );
       const convertProducts = Convert.products(products);
       res.status(200).send({

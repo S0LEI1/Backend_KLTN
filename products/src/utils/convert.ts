@@ -10,10 +10,12 @@ interface ConvertProduct {
   suplierName?: string;
   imageUrl: string;
   expire: Date;
+  discount: number;
   costPrice?: number;
   featured: boolean;
   salePrice: number;
   quantity: number;
+  createdAt: Date;
   version: number;
 }
 export class Convert {
@@ -33,6 +35,8 @@ export class Convert {
       quantity: productDoc.quantity,
       version: productDoc.version,
       featured: productDoc.featured!,
+      discount: productDoc.discount,
+      createdAt: productDoc.createdAt,
     };
     return convertProduct;
   }

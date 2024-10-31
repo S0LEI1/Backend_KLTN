@@ -26,13 +26,13 @@ export interface ProductDoc extends mongoose.Document {
   imageUrl: string;
   expire: Date;
   costPrice: number;
-  salePrice?: number;
+  salePrice: number;
   quantity: number;
-  featured?: boolean;
-  discount?: number;
+  featured: boolean;
+  discount: number;
   version: number;
-  isDeleted?: boolean;
-  createdAt?: Date;
+  isDeleted: boolean;
+  createdAt: Date;
 }
 interface ProductModel extends mongoose.Model<ProductDoc> {
   build(attrs: ProductAttrs): ProductDoc;
