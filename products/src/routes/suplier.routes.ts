@@ -46,9 +46,9 @@ router.patch(
 );
 router.get(
   '/products/supliers/export/data',
-  requireAuth,
-  requireType([UserType.Manager]),
-  requirePermission([ListPermission.ProductRead]),
+  // requireAuth,
+  // requireType([UserType.Manager]),
+  // requirePermission([ListPermission.ProductRead]),
   SuplierControllers.exportSuplier
 );
 router.post(

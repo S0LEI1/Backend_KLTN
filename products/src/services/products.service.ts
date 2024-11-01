@@ -396,11 +396,21 @@ export class ProductService {
     const workbook = new exceljs.Workbook();
     await workbook.xlsx.readFile(file.path);
     const products: ProductDoc[] = [];
-    workbook.eachSheet((worksheet, sheetId) => {
+    const existProducts: ProductDoc[] = [];
+    for (const worksheet of workbook.worksheets) {
       const rowNumber = worksheet.rowCount;
-      worksheet.getRows(2, rowNumber)!.map(async (row, index) => {
+      for (let i = 2; i <= rowNumber; i++) {
+        const row = worksheet.getRow(i);
         if (!row.hasValues) {
-          return workbook.nextId;
+          continue;
+        }
+        const existProduct = await Product.findOne({
+          name: row.getCell(2).value as string,
+          isDeleted: false,
+        });
+        if (existProduct) {
+          existProducts.push(existProduct);
+          continue;
         }
         const category = await Category.findCategory(
           row.getCell(7).value as string
@@ -423,8 +433,8 @@ export class ProductService {
         await product.save();
         ProductPublisher.new(product);
         products.push(product);
-      });
-    });
-    return products;
+      }
+    }
+    return { products, existProducts };
   }
 }

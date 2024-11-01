@@ -227,9 +227,16 @@ export class ProductControllers {
     }
   }
   static async importData(req: Request, res: Response) {
-    const file = req.file;
-
-    const products = await ProductService.importData(file!);
-    res.status(201).send({ message: 'import data successfully', products });
+    try {
+      const file = req.file;
+      const { products, existProducts } = await ProductService.importData(
+        file!
+      );
+      res
+        .status(201)
+        .send({ message: 'import data successfully', products, existProducts });
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

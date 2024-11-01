@@ -96,7 +96,15 @@ export class SuplierControllers {
   }
   static async importSuplier(req: Request, res: Response) {
     const file = req.file;
-    const supliers = await SuplierServices.importSuplier(file!);
-    res.status(201).send({ message: 'import suplier successfully', supliers });
+    const { supliers, existSupliers } = await SuplierServices.importSuplier(
+      file!
+    );
+    res
+      .status(201)
+      .send({
+        message: 'import suplier successfully',
+        supliers,
+        existSupliers,
+      });
   }
 }

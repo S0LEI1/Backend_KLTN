@@ -22,7 +22,6 @@ export class SuplierServices {
     if (existSuplier) throw new BadRequestError('Suplier name existing');
     const suplier = Suplier.build({
       name: name,
-
       description: description,
       phoneNumber: phoneNumber,
       email: email,
@@ -141,11 +140,22 @@ export class SuplierServices {
     const workbook = new exceljs.Workbook();
     await workbook.xlsx.readFile(file.path);
     const supliers: SuplierDoc[] = [];
-    workbook.eachSheet((worksheet, sheetId) => {
+    const existSupliers: SuplierDoc[] = [];
+    const rowData: any[] = [];
+    for (const worksheet of workbook.worksheets) {
       const rowNumber = worksheet.rowCount;
-      worksheet.getRows(2, rowNumber)!.map(async (row, index) => {
+      for (let i = 2; i <= rowNumber; i++) {
+        const row = worksheet.getRow(i);
         if (!row.hasValues) {
-          return workbook.nextId;
+          continue;
+        }
+        const existSuplier = await Suplier.findOne({
+          _id: row.getCell(1).value as string,
+          isDeleted: false,
+        });
+        if (existSuplier) {
+          existSupliers.push(existSuplier);
+          continue;
         }
         const suplier = Suplier.build({
           name: row.getCell(2).value as string,
@@ -157,8 +167,8 @@ export class SuplierServices {
         await suplier.save();
         SuplierPublisher.new(suplier);
         supliers.push(suplier);
-      });
-    });
-    return supliers;
+      }
+    }
+    return { supliers, existSupliers };
   }
 }
