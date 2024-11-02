@@ -67,9 +67,17 @@ router.patch(
 router.get('/services/find/name', requireAuth, ServiceControllers.readByName);
 router.get(
   '/services/export/data',
-  // requireAuth,
-  // requireType([UserType.Manager]),
-  // requirePermission([ListPermission.ServiceCreate]),
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.ServiceCreate]),
   ServiceControllers.exportService
+);
+router.post(
+  '/services/import/data',
+  singleUploadMiddleware,
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.ServiceCreate]),
+  ServiceControllers.importService
 );
 export { router as servicesRouter };

@@ -128,4 +128,18 @@ export class ServiceControllers {
     const workbook = await ServiceServices.exportService();
     workbook.xlsx.write(res);
   }
+  static async importService(req: Request, res: Response) {
+    const file = req.file;
+    Check.checkExcel(file!);
+    const { services, existServices } = await ServiceServices.importService(
+      file!
+    );
+    res
+      .status(201)
+      .send({
+        message: 'Import services successfully',
+        services,
+        existServices,
+      });
+  }
 }

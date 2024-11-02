@@ -3,7 +3,7 @@ import {
   NotFoundError,
   UserType,
 } from '@share-package/common';
-import { Service } from '../models/service';
+import { Service, ServiceDoc } from '../models/service';
 import { checkImage } from '../utils/check-image';
 import { AwsServices } from './aws.service';
 import { Pagination } from '../utils/pagination';
@@ -237,5 +237,41 @@ export class ServiceServices {
       }
     });
     return workbook;
+  }
+  static async importService(file: Express.Multer.File) {
+    const workbook = new exceljs.Workbook();
+    await workbook.xlsx.readFile(file.path);
+    const services: ServiceDoc[] = [];
+    const existServices: ServiceDoc[] = [];
+    for (const worksheet of workbook.worksheets) {
+      const rowNumber = worksheet.rowCount;
+      for (let i = 2; i <= rowNumber; i++) {
+        const row = worksheet.getRow(i);
+        if (!row.hasValues) {
+          continue;
+        }
+        const existService = await Service.findOne({
+          name: row.getCell(2).value as string,
+          isDeleted: false,
+        });
+        if (existService) {
+          existServices.push(existService);
+          continue;
+        }
+        const service = Service.build({
+          name: row.getCell(2).value as string,
+          costPrice: row.getCell(4).value as number,
+          salePrice: row.getCell(5).value as number,
+          imageUrl: row.getCell(3).value as string,
+          time: row.getCell(7).value as number,
+          expire: row.getCell(8).value as number,
+          description: row.getCell(10).value as string,
+        });
+        await service.save();
+        ServicePublishers.new(service);
+        services.push(service);
+      }
+    }
+    return { services, existServices };
   }
 }
