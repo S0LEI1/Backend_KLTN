@@ -3,13 +3,15 @@ import { Password } from '../services/password';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { NotFoundError, UserType } from '@share-package/common';
 export interface UserAttrs {
+  fullName: string;
   email: string;
   password: string;
-  type?: UserType;
-  fullName: string;
-  gender: boolean;
   phoneNumber: string;
+  avatar?: string;
+  gender: boolean;
   address: string;
+  type?: UserType;
+  point?: number;
 }
 // property model build has
 interface UserModel extends mongoose.Model<UserDoc> {
@@ -31,7 +33,8 @@ export interface UserDoc extends mongoose.Document {
   gender: boolean;
   phoneNumber: string;
   address: string;
-  avatar?: string;
+  avatar: string;
+  point: number;
   version: number;
   isDeleted: boolean;
 }
@@ -68,6 +71,12 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
+      default:
+        'https://kimbeautyspa.s3.ap-southeast-1.amazonaws.com/avatar.png',
+    },
+    point: {
+      type: Number,
+      default: 100,
     },
     isDeleted: {
       type: Boolean,
@@ -90,13 +99,13 @@ userSchema.plugin(updateIfCurrentPlugin);
 userSchema.statics.build = (attrs: UserAttrs) => {
   return new User(attrs);
 };
-userSchema.pre('save', async function (done) {
-  if (this.isModified('password')) {
-    const hashed = await Password.toHash(this.get('password'));
-    this.set('password', hashed);
-  }
-  done();
-});
+// userSchema.pre('save', async function (done) {
+//   if (this.isModified('password')) {
+//     const hashed = await Password.toHash(this.get('password'));
+//     this.set('password', hashed);
+//   }
+//   done();
+// });
 userSchema.statics.checkExists = async (id: string) => {
   const user = await User.findById(id);
   if (!user) throw new NotFoundError('User');

@@ -14,6 +14,8 @@ export class UserPublisher {
       address: userDoc.address,
       type: userDoc.type,
       email: userDoc.email,
+      avatar: userDoc.avatar,
+      point: userDoc.point,
     });
   }
   static async updateUser(userDoc: UserDoc) {
@@ -27,6 +29,7 @@ export class UserPublisher {
       email: userDoc.email,
       version: userDoc.version,
       avatar: userDoc.avatar,
+      point: userDoc.point,
     });
   }
   static async deleteUser(userDoc: UserDoc) {

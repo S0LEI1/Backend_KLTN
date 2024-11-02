@@ -5,6 +5,7 @@ import {
   requireAuth,
   requirePermission,
   requireType,
+  singleUploadMiddleware,
   validationRequest,
 } from '@share-package/common';
 import express, { Request, Response } from 'express';
@@ -105,5 +106,26 @@ router.post(
   [body('email').isEmail().withMessage(EMAIL_MESSAGE)],
   validationRequest,
   AccountControllers.sendOtp
+);
+router.get(
+  '/users/export/data',
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([
+    ListPermission.EmployeeCreate,
+    ListPermission.CustomerCreate,
+  ]),
+  AccountControllers.exportUser
+);
+router.post(
+  '/users/import/data',
+  requireAuth,
+  singleUploadMiddleware,
+  requireType([UserType.Manager]),
+  requirePermission([
+    ListPermission.EmployeeCreate,
+    ListPermission.CustomerCreate,
+  ]),
+  AccountControllers.importUser
 );
 export { router as authRouter };

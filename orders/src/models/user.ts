@@ -8,6 +8,8 @@ export interface UserAttrs {
   fullName: string;
   gender: boolean;
   phoneNumber: string;
+  avatar?: string;
+  point?: number;
 }
 // property model build has
 interface UserModel extends mongoose.Model<UserDoc> {
@@ -28,6 +30,7 @@ export interface UserDoc extends mongoose.Document {
   phoneNumber: string;
   email: string;
   avatar?: string;
+  point: number;
   version: number;
   isDeleted: boolean;
 }
@@ -57,6 +60,10 @@ const userSchema = new mongoose.Schema(
     avatar: {
       type: String,
     },
+    point: {
+      type: Number,
+      default: 100,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -83,6 +90,7 @@ userSchema.statics.build = (attrs: UserAttrs) => {
     phoneNumber: attrs.phoneNumber,
     type: attrs.type,
     email: attrs.email,
+    avatar: attrs.avatar,
   });
 };
 

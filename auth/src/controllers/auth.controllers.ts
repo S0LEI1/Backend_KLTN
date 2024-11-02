@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services/auth/auth.service';
+import { Check } from '@share-package/common';
 export class AccountControllers {
   static async createEmployee(req: Request, res: Response) {
     const { email, fullName, gender, phoneNumber, address } = req.body;
@@ -44,5 +45,32 @@ export class AccountControllers {
     const { email } = req.body;
     const otp = await AuthService.sendOtp(email);
     res.status(200).send({ message: 'Send otp successfully', otp: otp });
+  }
+  static async exportUser(req: Request, res: Response) {
+    const { sort } = req.query;
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="users.xlsx"`,
+    });
+    try {
+      if (sort === 'type') {
+        const workbook = await AuthService.exportUserByType();
+        return workbook.xlsx.write(res);
+      }
+      const workbook = await AuthService.exportUser();
+      workbook.xlsx.write(res);
+      // res.status(200).send({ message: 'Export successfully' });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  static async importUser(req: Request, res: Response) {
+    const file = req.file;
+    Check.checkExcel(file!);
+    const { users, existUsers } = await AuthService.importUser(file!);
+    res
+      .status(201)
+      .send({ message: 'Import users successfully', users, existUsers });
   }
 }
