@@ -4,22 +4,26 @@ import { calcSalePrice } from '../utils/calcSalePrice';
 
 export interface ServiceAttrs {
   name: string;
-  imageUrl: string;
   costPrice: number;
+  salePrice?: number;
+  imageUrl: string;
+  time: number;
+  expire: number;
   description: string;
 }
 export interface ServiceDoc extends mongoose.Document {
   name: string;
   imageUrl: string;
-  price: number;
   costPrice: number;
   salePrice: number;
   discount: number;
-  active: boolean;
+  time: number;
+  expire: number;
   featured: boolean;
-  isDeleted: boolean;
   description: string;
+  isDeleted: boolean;
   version: number;
+  createdAt: Date;
 }
 
 interface ServiceModel extends mongoose.Model<ServiceDoc> {
@@ -48,9 +52,13 @@ const serviceSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    active: {
-      type: Boolean,
-      default: true,
+    time: {
+      type: Number,
+      required: true,
+    },
+    expire: {
+      type: Number,
+      required: true,
     },
     isDeleted: {
       type: Boolean,
@@ -90,6 +98,10 @@ serviceSchema.pre('save', async function (done) {
   this.set('salePrice', salePrice);
   done();
 });
+// serviceSchema.pre('updateOne', async function (done) {
+//   const update = this.getUpdate();
+//   update.
+// })
 const Service = mongoose.model<ServiceDoc, ServiceModel>(
   'Service',
   serviceSchema

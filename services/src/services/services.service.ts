@@ -10,13 +10,16 @@ import { Pagination } from '../utils/pagination';
 import { Check } from '../utils/check-type';
 import { calcSalePrice } from '../utils/calcSalePrice';
 import { ServicePublishers } from './services.publisher.service';
+import exceljs from 'exceljs';
 const PER_PAGES = process.env.PER_PAGES;
 export class ServiceServices {
   static async new(
     name: string,
     file: Express.Multer.File,
     description: string,
-    costPrice: number
+    costPrice: number,
+    time: number,
+    expire: number
   ) {
     const imageUrl = await AwsServices.uploadFile(file);
     const existService = await Service.findOne({ name: name });
@@ -26,6 +29,8 @@ export class ServiceServices {
       imageUrl: imageUrl,
       description: description,
       costPrice: costPrice,
+      time: time,
+      expire: expire,
     });
     await service.save();
     ServicePublishers.new(service);
@@ -90,7 +95,9 @@ export class ServiceServices {
     costPrice: number,
     description: string,
     discount: number,
-    featured: boolean
+    featured: boolean,
+    time: number,
+    expire: number
   ) {
     const query = Pagination.query();
     query._id = id;
@@ -112,6 +119,8 @@ export class ServiceServices {
       salePrice: salePrice,
       imageUrl: imageUrl,
       featured: featured,
+      time: time,
+      expire: expire,
     });
     await service.save();
     return service;
@@ -151,5 +160,82 @@ export class ServiceServices {
       options
     );
     return { services, totalItems };
+  }
+  static async exportService() {
+    const workbook = new exceljs.Workbook();
+    const sheet = workbook.addWorksheet('Suplier');
+    const services = await Service.find({ isDeleted: false });
+    if (services.length <= 0) {
+      throw new BadRequestError('Supliers not found');
+    }
+    sheet.columns = [
+      { header: 'Mã dịch vụ', key: 'id', width: 25 },
+      { header: 'Tên dịch vụ', key: 'name', width: 35 },
+      {
+        header: 'Hình ảnh',
+        key: 'imageUrl',
+        width: 50,
+      },
+      {
+        header: 'Giá gốc (đ)',
+        key: 'costPrice',
+        width: 15,
+      },
+      {
+        header: 'Giá bán (đ)',
+        key: 'salePrice',
+        width: 15,
+      },
+      {
+        header: 'Giảm giá (%)',
+        key: 'discount',
+        width: 15,
+      },
+      {
+        header: 'Thời gian (phút)',
+        key: 'time',
+        width: 25,
+      },
+      {
+        header: 'Hạn sử dụng (ngày)',
+        key: 'expire',
+        width: 25,
+      },
+      {
+        header: 'Bán chạy',
+        key: 'featured',
+        width: 10,
+      },
+      {
+        header: 'Mô tả',
+        key: 'description',
+        width: 50,
+      },
+    ];
+    services.map((value, index) => {
+      sheet.addRow({
+        id: value.id,
+        name: value.name,
+        imageUrl: value.imageUrl,
+        costPrice: value.costPrice,
+        salePrice: value.salePrice,
+        discount: value.discount,
+        time: value.time,
+        expire: value.expire,
+        featured: value.featured === true ? 'Có' : 'Không',
+        description: value.description,
+        // isDeleted: value.isDeleted,
+        createdAt: value.createdAt,
+      });
+      let rowIndex = 1;
+      for (rowIndex; rowIndex <= sheet.rowCount; rowIndex++) {
+        sheet.getRow(rowIndex).alignment = {
+          vertical: 'middle',
+          horizontal: 'left',
+          wrapText: true,
+        };
+      }
+    });
+    return workbook;
   }
 }

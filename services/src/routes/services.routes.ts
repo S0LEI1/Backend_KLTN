@@ -17,6 +17,14 @@ router.post(
   [
     body('name').notEmpty().withMessage('Name service must be provided'),
     body('costPrice').isNumeric().withMessage('Price must be number'),
+    body('time')
+      .notEmpty()
+      .isInt({ min: 1 })
+      .withMessage('Time must be greater than equal 1 min'),
+    body('expire')
+      .notEmpty()
+      .isInt({ min: 1 })
+      .withMessage('Time must be greater than equal 1 day'),
   ],
   validationRequest,
   requireAuth,
@@ -30,8 +38,16 @@ router.patch(
   '/services/:id',
   singleUploadMiddleware,
   [
-    body('name').notEmpty().withMessage('Service name must be provided'),
-    body('costPrice').isNumeric().withMessage('Cost price must be numeric'),
+    body('name').notEmpty().withMessage('Name service must be provided'),
+    body('costPrice').isNumeric().withMessage('Price must be number'),
+    body('time')
+      .notEmpty()
+      .isInt({ min: 1 })
+      .withMessage('Time must be greater than equal 1 min'),
+    body('expire')
+      .notEmpty()
+      .isInt({ min: 1 })
+      .withMessage('Time must be greater than equal 1 day'),
     body('discount').isNumeric().withMessage('Discount must be numeric'),
   ],
   validationRequest,
@@ -49,5 +65,11 @@ router.patch(
 );
 
 router.get('/services/find/name', requireAuth, ServiceControllers.readByName);
-
+router.get(
+  '/services/export/data',
+  // requireAuth,
+  // requireType([UserType.Manager]),
+  // requirePermission([ListPermission.ServiceCreate]),
+  ServiceControllers.exportService
+);
 export { router as servicesRouter };

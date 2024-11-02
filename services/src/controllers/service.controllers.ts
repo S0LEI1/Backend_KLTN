@@ -13,14 +13,16 @@ export class ServiceControllers {
   static async new(req: Request, res: Response) {
     try {
       const { file } = req;
-      const { name, description, costPrice } = req.body;
+      const { name, description, costPrice, time, expire } = req.body;
       if (!file) throw new BadRequestError('Image must be provided');
       Check.checkImage(file);
       const service = await ServiceServices.new(
         name,
         file,
         description,
-        costPrice
+        costPrice,
+        parseInt(time as string),
+        parseInt(expire as string)
       );
       // ServicePublishers.new(service);
       res
@@ -69,7 +71,8 @@ export class ServiceControllers {
   }
   static async updateService(req: Request, res: Response) {
     const { id } = req.params;
-    const { name, costPrice, description, discount, featured } = req.body;
+    const { name, costPrice, description, discount, featured, time, expire } =
+      req.body;
     const { file } = req;
     const isFeatured = (featured as string) === 'true' ? true : false;
     const service = await ServiceServices.update(
@@ -79,7 +82,9 @@ export class ServiceControllers {
       costPrice,
       description,
       discount,
-      isFeatured
+      isFeatured,
+      time as number,
+      parseInt(expire as string)
     );
     ServicePublishers.updateService(service);
     res.status(200).send({ message: 'PATCH: service successfully', service });
@@ -113,5 +118,14 @@ export class ServiceControllers {
     } catch (error) {
       console.log(error);
     }
+  }
+  static async exportService(req: Request, res: Response) {
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="services.xlsx"`,
+    });
+    const workbook = await ServiceServices.exportService();
+    workbook.xlsx.write(res);
   }
 }
