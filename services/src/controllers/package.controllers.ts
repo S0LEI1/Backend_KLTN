@@ -6,14 +6,15 @@ import { Check } from '../utils/check-type';
 export class PackageControllers {
   static async newPackage(req: Request, res: Response) {
     try {
-      const { files } = req;
-      const { name, costPrice, description } = req.body;
-      if (files === undefined) throw new BadRequestError('Image must be valid');
+      const { file } = req;
+      const { name, costPrice, description, count, expire } = req.body;
       const newPackage = await PackageServices.newPackage(
         name,
         costPrice,
-        files as Express.Multer.File[],
-        description
+        file as Express.Multer.File,
+        description,
+        count,
+        expire
       );
       res
         .status(201)
@@ -30,6 +31,15 @@ export class PackageControllers {
       gteDiscount,
       ltePrice,
       gtePrice,
+      price,
+      discount,
+      featured,
+      lteCount,
+      gteCount,
+      count,
+      lteExpire,
+      gteExpire,
+      expire,
     } = req.query;
     const { type, permissions } = req.currentUser!;
     const isManager = Check.isManager(type, permissions, [
@@ -42,7 +52,16 @@ export class PackageControllers {
       parseInt(gteDiscount as string),
       parseInt(ltePrice as string),
       parseInt(gtePrice as string),
-      isManager
+      isManager,
+      price as string,
+      discount as string,
+      (featured as string) === 'true' ? true : false,
+      parseInt(lteCount as string),
+      parseInt(gteCount as string),
+      count as string,
+      parseInt(lteExpire as string),
+      parseInt(gteExpire as string),
+      expire as string
     );
     res
       .status(200)
@@ -54,8 +73,14 @@ export class PackageControllers {
     const isManager = Check.isManager(type, permissions, [
       ListPermission.PackageRead,
     ]);
-    const response = await PackageServices.readOne(id, isManager);
-    res.status(200).send({ message: 'GET: Package successfully', response });
+    const { existPackage, notInSerivce, services } =
+      await PackageServices.readOne(id, isManager);
+    res.status(200).send({
+      message: 'GET: Package successfully',
+      package: existPackage,
+      notInSerivce,
+      services,
+    });
   }
   static async deletePackage(req: Request, res: Response) {
     const { id } = req.params;
@@ -64,5 +89,39 @@ export class PackageControllers {
       message: 'PATCH: Delete package successfully',
       package: deletePackage,
     });
+  }
+  static async updatePackage(req: Request, res: Response) {
+    const { id } = req.params;
+    const {
+      name,
+      costPrice,
+      salePrice,
+      discount,
+      count,
+      time,
+      featured,
+      description,
+    } = req.body;
+    const file = req.file;
+    try {
+      const updatePackage = await PackageServices.updatePackage({
+        id: id,
+        name: name,
+        costPrice: parseInt(costPrice as string),
+        // salePrice: parseInt(salePrice as string),
+        discount: parseInt(discount as string),
+        count: parseInt(count as string),
+        expire: parseInt(time as string),
+        file: file!,
+        featured: featured === 'true' ? true : false,
+        description: description,
+      });
+      res.status(200).send({
+        message: 'Update package successfully',
+        package: updatePackage,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

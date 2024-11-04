@@ -1,12 +1,12 @@
 import {
   BadRequestError,
   NotFoundError,
+  Pagination,
   UserType,
 } from '@share-package/common';
 import { Service, ServiceDoc } from '../models/service';
 import { checkImage } from '../utils/check-image';
 import { AwsServices } from './aws.service';
-import { Pagination } from '../utils/pagination';
 import { Check } from '../utils/check-type';
 import { calcSalePrice } from '../utils/calcSalePrice';
 import { ServicePublishers } from './services.publisher.service';
@@ -43,9 +43,21 @@ export class ServiceServices {
     lteDiscount: number,
     gteDiscount: number,
     ltePrice: number,
-    gtePrice: number
+    gtePrice: number,
+    price: string,
+    discount: string,
+    featured: string,
+    lteTime: number,
+    gteTime: number,
+    time: string,
+    lteExpire: number,
+    gteExpire: number,
+    expire: string
   ) {
+    console.log(featured);
+
     const query = Pagination.query();
+    const sort = Pagination.query();
     query.isDeleted = false;
     if (gteDiscount) query.discount = { $gte: gteDiscount };
     if (lteDiscount) query.discount = { $lte: lteDiscount };
@@ -53,8 +65,29 @@ export class ServiceServices {
       query.discount = { $gte: gteDiscount, $lte: lteDiscount };
     if (gtePrice) query.salePrice = { $gte: gtePrice };
     if (ltePrice) query.salePrice = { $lte: ltePrice };
-    if (gtePrice && ltePrice)
+    if (gtePrice && ltePrice) {
       query.salePrice = { $gte: gtePrice, $lte: ltePrice };
+    }
+    if (gteTime) query.time = { $gte: gteTime };
+    if (lteTime) query.time = { $lte: lteTime };
+    if (lteTime && gteTime) query.time = { $gte: gteTime, $lte: lteTime };
+    if (gteExpire) query.expire = { $gte: gteExpire };
+    if (lteExpire) query.expire = { $lte: lteExpire };
+    if (lteExpire && gteExpire)
+      query.expire = { $gte: gteExpire, $lte: lteExpire };
+    // sort
+    if (sortBy === 'asc') sort.name = 1;
+    if (sortBy === 'desc') sort.name = -1;
+    if (price === 'asc') sort.salePrice = 1;
+    if (price === 'desc') sort.salePrice = -1;
+    if (discount === 'asc') sort.discount = 1;
+    if (discount === 'desc') sort.discount = -1;
+    if (featured === 'true') sort.featured = -1;
+    if (featured === 'false') sort.featured = 1;
+    if (time === 'asc') sort.time = 1;
+    if (time === 'desc') sort.time = -1;
+    if (expire === 'asc') sort.expire = 1;
+    if (expire === 'desc') sort.expire = -1;
     const select = {
       _id: 1,
       name: 1,
@@ -63,7 +96,7 @@ export class ServiceServices {
       description: 1,
     };
 
-    const options = Pagination.options(pages, PER_PAGES!, sortBy);
+    const options = Pagination.options(pages, PER_PAGES!, sort);
     const services = await Service.find(
       query,
       isManager ? null : select,
@@ -152,7 +185,10 @@ export class ServiceServices {
       description: 1,
       createdAt: 1,
     };
-    const options = Pagination.options(pages, PER_PAGES!, sortBy);
+    const sort = Pagination.query();
+    if (sortBy === 'asc') sort.name = 1;
+    if (sortBy === 'desc') sort.name = -1;
+    const options = Pagination.options(pages, PER_PAGES!, sort);
     const totalItems = await Service.find(query).countDocuments();
     const services = await Service.find(
       query,

@@ -12,6 +12,10 @@ export class ServicePublishers {
       imageUrl: serviceDoc.imageUrl,
       salePrice: serviceDoc.salePrice,
       description: serviceDoc.description,
+      discount: serviceDoc.discount,
+      time: serviceDoc.time,
+      expire: serviceDoc.expire,
+      featured: serviceDoc.featured,
     });
   }
   static async updateService(serviceDoc: ServiceDoc) {
@@ -24,6 +28,8 @@ export class ServicePublishers {
       featured: serviceDoc.featured,
       discount: serviceDoc.discount,
       version: serviceDoc.version,
+      time: serviceDoc.time,
+      expire: serviceDoc.expire,
     });
   }
   static async deleteService(serviceDoc: ServiceDoc) {

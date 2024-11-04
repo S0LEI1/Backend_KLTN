@@ -16,8 +16,10 @@ export class PackageServices {
   static async newPackage(
     name: string,
     costPrice: number,
-    files: Express.Multer.File[],
-    description: string
+    file: Express.Multer.File,
+    description: string,
+    count: number,
+    expire: number
   ) {
     // check package exitst
     const existPackage = await Package.findOne({
@@ -27,21 +29,19 @@ export class PackageServices {
     // if exist => throw error
     if (existPackage) throw new BadRequestError('Package name is exist');
     // define imageUrls
-    const imageUrls: string[] = [];
-    for (const file of files) {
-      // check file type
-      Check.checkImage(file);
-      // upload file
-      const imageUrl = await AwsServices.uploadFile(file);
-      // push imageUrl on imageUrls
-      imageUrls.push(imageUrl);
-    }
+    // check file type
+    Check.checkImage(file);
+    // upload file
+    const imageUrl = await AwsServices.uploadFile(file);
+    // push imageUrl on imageUrls
     // define package
     const newPackage = Package.build({
       name: name,
       description: description,
       costPrice: costPrice,
-      imageUrls: imageUrls,
+      imageUrl: imageUrl,
+      count: count,
+      expire: expire,
     });
     // save package on database
     await newPackage.save();
@@ -57,7 +57,16 @@ export class PackageServices {
     gteDiscount: number,
     ltePrice: number,
     gtePrice: number,
-    isManager: boolean
+    isManager: boolean,
+    price: string,
+    discount: string,
+    featured: boolean,
+    lteCount: number,
+    gteCount: number,
+    count: string,
+    lteExpire: number,
+    gteExpire: number,
+    expire: string
   ) {
     // define query
     const query = Pagination.query();
@@ -71,18 +80,39 @@ export class PackageServices {
     if (ltePrice) query.salePrice = { $lte: ltePrice };
     if (gtePrice && ltePrice)
       query.salePrice = { $gte: gtePrice, $lte: ltePrice };
+
+    if (gteCount) query.count = { $gte: gteCount };
+    if (lteCount) query.count = { $lte: lteCount };
+    if (gteCount && lteCount) query.count = { $gte: gteCount, $lte: lteCount };
+
+    if (gteExpire) query.expire = { $gte: gteExpire };
+    if (lteExpire) query.expire = { $lte: lteExpire };
+    if (lteExpire && gteExpire)
+      query.expire = { $gte: gteExpire, $lte: lteExpire };
     // console.log(query);
     // console.log('isManager', isManager);
 
-    // const sort = Pagination.query();
+    const sort = Pagination.query();
+    if (sortBy === 'asc') sort.name = 1;
+    if (sortBy === 'desc') sort.name = -1;
+    if (price === 'asc') sort.salePrice = 1;
+    if (price === 'desc') sort.salePrice = -1;
+    if (discount === 'asc') sort.discount = 1;
+    if (discount === 'asc') sort.discount = -1;
+    if (featured === true) sort.discount = -1;
+    if (featured === false) sort.discount = -1;
+    if (expire === 'asc') sort.expire = 1;
+    if (expire === 'desc') sort.expire = -1;
+    if (count === 'asc') sort.count = 1;
+    if (count === 'desc') sort.count = -1;
     // get total package by query
-    const options = Pagination.options(pages, PER_PAGE, sortBy);
+    const options = Pagination.options(pages, PER_PAGE, sort);
     const totalItems = await Package.find(query).countDocuments();
     // get packages
     const packages = await Package.find(
       query,
       isManager ? null : { costPrice: 0 },
-      { options, sort: { featured: -1 } }
+      options
     );
     return { packages, totalItems };
   }
@@ -100,7 +130,7 @@ export class PackageServices {
       isManager ? null : select
     );
     // if packageService lenght => no service attach package => return package
-    if (packageServices.length === 0) return existPackage;
+    if (packageServices.length === 0) return { existPackage };
     // define service id array
     const serviceIds: mongoose.Types.ObjectId[] = [];
     packageServices.forEach((ps) =>
@@ -110,14 +140,11 @@ export class PackageServices {
     // find services attach with package
     const services = await Service.find({ _id: { $in: serviceIds } });
     // if user = manager => return services not attach with package
-    if (isManager === true) {
-      const notInSerivce = await Service.find(
-        { _id: { $nin: serviceIds }, isDeleted: false },
-        isManager ? null : select
-      );
-      return { existPackage, notInSerivce, services };
-    }
-    return { existPackage, services };
+    const notInSerivce = await Service.find(
+      { _id: { $nin: serviceIds }, isDeleted: false },
+      isManager ? null : select
+    );
+    return { existPackage, notInSerivce, services };
   }
   static async deletedPackage(id: string) {
     // check exist package and isDeleted = false
@@ -131,6 +158,43 @@ export class PackageServices {
     // publisher deleted event
     PackagePublisher.deletePackage(existPackage);
     // return controller
+    return existPackage;
+  }
+  static async updatePackage(packageAttrs: {
+    id: string;
+    name: string;
+    costPrice: number;
+    // salePrice: number;
+    discount: number;
+    count: number;
+    expire: number;
+    file: Express.Multer.File;
+    featured: boolean;
+    description: string;
+  }) {
+    const existPackage = await Package.findOne({
+      _id: packageAttrs.id,
+      isDeleted: false,
+    });
+    if (!existPackage) throw new NotFoundError('Package services');
+    let imageUrl = existPackage.imageUrl;
+    if (packageAttrs.file) {
+      await AwsServices.deleteFile(imageUrl);
+      Check.checkImage(packageAttrs.file);
+      imageUrl = await AwsServices.uploadFile(packageAttrs.file);
+    }
+    existPackage.set({
+      name: packageAttrs.name,
+      costPrice: packageAttrs.costPrice,
+      // salePrice: packageAttrs.salePrice,
+      imageUrl: imageUrl,
+      discount: packageAttrs.discount,
+      expire: packageAttrs.expire,
+      count: packageAttrs.count,
+      featured: packageAttrs.featured,
+      description: packageAttrs.description,
+    });
+    await existPackage.save();
     return existPackage;
   }
 }

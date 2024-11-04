@@ -6,10 +6,11 @@ interface PackageAttrs {
   name: string;
   description: string;
   costPrice: number;
-  imageUrls: string[];
+  imageUrl: string;
   salePrice?: number;
+  count: number;
+  expire: number;
   featured?: boolean;
-  active?: boolean;
   discount?: number;
   isDeleted?: boolean;
 }
@@ -17,11 +18,12 @@ export interface PackageDoc extends mongoose.Document {
   name: string;
   description: string;
   costPrice: number;
-  imageUrls: string[];
+  imageUrl: string;
   salePrice: number;
   featured?: boolean;
   discount?: number;
-  active?: boolean;
+  count: number;
+  expire: number;
   isDeleted?: boolean;
   version: number;
 }
@@ -46,17 +48,20 @@ const packageSchema = new mongoose.Schema(
     salePrice: {
       type: Number,
     },
-    imageUrls: [{ type: String, required: true }],
+    imageUrl: { type: String, required: true },
     discount: {
       type: Number,
       default: 0,
     },
+    count: {
+      type: Number,
+    },
+    expire: {
+      type: Number,
+    },
     featured: {
       type: Boolean,
       default: false,
-    },
-    active: {
-      type: Boolean,
     },
     isDeleted: {
       type: Boolean,

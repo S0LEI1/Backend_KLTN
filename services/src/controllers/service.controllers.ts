@@ -40,6 +40,15 @@ export class ServiceControllers {
       gteDiscount,
       ltePrice,
       gtePrice,
+      price,
+      discount,
+      featured,
+      lteTime,
+      gteTime,
+      time,
+      lteExpire,
+      gteExpire,
+      expire,
     } = req.query;
     let isManager = false;
     if (req.currentUser) {
@@ -55,7 +64,16 @@ export class ServiceControllers {
       parseInt(lteDiscount as string),
       parseInt(gteDiscount as string),
       parseInt(ltePrice as string),
-      parseInt(gtePrice as string)
+      parseInt(gtePrice as string),
+      price as string,
+      discount as string,
+      featured as string,
+      parseInt(lteTime as string),
+      parseInt(gteTime as string),
+      time as string,
+      parseInt(lteExpire as string),
+      parseInt(gteExpire as string),
+      expire as string
     );
     res
       .status(200)

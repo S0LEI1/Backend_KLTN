@@ -1,5 +1,6 @@
 import { PackageCreatedPublisher } from '../events/publishers/package-events/package-created-publisher';
 import { PackageDeletedPublisher } from '../events/publishers/package-events/package-deleted-publisher';
+import { PackageUpdatedPublisher } from '../events/publishers/package-events/package-updated-publisher';
 import { PackageDoc } from '../models/package';
 import { natsWrapper } from '../nats-wrapper';
 
@@ -9,14 +10,32 @@ export class PackagePublisher {
       id: packageDoc.id,
       name: packageDoc.name,
       salePrice: packageDoc.salePrice!,
-      imageUrls: packageDoc.imageUrls,
+      imageUrl: packageDoc.imageUrl,
       description: packageDoc.description,
+      count: packageDoc.count,
+      expire: packageDoc.expire,
+      discount: packageDoc.discount,
+      featured: packageDoc.featured,
     });
   }
   static async deletePackage(packageDoc: PackageDoc) {
     new PackageDeletedPublisher(natsWrapper.client).publish({
       id: packageDoc.id,
       isDeleted: packageDoc.isDeleted!,
+      version: packageDoc.version,
+    });
+  }
+  static updatedPackage(packageDoc: PackageDoc) {
+    new PackageUpdatedPublisher(natsWrapper.client).publish({
+      id: packageDoc.id,
+      name: packageDoc.name,
+      salePrice: packageDoc.salePrice!,
+      imageUrl: packageDoc.imageUrl,
+      description: packageDoc.description,
+      count: packageDoc.count,
+      expire: packageDoc.expire,
+      discount: packageDoc.discount!,
+      featured: packageDoc.featured!,
       version: packageDoc.version,
     });
   }
