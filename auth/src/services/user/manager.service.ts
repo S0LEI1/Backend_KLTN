@@ -17,11 +17,20 @@ export class ManagerService {
     const isMale = gender === 'true' ? true : false;
     if (gender) query.gender = isMale;
     const sort = Pagination.query();
-    if (name === 'asc') sort.name = 1;
-    if (name === 'desc') sort.name = -1;
+    if (name === 'asc') sort.lastName = 1;
+    if (name === 'desc') sort.lastName = -1;
     const totalItems = await User.find(query).countDocuments();
-    const options = Pagination.options(pages, PER_PAGE, sort);
-    const users = await User.find(query, { password: 0 }, options);
+    const users = await User.aggregate<UserDoc>([
+      {
+        $addFields: {
+          lastName: { $arrayElemAt: [{ $split: ['$fullName', ' '] }, -1] },
+        },
+      },
+      { $skip: parseInt(pages as string) - 1 },
+      { $limit: parseInt(PER_PAGE as string, 10) },
+      { $sort: sort },
+      { $project: { lastName: 0 } },
+    ]);
     return { users, totalItems };
   }
   static async pagination(total: number, pages: number) {
