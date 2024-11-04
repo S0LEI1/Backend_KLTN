@@ -41,10 +41,13 @@ export class ServiceControllers {
       ltePrice,
       gtePrice,
     } = req.query;
-    const { type, permissions } = req.currentUser!;
-    const isManager = Check.isManager(type, permissions, [
-      ListPermission.ServiceRead,
-    ]);
+    let isManager = false;
+    if (req.currentUser) {
+      const { type, permissions } = req.currentUser!;
+      isManager = Check.isManager(type, permissions, [
+        ListPermission.ServiceRead,
+      ]);
+    }
     const { services, totalItems } = await ServiceServices.readAll(
       pages as string,
       sortBy as string,
@@ -60,10 +63,13 @@ export class ServiceControllers {
   }
   static async readOne(req: Request, res: Response) {
     const { id } = req.params;
-    const { type, permissions } = req.currentUser!;
-    const isManager = Check.isManager(type, permissions, [
-      ListPermission.ServiceRead,
-    ]);
+    let isManager = false;
+    if (req.currentUser) {
+      const { type, permissions } = req.currentUser!;
+      isManager = Check.isManager(type, permissions, [
+        ListPermission.ServiceRead,
+      ]);
+    }
     const service = await ServiceServices.readOne(id, isManager);
     res
       .status(200)
@@ -134,12 +140,10 @@ export class ServiceControllers {
     const { services, existServices } = await ServiceServices.importService(
       file!
     );
-    res
-      .status(201)
-      .send({
-        message: 'Import services successfully',
-        services,
-        existServices,
-      });
+    res.status(201).send({
+      message: 'Import services successfully',
+      services,
+      existServices,
+    });
   }
 }

@@ -22,10 +22,11 @@ export class RoleControllers {
   }
   static async readAll(req: Request, res: Response) {
     try {
-      const { pages = 1, sortBy } = req.query;
+      const { pages = 1, sortBy, name } = req.query;
       const roles = await RoleServices.readAll(
         pages as string,
-        sortBy as string
+        sortBy as string,
+        name as string
       );
       res.status(200).send({ message: 'GET: Roles successfully', roles });
     } catch (error) {

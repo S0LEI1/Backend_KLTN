@@ -134,16 +134,16 @@ export class AuthService {
     type: string
   ) {
     const sheet = workbook.addWorksheet(worksheetName);
-    let colId = 'Mã người dùng';
+    // let colId = 'Mã người dùng';
     let colName = 'Tên người dùng';
-    if (type === UserType.Customer) colId = 'Mã khách hàng';
-    if (type === UserType.Employee) colId = 'Mã nhân viên';
-    if (type === UserType.Manager) colId = 'Mã người quản lý';
+    // if (type === UserType.Customer) colId = 'Mã khách hàng';
+    // if (type === UserType.Employee) colId = 'Mã nhân viên';
+    // if (type === UserType.Manager) colId = 'Mã người quản lý';
     if (type === UserType.Customer) colName = 'Tên khách hàng';
     if (type === UserType.Employee) colName = 'Tên nhân viên';
     if (type === UserType.Manager) colName = 'Tên người quản lý';
     sheet.columns = [
-      { header: colId, key: 'id', width: 25 },
+      // { header: colId, key: 'id', width: 25 },
       { header: colName, key: 'name', width: 50 },
       {
         header: 'Email',
@@ -190,7 +190,7 @@ export class AuthService {
       if (value.type === UserType.Manager) type = 'Người quản lý';
       const gender = value.gender === true ? 'Nam' : 'Nữ';
       sheet.addRow({
-        id: value.id,
+        // id: value.id,
         name: value.fullName,
         email: value.email,
         password: value.password,
@@ -249,7 +249,7 @@ export class AuthService {
           continue;
         }
         const existUser = await User.findOne({
-          fullName: row.getCell(2).value as string,
+          fullName: row.getCell(1).value as string,
           isDeleted: false,
         });
         if (existUser) {
@@ -257,24 +257,24 @@ export class AuthService {
           continue;
         }
         const gender =
-          (row.getCell(7).value as string) === 'Nam' ? true : false;
+          (row.getCell(6).value as string) === 'Nam' ? true : false;
         let type: UserType = UserType.Customer;
-        if ((row.getCell(9).value as string) === 'Nhân viên')
+        if ((row.getCell(8).value as string) === 'Nhân viên')
           type = UserType.Employee;
-        if ((row.getCell(9).value as string) === 'Khách hàng')
+        if ((row.getCell(8).value as string) === 'Khách hàng')
           type = UserType.Customer;
-        if ((row.getCell(9).value as string) === 'Người quản lý')
+        if ((row.getCell(8).value as string) === 'Người quản lý')
           type = UserType.Manager;
         const user = User.build({
-          fullName: row.getCell(2).value as string,
-          email: row.getCell(3).value as string,
-          password: row.getCell(4).value as string,
-          avatar: row.getCell(5).value as string,
-          phoneNumber: row.getCell(6).value as string,
+          fullName: row.getCell(1).value as string,
+          email: row.getCell(2).value as string,
+          password: row.getCell(3).value as string,
+          avatar: row.getCell(4).value as string,
+          phoneNumber: row.getCell(5).value as string,
           gender: gender,
-          address: row.getCell(8).value as string,
+          address: row.getCell(7).value as string,
           type: type,
-          point: row.getCell(10).value as number,
+          point: row.getCell(9).value as number,
         });
         await user.save();
         UserPublisher.newUser(user);

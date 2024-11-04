@@ -8,15 +8,19 @@ export class ManagerService {
     type: string,
     sortBy: string,
     pages: string,
-    gender: string
+    gender: string,
+    name: string
   ) {
     const query = Pagination.query();
     query.isDeleted = false;
     if (type) query.type = type;
     const isMale = gender === 'true' ? true : false;
     if (gender) query.gender = isMale;
+    const sort = Pagination.query();
+    if (name === 'asc') sort.name = 1;
+    if (name === 'desc') sort.name = -1;
     const totalItems = await User.find(query).countDocuments();
-    const options = Pagination.options(pages, PER_PAGE, sortBy);
+    const options = Pagination.options(pages, PER_PAGE, sort);
     const users = await User.find(query, { password: 0 }, options);
     return { users, totalItems };
   }
@@ -106,7 +110,10 @@ export class ManagerService {
       fullName: new RegExp(name, 'i'),
       isDeleted: false,
     }).countDocuments();
-    const options = Pagination.options(pages, PER_PAGE, sortBy);
+    const sort = Pagination.query();
+    sort.name = 1;
+    if (name === 'desc') sort.name = -1;
+    const options = Pagination.options(pages, PER_PAGE, sort);
     const users = await User.find(
       { fullName: new RegExp(name, 'i'), isDeleted: false },
       { password: 0 },

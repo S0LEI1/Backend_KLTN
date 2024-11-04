@@ -4,8 +4,11 @@ import { Role } from '../models/role';
 import { RolePermission } from '../models/role-permission';
 const PER_PAGE = process.env.PER_PAGE!;
 export class PermissionServices {
-  static async readAll(pages: string, sortBy: string) {
-    const options = Pagination.options(pages, PER_PAGE, sortBy);
+  static async readAll(pages: string, sortBy: string, name: string) {
+    const sort = Pagination.query();
+    sort.name = 1;
+    if (name === 'desc') sort.name = 1;
+    const options = Pagination.options(pages, PER_PAGE, sort);
     const permissions = await Permission.find({}, null, options);
     return permissions;
   }

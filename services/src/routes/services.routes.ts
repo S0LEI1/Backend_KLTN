@@ -32,8 +32,8 @@ router.post(
   requirePermission([ListPermission.ServiceCreate]),
   ServiceControllers.new
 );
-router.get('/services/', requireAuth, ServiceControllers.readAll);
-router.get('/services/:id', requireAuth, ServiceControllers.readOne);
+router.get('/services/', ServiceControllers.readAll);
+router.get('/services/:id', ServiceControllers.readOne);
 router.patch(
   '/services/:id',
   singleUploadMiddleware,

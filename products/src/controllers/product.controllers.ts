@@ -15,6 +15,7 @@ export class ProductControllers {
       expire,
       costPrice,
       quantity,
+      code,
     } = req.body!;
     const { file } = req;
     const { type } = req.currentUser!;
@@ -28,6 +29,7 @@ export class ProductControllers {
       expire: expire,
       costPrice: costPrice,
       quantity: quantity,
+      code: code,
     });
     ProductPublisher.new(product!);
     const convertProduct = Convert.product(product!);
@@ -112,6 +114,7 @@ export class ProductControllers {
       featured,
       discount,
       active,
+      code,
     } = req.body;
     const { type } = req.currentUser!;
     const { file } = req;
@@ -127,6 +130,7 @@ export class ProductControllers {
         expire: expire,
         costPrice: costPrice,
         quantity: quantity,
+        code: code,
       },
       isFeatured,
       parseInt(discount as string),
@@ -147,7 +151,7 @@ export class ProductControllers {
   }
   static async sortByCategoryOrSuplier(req: Request, res: Response) {
     const { id } = req.params;
-    const { pages, sortBy } = req.query;
+    const { pages, name, featured } = req.query;
     const { type, permissions } = req.currentUser!;
     const isManager = Check.isManager(type, permissions, [
       ListPermission.ProductRead,
@@ -155,9 +159,10 @@ export class ProductControllers {
     const { products, totalItems } =
       await ProductService.sortByCategoryOrSuplier(
         id,
-        sortBy as string,
         pages as string,
-        isManager
+        isManager,
+        name as string,
+        featured as string
       );
     const convertProducts = Convert.products(products);
     res.status(200).send({

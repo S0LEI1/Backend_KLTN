@@ -31,13 +31,14 @@ export class ManagerControllers {
       .send({ message: 'PATCH: update user profile successfully', user });
   }
   static async readAll(req: Request, res: Response) {
-    const { pages = 1, type, sortBy, gender } = req.query;
+    const { pages = 1, type, sortBy, gender, name } = req.query;
     try {
       const { users, totalItems } = await ManagerService.readAll(
         type as string,
         sortBy as string,
         pages as string,
-        gender as string
+        gender as string,
+        name as string
       );
       res
         .status(200)

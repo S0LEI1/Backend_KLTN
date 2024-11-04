@@ -22,6 +22,10 @@ router.post(
     body('expire').isISO8601().toDate().withMessage('Expire must be valid'),
     body('costPrice').isNumeric().withMessage('Cost price must be valid'),
     body('quantity').isNumeric().withMessage('Quanity must be valid'),
+    body('code')
+      .notEmpty()
+      .isUppercase()
+      .withMessage(`Product code must be uppercase character`),
   ],
   validationRequest,
   requireAuth,
@@ -46,6 +50,10 @@ router.patch(
     body('expire').isISO8601().toDate().withMessage('Expire must be valid'),
     body('costPrice').isNumeric().withMessage('Cost price must be valid'),
     body('quantity').isNumeric().withMessage('Quanity must be valid'),
+    body('code')
+      .notEmpty()
+      .isUppercase()
+      .withMessage(`Product code must be uppercase character`),
   ],
   validationRequest,
   requireAuth,

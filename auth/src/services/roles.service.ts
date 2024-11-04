@@ -27,10 +27,13 @@ export class RoleServices {
     //publish event
     return newRole;
   }
-  static async readAll(pages: string, sortBy: string) {
+  static async readAll(pages: string, sortBy: string, name: string) {
     const query = Pagination.query();
+    const sort = Pagination.query();
+    sort.name = 1;
+    if (name === 'desc') sort.name = -1;
     query.isDeleted = false;
-    const options = Pagination.options(pages, PER_PAGE!, sortBy);
+    const options = Pagination.options(pages, PER_PAGE!, sort);
     const roles = await Role.find(query, null, options);
     return roles;
   }
@@ -46,7 +49,8 @@ export class RoleServices {
       id,
       pages,
       sortBy,
-      isManager
+      isManager,
+      ''
     );
     const notInPermission = await this.readPermssionNotInRole(id, isManager);
     return { role, permissions, notInPermission };
@@ -70,10 +74,13 @@ export class RoleServices {
     id: string,
     pages: string,
     sortBy: string,
-    isManager: boolean
+    isManager: boolean,
+    name: string
   ) {
     try {
-      const options = Pagination.options(pages, PER_PAGE!, sortBy);
+      const sort = Pagination.query();
+      sort.name = 1;
+      const options = Pagination.options(pages, PER_PAGE!, sort);
       const rolePermissions = await RolePermission.find(
         { role: id },
         null,

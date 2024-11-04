@@ -18,6 +18,7 @@ export interface ProductAttrs {
   featured?: boolean;
   isDeleted?: boolean;
   description: string;
+  code: string;
 }
 export interface ProductDoc extends mongoose.Document {
   name: string;
@@ -31,6 +32,7 @@ export interface ProductDoc extends mongoose.Document {
   quantity: number;
   featured: boolean;
   discount: number;
+  code: string;
   version: number;
   isDeleted: boolean;
   createdAt: Date;
@@ -85,6 +87,10 @@ const productSchema = new mongoose.Schema(
     featured: {
       type: Boolean,
       default: false,
+    },
+    code: {
+      type: String,
+      required: true,
     },
     isDeleted: {
       type: Boolean,

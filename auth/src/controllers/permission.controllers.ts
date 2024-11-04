@@ -6,10 +6,11 @@ import { RolePermission } from '../models/role-permission';
 
 export class PermissionControllers {
   static async readAll(req: Request, res: Response) {
-    const { pages, sortBy } = req.query;
+    const { pages, sortBy, name } = req.query;
     const permissions = await PermissionServices.readAll(
       pages as string,
-      sortBy as string
+      sortBy as string,
+      name as string
     );
     res
       .status(200)

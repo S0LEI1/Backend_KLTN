@@ -1,4 +1,8 @@
-import { NotFoundError, Pagination } from '@share-package/common';
+import {
+  BadRequestError,
+  NotFoundError,
+  Pagination,
+} from '@share-package/common';
 import { Category } from '../models/category';
 import { Product, ProductDoc } from '../models/product';
 import { Suplier } from '../models/suplier';
@@ -19,12 +23,18 @@ interface ProductAttrs {
   quantity: number;
   file?: Express.Multer.File;
   discount?: number;
+  code: string;
 }
 const PER_PAGE = process.env.PER_PAGE;
 export class ProductService {
   static async new(productAttrs: ProductAttrs) {
     try {
       const existProduct = await Product.findByName(productAttrs.name);
+      const existCode = await Product.findOne({
+        code: productAttrs.code,
+        isDeleted: false,
+      });
+      if (existCode) throw new BadRequestError('Product code is exist');
       const category = await Category.findCategory(productAttrs.categoryId);
       const suplier = await Suplier.findSuplier(productAttrs.suplierId);
       checkImage(productAttrs.file!);
@@ -41,6 +51,7 @@ export class ProductService {
         costPrice: productAttrs.costPrice,
         salePrice: salePrice,
         quantity: productAttrs.quantity,
+        code: productAttrs.code,
       });
       await product.save();
       return product;
@@ -90,12 +101,12 @@ export class ProductService {
     sort.name = 1;
     if (expire === 'asc') sort.expire = 1;
     if (expire === 'desc') sort.expire = -1;
-    const options = Pagination.options(pages, PER_PAGE!, sortBy);
+    const options = Pagination.options(pages, PER_PAGE!, sort);
     const totalItems = await Product.find(query).countDocuments();
     const products = await Product.find(
       query,
       isManager ? null : { costPrice: 0, version: 0, active: 0 },
-      { options, sort: sort }
+      options
     )
       .populate({
         path: 'category',
@@ -177,11 +188,17 @@ export class ProductService {
   }
   static async sortByCategoryOrSuplier(
     id: string,
-    sortBy: string,
     pages: string,
-    isManager: boolean
+    isManager: boolean,
+    name: string,
+    featured: string
   ) {
-    const options = Pagination.options(pages, PER_PAGE!, sortBy);
+    const sort = Pagination.query();
+    sort.name = 1;
+    if (name === 'desc') sort.name = -1;
+    sort.featured = -1;
+    if (featured === 'false') sort.featured = 1;
+    const options = Pagination.options(pages, PER_PAGE!, sort);
     const totalItems = await Product.find({
       $and: [
         { isDeleted: false },
@@ -196,7 +213,7 @@ export class ProductService {
         ],
       },
       isManager ? null : { costPrice: 0 },
-      { options, sort: { featured: -1 } }
+      options
     )
       .populate({
         path: 'category',
@@ -220,7 +237,12 @@ export class ProductService {
     const query = Pagination.query();
     query.name = new RegExp(name, 'i');
     query.isDeleted = false;
-    const options = Pagination.options(pages, PER_PAGE!, sortBy);
+    const sort = Pagination.query();
+    sort.name = 1;
+    if (sortBy === 'desc') sort.name = -1;
+    // sort.featured = -1
+    // if(featured === 'false') sort.featured = 1;
+    const options = Pagination.options(pages, PER_PAGE!, sort);
     const totalItems = await Product.find(query).countDocuments();
     const products = await Product.find(
       query,
@@ -261,7 +283,7 @@ export class ProductService {
   ) {
     const sheet = workbook.addWorksheet(worksheetName);
     sheet.columns = [
-      { header: 'Mã sản phẩm', key: 'id', width: 25 },
+      { header: 'Mã sản phẩm', key: 'code', width: 20 },
       { header: 'Tên sản phẩm', key: 'name', width: 50 },
       {
         header: 'Giá gốc',
@@ -317,7 +339,7 @@ export class ProductService {
     ];
     data.map((value, index) => {
       sheet.addRow({
-        id: value.id,
+        code: value.code,
         name: value.name,
         costPrice: value.costPrice,
         salePrice: value.salePrice,
@@ -397,6 +419,7 @@ export class ProductService {
     await workbook.xlsx.readFile(file.path);
     const products: ProductDoc[] = [];
     const existProducts: ProductDoc[] = [];
+    const importFaild: any[] = [];
     for (const worksheet of workbook.worksheets) {
       const rowNumber = worksheet.rowCount;
       for (let i = 2; i <= rowNumber; i++) {
@@ -405,7 +428,7 @@ export class ProductService {
           continue;
         }
         const existProduct = await Product.findOne({
-          name: row.getCell(2).value as string,
+          name: row.getCell(1).value as string,
           isDeleted: false,
         });
         if (existProduct) {
@@ -416,7 +439,7 @@ export class ProductService {
           row.getCell(7).value as string
         );
         const suplier = await Suplier.findSuplier(
-          row.getCell(5).value as string
+          row.getCell(8).value as string
         );
         const product = Product.build({
           name: row.getCell(2).value as string,
@@ -429,6 +452,7 @@ export class ProductService {
           quantity: row.getCell(10).value as number,
           discount: row.getCell(12).value as number,
           featured: row.getCell(13).value === 'có' ? true : false,
+          code: row.getCell(1).value as string,
         });
         await product.save();
         ProductPublisher.new(product);
