@@ -22,7 +22,10 @@ export class CategoriesServices {
   static async readAll(pages: string, sortBy: string) {
     const query = Pagination.query();
     query.isDeleted = false;
-    const options = Pagination.options(pages, PER_PAGE as string, sortBy);
+    const sort = Pagination.query();
+    if (sortBy === 'asc') sort.name = 1;
+    if (sortBy === 'desc') sort.name = -1;
+    const options = Pagination.options(pages, PER_PAGE as string, sort);
     const totalItems = await Category.find(query).countDocuments();
     const categories = await Category.find(query, null, options);
     if (!categories) throw new NotFoundError('Categories');
@@ -40,7 +43,7 @@ export class CategoriesServices {
     // const pQuery = Pagination.query();
     // pQuery.category = id;
     // pQuery.isDeleted = false;
-    const pOptions = Pagination.options(pages, PER_PAGE!, sortBy);
+    // const pOptions = Pagination.options(pages, PER_PAGE!, sortBy);
     const category = await Category.findOne(query);
     if (!category) throw new NotFoundError('Category');
     return category;
@@ -49,8 +52,11 @@ export class CategoriesServices {
     const query = Pagination.query();
     query.name = new RegExp(name, 'i');
     query.isDeleted = false;
-    const options = Pagination.options(pages, PER_PAGE!, sortBy);
-    const category = await Category.find(query, options);
+    const sort = Pagination.query();
+    if (sortBy === 'asc') sort.name = 1;
+    if (sortBy === 'desc') sort.name = -1;
+    const options = Pagination.options(pages, PER_PAGE!, sort);
+    const category = await Category.find(query, {}, options);
     if (!category) throw new NotFoundError('Category by name');
     return category;
   }

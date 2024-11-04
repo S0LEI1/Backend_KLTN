@@ -51,10 +51,10 @@ router.get(
   ManagerControllers.readByType
 );
 router.get(
-  '/users/manage/find',
+  '/users/manage/findbyname',
   validationRequest,
   requireAuth,
-  requireType([UserType.Manager]),
+  requireType([UserType.Manager, UserType.Employee]),
   requirePermission([ListPermission.CustomerRead, ListPermission.CustomerRead]),
   ManagerControllers.readByName
 );

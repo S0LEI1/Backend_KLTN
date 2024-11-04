@@ -37,8 +37,7 @@ export class ManagerControllers {
         type as string,
         sortBy as string,
         pages as string,
-        gender as string,
-        name as string
+        gender as string
       );
       res
         .status(200)

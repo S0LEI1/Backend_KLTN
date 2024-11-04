@@ -15,6 +15,7 @@ export class ProductPublisher {
       expire: product.expire,
       salePrice: product.salePrice!,
       quantity: product.quantity,
+      code: product.code,
     });
   }
   static update(productDoc: ProductDoc) {
@@ -31,6 +32,7 @@ export class ProductPublisher {
       version: productDoc.version,
       featured: productDoc.featured,
       discount: productDoc.discount,
+      code: productDoc.code,
     });
   }
   static delete(productDoc: ProductDoc) {

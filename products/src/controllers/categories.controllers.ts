@@ -63,14 +63,18 @@ export class CategoriesControllers {
   }
   static async findByName(req: Request, res: Response) {
     const { name, pages = 1, sortBy } = req.query;
-    const category = await CategoriesServices.findByName(
-      name as string,
-      pages as string,
-      sortBy as string
-    );
-    res
-      .status(200)
-      .send({ message: 'GET: Category by name successfully', category });
+    try {
+      const category = await CategoriesServices.findByName(
+        name as string,
+        pages as string,
+        sortBy as string
+      );
+      res
+        .status(200)
+        .send({ message: 'GET: Category by name successfully', category });
+    } catch (error) {
+      console.log(error);
+    }
   }
   static async update(req: Request, res: Response) {
     const { name, description } = req.body;

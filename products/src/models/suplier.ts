@@ -15,6 +15,7 @@ export interface SuplierDoc extends mongoose.Document {
   email: string;
   address: string;
   description: string;
+  code: string;
   version: number;
   isDeleted: boolean;
 }

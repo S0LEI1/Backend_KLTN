@@ -13,6 +13,7 @@ export class SuplierPublisher {
       phoneNumber: suplier.phoneNumber,
       email: suplier.email,
       address: suplier.address,
+      code: suplier.code,
     });
   }
   static update(suplier: SuplierDoc) {
@@ -24,6 +25,7 @@ export class SuplierPublisher {
       phoneNumber: suplier.phoneNumber,
       email: suplier.email,
       address: suplier.address,
+      code: suplier.code,
     });
   }
   static delete(suplier: SuplierDoc) {

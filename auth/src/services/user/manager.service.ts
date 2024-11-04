@@ -8,8 +8,7 @@ export class ManagerService {
     type: string,
     sortBy: string,
     pages: string,
-    gender: string,
-    name: string
+    gender: string
   ) {
     const query = Pagination.query();
     query.isDeleted = false;
@@ -17,8 +16,8 @@ export class ManagerService {
     const isMale = gender === 'true' ? true : false;
     if (gender) query.gender = isMale;
     const sort = Pagination.query();
-    if (name === 'asc') sort.lastName = 1;
-    if (name === 'desc') sort.lastName = -1;
+    if (sortBy === 'asc') sort.lastName = 1;
+    if (sortBy === 'desc') sort.lastName = -1;
     const totalItems = await User.find(query).countDocuments();
     const users = await User.aggregate<UserDoc>([
       {
@@ -120,14 +119,28 @@ export class ManagerService {
       isDeleted: false,
     }).countDocuments();
     const sort = Pagination.query();
-    sort.name = 1;
-    if (name === 'desc') sort.name = -1;
+    if (sortBy === 'asc') sort.lastName = 1;
+    if (sortBy === 'desc') sort.lastName = -1;
     const options = Pagination.options(pages, PER_PAGE, sort);
-    const users = await User.find(
-      { fullName: new RegExp(name, 'i'), isDeleted: false },
-      { password: 0 },
-      options
-    );
+    // const users = await User.find(
+    //   { fullName: new RegExp(name, 'i'), isDeleted: false },
+    //   { password: 0 },
+    //   options
+    // );
+    const users = await User.aggregate<UserDoc>([
+      {
+        $match: { fullName: new RegExp(name, 'i'), isDeleted: false },
+      },
+      {
+        $addFields: {
+          lastName: { $arrayElemAt: [{ $split: ['$fullName', ' '] }, -1] },
+        },
+      },
+      { $skip: parseInt(pages as string) - 1 },
+      { $limit: parseInt(PER_PAGE as string, 10) },
+      { $sort: sort },
+      { $project: { lastName: 0 } },
+    ]);
     return { users, totalItems };
   }
   static async deleteUser(id: string) {
