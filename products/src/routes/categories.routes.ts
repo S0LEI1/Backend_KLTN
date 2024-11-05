@@ -1,19 +1,23 @@
 import {
   ListPermission,
   UserType,
+  codeRegex,
   requireAuth,
   requirePermission,
   requireType,
   validationRequest,
 } from '@share-package/common';
 import express, { Request, Response } from 'express';
-import { NAME_MESSAGE } from '../utils/message';
+import { CODE_MESSAGE, NAME_MESSAGE } from '../utils/message';
 import { body } from 'express-validator';
 import { CategoriesControllers } from '../controllers/categories.controllers';
 const router = express.Router();
 router.post(
   '/products/category',
-  [body('name').not().isEmpty().withMessage(`Category ${NAME_MESSAGE}`)],
+  [
+    body('name').not().isEmpty().withMessage(`Category ${NAME_MESSAGE}`),
+    body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
+  ],
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
@@ -25,7 +29,10 @@ router.get('/products/category/:id', CategoriesControllers.readOne);
 router.get('/products/category', CategoriesControllers.findByName);
 router.patch(
   '/products/category/:id',
-  [body('name').not().isEmpty().withMessage(`Category ${NAME_MESSAGE}`)],
+  [
+    body('name').not().isEmpty().withMessage(`Category ${NAME_MESSAGE}`),
+    body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
+  ],
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),

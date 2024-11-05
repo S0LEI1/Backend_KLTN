@@ -9,12 +9,15 @@ import { ProductService } from './products.service';
 import { Convert } from '../utils/convert';
 const PER_PAGE = process.env.PER_PAGE;
 export class CategoriesServices {
-  static async create(name: string, description: string) {
-    const existCategory = await Category.findOne({ name: name });
+  static async create(name: string, description: string, code: string) {
+    const existCategory = await Category.findOne({
+      $or: [{ name: name }, { code: code }],
+    });
     if (existCategory) throw new BadRequestError('Category existing');
     const category = Category.build({
       name: name,
       description: description,
+      code: code,
     });
     await category.save();
     return category;
@@ -60,10 +63,15 @@ export class CategoriesServices {
     if (!category) throw new NotFoundError('Category by name');
     return category;
   }
-  static async update(id: string, name: string, description: string) {
+  static async update(
+    id: string,
+    name: string,
+    description: string,
+    code: string
+  ) {
     const existCategory = await Category.findById(id);
     if (!existCategory) throw new NotFoundError('Category update');
-    existCategory.set({ name: name, description: description });
+    existCategory.set({ name: name, description: description, code: code });
     await existCategory.save();
     return existCategory;
   }

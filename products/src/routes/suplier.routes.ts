@@ -1,6 +1,7 @@
 import {
   ListPermission,
   UserType,
+  codeRegex,
   requireAuth,
   requirePermission,
   requireType,
@@ -9,7 +10,12 @@ import {
 } from '@share-package/common';
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
-import { NAME_MESSAGE, EMAIL_MESSAGE, PHONE_MESSAGE } from '../utils/message';
+import {
+  NAME_MESSAGE,
+  EMAIL_MESSAGE,
+  PHONE_MESSAGE,
+  CODE_MESSAGE,
+} from '../utils/message';
 import { SuplierControllers } from '../controllers/suplier.controllers';
 const router = express.Router();
 router.post(
@@ -18,6 +24,7 @@ router.post(
     body('name').not().isEmpty().withMessage(`Suplier ${NAME_MESSAGE}`),
     body('email').isEmail().withMessage(EMAIL_MESSAGE),
     body('phoneNumber').isMobilePhone('vi-VN').withMessage(PHONE_MESSAGE),
+    body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
   ],
   validationRequest,
   requireAuth,
@@ -30,7 +37,10 @@ router.get('/products/suplier/:id', SuplierControllers.readOne);
 router.get('/products/suplier', SuplierControllers.findByName);
 router.patch(
   '/products/suplier/:id',
-  [body('name').not().isEmpty().withMessage(`Suplier ${NAME_MESSAGE}`)],
+  [
+    body('name').not().isEmpty().withMessage(`Suplier ${NAME_MESSAGE}`),
+    body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
+  ],
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),
@@ -46,9 +56,9 @@ router.patch(
 );
 router.get(
   '/products/supliers/export/data',
-  // requireAuth,
-  // requireType([UserType.Manager]),
-  // requirePermission([ListPermission.ProductRead]),
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.ProductRead]),
   SuplierControllers.exportSuplier
 );
 router.post(

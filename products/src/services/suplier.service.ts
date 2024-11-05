@@ -124,7 +124,7 @@ export class SuplierServices {
       {
         header: 'Email',
         key: 'email',
-        width: 15,
+        width: 25,
       },
       {
         header: 'Địa chỉ',

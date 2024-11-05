@@ -6,9 +6,9 @@ import { Check } from '../utils/check-type';
 
 export class CategoriesControllers {
   static async new(req: Request, res: Response) {
-    const { name, description } = req.body;
+    const { name, description, code } = req.body;
     try {
-      const category = await CategoriesServices.create(name, description);
+      const category = await CategoriesServices.create(name, description, code);
       CategoriesPublisher.new(category);
       res
         .status(201)
@@ -77,12 +77,13 @@ export class CategoriesControllers {
     }
   }
   static async update(req: Request, res: Response) {
-    const { name, description } = req.body;
+    const { name, description, code } = req.body;
     const { id } = req.params;
     const existCategory = await CategoriesServices.update(
       id,
       name,
-      description
+      description,
+      code
     );
     CategoriesPublisher.update(existCategory);
     res.status(200).send({

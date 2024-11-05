@@ -297,7 +297,7 @@ export class ProductService {
       },
       {
         header: 'Mã nhà cung cấp',
-        key: 'suplierId',
+        key: 'suplierCode',
         width: 25,
       },
       {
@@ -307,7 +307,7 @@ export class ProductService {
       },
       {
         header: 'Mã loại sản phẩm',
-        key: 'categoryId',
+        key: 'categoryCode',
         width: 25,
       },
       {
@@ -338,15 +338,18 @@ export class ProductService {
       { header: 'Phiên bản', key: 'version', width: 10 },
     ];
     data.map((value, index) => {
+      // console.log(value.category.name, value.category.code);
+      // console.log(value.suplier.name, value.suplier.code);
+
       sheet.addRow({
         code: value.code,
         name: value.name,
         costPrice: value.costPrice,
         salePrice: value.salePrice,
-        suplierId: value.suplier.id,
-        suplierName: value.suplier.name,
-        categoryId: value.category.id,
-        categoryName: value.category.name,
+        suplierCode: value?.suplier?.code ?? '',
+        suplierName: value?.suplier?.name ?? '',
+        categoryCode: value?.category?.code ?? '',
+        categoryName: value?.category?.name ?? '',
         imageUrl: value.imageUrl,
         quantity: value.quantity,
         expire: value.expire,
@@ -373,6 +376,7 @@ export class ProductService {
     const products = await Product.find({ isDeleted: false })
       .populate('category')
       .populate('suplier');
+
     const workbookData = await this.exportData(workbook, 'Products', products);
     return workbook;
   }
@@ -438,12 +442,12 @@ export class ProductService {
           existProducts.push(existProduct);
           continue;
         }
-        const category = await Category.findCategory(
-          row.getCell(7).value as string
-        );
-        const suplier = await Suplier.findSuplier(
-          row.getCell(5).value as string
-        );
+        const category = await Category.findOne({
+          code: row.getCell(7).value as string,
+        });
+        const suplier = await Suplier.findOne({
+          code: row.getCell(5).value as string,
+        });
         const product = Product.build({
           name: row.getCell(2).value as string,
           description: row.getCell(14).value as string,

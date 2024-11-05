@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
-import { NAME_MESSAGE } from '../utils/message';
+import { CODE_MESSAGE, NAME_MESSAGE } from '../utils/message';
 import {
   ListPermission,
   UserType,
@@ -9,8 +9,10 @@ import {
   requireType,
   singleUploadMiddleware,
   validationRequest,
+  codeRegex,
 } from '@share-package/common';
 import { ProductControllers } from '../controllers/product.controllers';
+
 const router = express.Router();
 router.post(
   '/products/manage/new',
@@ -22,10 +24,7 @@ router.post(
     body('expire').isISO8601().toDate().withMessage('Expire must be valid'),
     body('costPrice').isNumeric().withMessage('Cost price must be valid'),
     body('quantity').isNumeric().withMessage('Quanity must be valid'),
-    body('code')
-      .notEmpty()
-      .isUppercase()
-      .withMessage(`Product code must be uppercase character`),
+    body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
   ],
   validationRequest,
   requireAuth,
@@ -50,10 +49,7 @@ router.patch(
     body('expire').isISO8601().toDate().withMessage('Expire must be valid'),
     body('costPrice').isNumeric().withMessage('Cost price must be valid'),
     body('quantity').isNumeric().withMessage('Quanity must be valid'),
-    body('code')
-      .notEmpty()
-      .isUppercase()
-      .withMessage(`Product code must be uppercase character`),
+    body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
   ],
   validationRequest,
   requireAuth,
