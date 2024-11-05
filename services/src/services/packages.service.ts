@@ -11,6 +11,7 @@ import { PackageService } from '../models/package-service';
 import { Service } from '../models/service';
 import { select } from '../utils/convert';
 import mongoose, { ObjectId } from 'mongoose';
+import exceljs from 'exceljs';
 const PER_PAGE = process.env.PER_PAGE!;
 export class PackageServices {
   static async newPackage(
@@ -196,5 +197,56 @@ export class PackageServices {
     });
     await existPackage.save();
     return existPackage;
+  }
+  static async exportPackage() {
+    const workbook = new exceljs.Workbook();
+    const sheet = workbook.addWorksheet('Suplier');
+    const packages = await Package.find({ isDeleted: false });
+    if (packages.length <= 0) {
+      throw new BadRequestError('Packages not found');
+    }
+    sheet.columns = [
+      { header: 'Mã nhà cung cấp', key: 'code', width: 15 },
+      { header: 'Tên nhà cung cấp', key: 'name', width: 35 },
+      {
+        header: 'Số điện thoại',
+        key: 'phoneNumber',
+        width: 15,
+      },
+      {
+        header: 'Email',
+        key: 'email',
+        width: 25,
+      },
+      {
+        header: 'Địa chỉ',
+        key: 'address',
+        width: 25,
+      },
+      {
+        header: 'Mô tả',
+        key: 'description',
+        width: 50,
+      },
+    ];
+    packages.map((value, index) => {
+      sheet.addRow({
+        // code: value.code,
+        // name: value.name,
+        // phoneNumber: value.phoneNumber,
+        // email: value.email,
+        // address: value.address,
+        // description: value.description,
+      });
+      let rowIndex = 1;
+      for (rowIndex; rowIndex <= sheet.rowCount; rowIndex++) {
+        sheet.getRow(rowIndex).alignment = {
+          vertical: 'middle',
+          horizontal: 'left',
+          wrapText: true,
+        };
+      }
+    });
+    return workbook;
   }
 }

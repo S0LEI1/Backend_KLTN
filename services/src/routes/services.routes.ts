@@ -6,10 +6,14 @@ import {
   requireType,
   singleUploadMiddleware,
   validationRequest,
+  codeRegex,
 } from '@share-package/common';
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { ServiceControllers } from '../controllers/service.controllers';
+const CODE_MESSAGE =
+  'Password must contain digit from 1 to 9, uppercase letter, no space, and it must be 3-7 characters long.';
+
 const router = express.Router();
 router.post(
   '/services/manage/new',
@@ -25,6 +29,7 @@ router.post(
       .notEmpty()
       .isInt({ min: 1 })
       .withMessage('Time must be greater than equal 1 day'),
+    body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
   ],
   validationRequest,
   requireAuth,
@@ -49,6 +54,7 @@ router.patch(
       .isInt({ min: 1 })
       .withMessage('Time must be greater than equal 1 day'),
     body('discount').isNumeric().withMessage('Discount must be numeric'),
+    body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
   ],
   validationRequest,
   requireAuth,

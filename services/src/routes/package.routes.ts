@@ -67,4 +67,11 @@ router.patch(
   requirePermission([ListPermission.PackageUpdate]),
   PackageControllers.updatePackage
 );
+// router.get(
+//   '/services/package/export/data',
+//   requireAuth,
+//   requireType([UserType.Manager]),
+//   requirePermission([ListPermission.PackageRead]),
+//   PackageControllers.exportPackage
+// );
 export { router as packageRouter };

@@ -46,4 +46,11 @@ router.patch(
   requirePermission([ListPermission.ProductRead]),
   CategoriesControllers.delete
 );
+router.get(
+  '/products/category/export/data',
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.ProductRead]),
+  CategoriesControllers.exportCategories
+);
 export { router as categoriesRouter };

@@ -9,6 +9,7 @@ export interface ServiceAttrs {
   imageUrl: string;
   time: number;
   expire: number;
+  code: string;
   description: string;
 }
 export interface ServiceDoc extends mongoose.Document {
@@ -21,6 +22,7 @@ export interface ServiceDoc extends mongoose.Document {
   expire: number;
   featured: boolean;
   description: string;
+  code: string;
   isDeleted: boolean;
   version: number;
   createdAt: Date;
@@ -58,6 +60,10 @@ const serviceSchema = new mongoose.Schema(
     },
     expire: {
       type: Number,
+      required: true,
+    },
+    code: {
+      type: String,
       required: true,
     },
     isDeleted: {

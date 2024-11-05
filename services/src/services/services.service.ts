@@ -19,11 +19,15 @@ export class ServiceServices {
     description: string,
     costPrice: number,
     time: number,
-    expire: number
+    expire: number,
+    code: string
   ) {
     const imageUrl = await AwsServices.uploadFile(file);
-    const existService = await Service.findOne({ name: name });
-    if (existService) throw new BadRequestError('service already exists');
+    const existService = await Service.findOne({
+      $or: [{ name: name }, { code: code }],
+    });
+    if (existService)
+      throw new BadRequestError('service name or service code already exists');
     const service = Service.build({
       name: name,
       imageUrl: imageUrl,
@@ -31,6 +35,7 @@ export class ServiceServices {
       costPrice: costPrice,
       time: time,
       expire: expire,
+      code: code,
     });
     await service.save();
     ServicePublishers.new(service);
@@ -130,7 +135,8 @@ export class ServiceServices {
     discount: number,
     featured: boolean,
     time: number,
-    expire: number
+    expire: number,
+    code: string
   ) {
     const query = Pagination.query();
     query._id = id;
@@ -154,6 +160,7 @@ export class ServiceServices {
       featured: featured,
       time: time,
       expire: expire,
+      code: code,
     });
     await service.save();
     return service;
@@ -205,7 +212,7 @@ export class ServiceServices {
       throw new BadRequestError('Supliers not found');
     }
     sheet.columns = [
-      { header: 'Mã dịch vụ', key: 'id', width: 25 },
+      { header: 'Mã dịch vụ', key: 'code', width: 25 },
       { header: 'Tên dịch vụ', key: 'name', width: 35 },
       {
         header: 'Hình ảnh',
@@ -250,7 +257,7 @@ export class ServiceServices {
     ];
     services.map((value, index) => {
       sheet.addRow({
-        id: value.id,
+        code: value.code,
         name: value.name,
         imageUrl: value.imageUrl,
         costPrice: value.costPrice,
@@ -302,6 +309,7 @@ export class ServiceServices {
           time: row.getCell(7).value as number,
           expire: row.getCell(8).value as number,
           description: row.getCell(10).value as string,
+          code: row.getCell(1).value as string,
         });
         await service.save();
         ServicePublishers.new(service);

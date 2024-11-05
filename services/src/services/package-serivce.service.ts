@@ -3,6 +3,7 @@ import { Service } from '../models/service';
 import { Package } from '../models/package';
 import { PackageService, PackageServiceDoc } from '../models/package-service';
 import { PackageServicePublisher } from './package-service.publisher.service';
+import exceljs from 'exceljs';
 
 export class PackageServiceServices {
   static async newPackageService(serviceIds: string[], packageId: string) {

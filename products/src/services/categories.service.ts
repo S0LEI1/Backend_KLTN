@@ -7,6 +7,7 @@ import { Category, CategoryDoc } from '../models/category';
 import { Product } from '../models/product';
 import { ProductService } from './products.service';
 import { Convert } from '../utils/convert';
+import exceljs from 'exceljs';
 const PER_PAGE = process.env.PER_PAGE;
 export class CategoriesServices {
   static async create(name: string, description: string, code: string) {
@@ -84,5 +85,38 @@ export class CategoriesServices {
     existCategory.set({ isDeleted: true });
     await existCategory.save();
     return existCategory;
+  }
+  static async exportCategories() {
+    const workbook = new exceljs.Workbook();
+    const sheet = workbook.addWorksheet('Suplier');
+    const categories = await Category.find({ isDeleted: false });
+    if (categories.length <= 0) {
+      throw new BadRequestError('Categories not found');
+    }
+    sheet.columns = [
+      { header: 'Mã loại sản phẩm', key: 'code', width: 20 },
+      { header: 'Tên loại sản phẩm', key: 'name', width: 35 },
+      {
+        header: 'Mô tả',
+        key: 'description',
+        width: 50,
+      },
+    ];
+    categories.map((value, index) => {
+      sheet.addRow({
+        code: value.code,
+        name: value.name,
+        description: value.description,
+      });
+      let rowIndex = 1;
+      for (rowIndex; rowIndex <= sheet.rowCount; rowIndex++) {
+        sheet.getRow(rowIndex).alignment = {
+          vertical: 'middle',
+          horizontal: 'left',
+          wrapText: true,
+        };
+      }
+    });
+    return workbook;
   }
 }

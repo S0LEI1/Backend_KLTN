@@ -11,26 +11,23 @@ import { Check } from '../utils/check-type';
 import { AwsServices } from '../services/aws.service';
 export class ServiceControllers {
   static async new(req: Request, res: Response) {
-    try {
-      const { file } = req;
-      const { name, description, costPrice, time, expire } = req.body;
-      if (!file) throw new BadRequestError('Image must be provided');
-      Check.checkImage(file);
-      const service = await ServiceServices.new(
-        name,
-        file,
-        description,
-        costPrice,
-        parseInt(time as string),
-        parseInt(expire as string)
-      );
-      // ServicePublishers.new(service);
-      res
-        .status(201)
-        .send({ message: 'POST: Add new services successfully', service });
-    } catch (error) {
-      console.log(error);
-    }
+    const { file } = req;
+    const { name, description, costPrice, time, expire, code } = req.body;
+    if (!file) throw new BadRequestError('Image must be provided');
+    Check.checkImage(file);
+    const service = await ServiceServices.new(
+      name,
+      file,
+      description,
+      costPrice,
+      parseInt(time as string),
+      parseInt(expire as string),
+      code
+    );
+    // ServicePublishers.new(service);
+    res
+      .status(201)
+      .send({ message: 'POST: Add new services successfully', service });
   }
   static async readAll(req: Request, res: Response) {
     const {
@@ -95,8 +92,16 @@ export class ServiceControllers {
   }
   static async updateService(req: Request, res: Response) {
     const { id } = req.params;
-    const { name, costPrice, description, discount, featured, time, expire } =
-      req.body;
+    const {
+      name,
+      costPrice,
+      description,
+      discount,
+      featured,
+      time,
+      expire,
+      code,
+    } = req.body;
     const { file } = req;
     const isFeatured = (featured as string) === 'true' ? true : false;
     const service = await ServiceServices.update(
@@ -108,7 +113,8 @@ export class ServiceControllers {
       discount,
       isFeatured,
       time as number,
-      parseInt(expire as string)
+      parseInt(expire as string),
+      code
     );
     ServicePublishers.updateService(service);
     res.status(200).send({ message: 'PATCH: service successfully', service });

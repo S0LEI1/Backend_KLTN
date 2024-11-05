@@ -97,4 +97,13 @@ export class CategoriesControllers {
     CategoriesPublisher.delete(category);
     res.status(200).send({ message: 'DELETE: category successfully' });
   }
+  static async exportCategories(req: Request, res: Response) {
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="categories.xlsx"`,
+    });
+    const workbook = await CategoriesServices.exportCategories();
+    workbook.xlsx.write(res);
+  }
 }

@@ -124,4 +124,13 @@ export class PackageControllers {
       console.log(error);
     }
   }
+  static async exportPackage(req: Request, res: Response) {
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="package-services.xlsx"`,
+    });
+    const workbook = await PackageServices.exportPackage();
+    workbook.xlsx.write(res);
+  }
 }
