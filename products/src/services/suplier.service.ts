@@ -16,16 +16,23 @@ export class SuplierServices {
     phoneNumber: string,
     email: string,
     address: string,
-    description: string
+    description: string,
+    code: string
   ) {
-    const existSuplier = await Suplier.findOne({ name: name });
+    const existSuplier = await Suplier.findOne({
+      name: name,
+      isDeleted: false,
+    });
     if (existSuplier) throw new BadRequestError('Suplier name existing');
+    const existCode = await Suplier.findOne({ code: code, isDeleted: false });
+    if (existCode) throw new BadRequestError('Code existing');
     const suplier = Suplier.build({
       name: name,
       description: description,
       phoneNumber: phoneNumber,
       email: email,
       address: address,
+      code: code,
     });
     await suplier.save();
     return suplier;
@@ -73,7 +80,8 @@ export class SuplierServices {
     description: string,
     phoneNumber: string,
     email: string,
-    address: String
+    address: String,
+    code: string
   ) {
     const existSuplier = await Suplier.findById(id);
     if (!existSuplier) throw new NotFoundError('Suplier update');
@@ -83,6 +91,7 @@ export class SuplierServices {
       phoneNumber: phoneNumber,
       email: email,
       address: address,
+      code: code,
     });
     await existSuplier.save();
     return existSuplier;
@@ -105,6 +114,7 @@ export class SuplierServices {
       throw new BadRequestError('Supliers not found');
     }
     sheet.columns = [
+      { header: 'Mã nhà cung cấp', key: 'code', width: 15 },
       { header: 'Tên nhà cung cấp', key: 'name', width: 35 },
       {
         header: 'Số điện thoại',
@@ -128,7 +138,14 @@ export class SuplierServices {
       },
     ];
     supliers.map((value, index) => {
-      sheet.addRow(value);
+      sheet.addRow({
+        code: value.code,
+        name: value.name,
+        phoneNumber: value.phoneNumber,
+        email: value.email,
+        address: value.address,
+        description: value.description,
+      });
       let rowIndex = 1;
       for (rowIndex; rowIndex <= sheet.rowCount; rowIndex++) {
         sheet.getRow(rowIndex).alignment = {
@@ -155,7 +172,10 @@ export class SuplierServices {
           continue;
         }
         const existSuplier = await Suplier.findOne({
-          name: row.getCell(1).value as string,
+          $or: [
+            { name: row.getCell(2).value as string },
+            { code: row.getCell(1).value as string },
+          ],
           isDeleted: false,
         });
         if (existSuplier) {
@@ -163,11 +183,12 @@ export class SuplierServices {
           continue;
         }
         const suplier = Suplier.build({
-          name: row.getCell(1).value as string,
-          phoneNumber: row.getCell(2).value as string,
-          email: row.getCell(3).value as string,
-          address: row.getCell(4).value as string,
-          description: row.getCell(5).value as string,
+          name: row.getCell(2).value as string,
+          phoneNumber: row.getCell(3).value as string,
+          email: row.getCell(4).value as string,
+          address: row.getCell(5).value as string,
+          description: row.getCell(6).value as string,
+          code: row.getCell(1).value as string,
         });
         await suplier.save();
         SuplierPublisher.new(suplier);

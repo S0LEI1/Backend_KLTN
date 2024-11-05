@@ -8,6 +8,7 @@ interface SuplierAttrs {
   email: string;
   address: string;
   description: string;
+  code: string;
 }
 export interface SuplierDoc extends mongoose.Document {
   name: string;
@@ -48,6 +49,10 @@ const suplierSchema = new mongoose.Schema(
     isDeleted: {
       type: Boolean,
       default: false,
+    },
+    code: {
+      required: true,
+      type: String,
     },
   },
   {

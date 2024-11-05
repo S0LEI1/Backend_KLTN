@@ -8,13 +8,14 @@ import { SuplierPublisher } from '../services/suplier.publiser.service';
 
 export class SuplierControllers {
   static async new(req: Request, res: Response) {
-    const { name, description, phoneNumber, email, address } = req.body;
+    const { name, description, phoneNumber, email, address, code } = req.body;
     const category = await SuplierServices.create(
       name,
       phoneNumber,
       email,
       address,
-      description
+      description,
+      code
     );
     SuplierPublisher.new(category);
     res
@@ -63,7 +64,7 @@ export class SuplierControllers {
       .send({ message: 'GET: suplier by name successfully', suplier });
   }
   static async update(req: Request, res: Response) {
-    const { name, description, phoneNumber, email, address } = req.body;
+    const { name, description, phoneNumber, email, address, code } = req.body;
     const { id } = req.params;
     const existSuplier = await SuplierServices.update(
       id,
@@ -71,7 +72,8 @@ export class SuplierControllers {
       description,
       phoneNumber,
       email,
-      address
+      address,
+      code
     );
     SuplierPublisher.update(existSuplier);
     res.status(200).send({
@@ -99,12 +101,10 @@ export class SuplierControllers {
     const { supliers, existSupliers } = await SuplierServices.importSuplier(
       file!
     );
-    res
-      .status(201)
-      .send({
-        message: 'import suplier successfully',
-        supliers,
-        existSupliers,
-      });
+    res.status(201).send({
+      message: 'import suplier successfully',
+      supliers,
+      existSupliers,
+    });
   }
 }

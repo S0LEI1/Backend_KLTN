@@ -428,7 +428,10 @@ export class ProductService {
           continue;
         }
         const existProduct = await Product.findOne({
-          name: row.getCell(1).value as string,
+          $or: [
+            { code: row.getCell(1).value as string },
+            { name: row.getCell(2).value as string },
+          ],
           isDeleted: false,
         });
         if (existProduct) {
@@ -439,7 +442,7 @@ export class ProductService {
           row.getCell(7).value as string
         );
         const suplier = await Suplier.findSuplier(
-          row.getCell(8).value as string
+          row.getCell(5).value as string
         );
         const product = Product.build({
           name: row.getCell(2).value as string,

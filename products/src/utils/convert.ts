@@ -17,6 +17,7 @@ interface ConvertProduct {
   quantity: number;
   createdAt: Date;
   version: number;
+  code: string;
 }
 export class Convert {
   static product(productDoc: ProductDoc) {
@@ -37,6 +38,7 @@ export class Convert {
       featured: productDoc.featured!,
       discount: productDoc.discount,
       createdAt: productDoc.createdAt,
+      code: productDoc.code,
     };
     return convertProduct;
   }
