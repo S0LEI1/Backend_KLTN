@@ -10,6 +10,7 @@ export class CategoriesPublisher {
       id: category.id,
       name: category.name,
       description: category.description,
+      code: category.code,
     });
   }
   static update(category: CategoryDoc) {
@@ -18,6 +19,7 @@ export class CategoriesPublisher {
       name: category.name,
       description: category.description,
       version: category.version,
+      code: category.code,
     });
   }
   static delete(category: CategoryDoc) {
