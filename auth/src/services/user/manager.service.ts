@@ -2,6 +2,7 @@ import { NotFoundError, Pagination } from '@share-package/common';
 import { User, UserDoc } from '../../models/user';
 import { Convert } from '../../utils/convert';
 import { UserPublisher } from '../publishers/user.publisher.service';
+import { FilterQuery } from 'mongoose';
 const PER_PAGE = process.env.PER_PAGE!;
 export class ManagerService {
   static async readAll(
@@ -11,15 +12,20 @@ export class ManagerService {
     gender: string
   ) {
     const query = Pagination.query();
+    let filter: FilterQuery<UserDoc> = {};
+
     query.isDeleted = false;
-    if (type) query.type = type;
+    if (type) filter = { type: type };
     const isMale = gender === 'true' ? true : false;
-    if (gender) query.gender = isMale;
+    if (gender) filter = { ...filter, gender: isMale };
     const sort = Pagination.query();
     if (sortBy === 'asc') sort.lastName = 1;
     if (sortBy === 'desc') sort.lastName = -1;
-    const totalItems = await User.find(query).countDocuments();
+    console.log(filter);
+
+    const totalItems = await User.find(filter).countDocuments();
     const users = await User.aggregate<UserDoc>([
+      { $match: filter },
       {
         $addFields: {
           lastName: { $arrayElemAt: [{ $split: ['$fullName', ' '] }, -1] },
@@ -28,8 +34,9 @@ export class ManagerService {
       { $skip: parseInt(pages as string) - 1 },
       { $limit: parseInt(PER_PAGE as string, 10) },
       { $sort: sort },
-      { $project: { lastName: 0 } },
+      { $project: { lastName: 0, password: 0 } },
     ]);
+
     return { users, totalItems };
   }
   static async pagination(total: number, pages: number) {
