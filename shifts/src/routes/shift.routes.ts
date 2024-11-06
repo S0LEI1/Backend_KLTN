@@ -13,10 +13,7 @@ import { body } from 'express-validator';
 const router = express.Router();
 router.post(
   '/shifts/new',
-  [
-    body('begin').isISO8601().toDate().withMessage('Begin must be valid'),
-    body('end').isISO8601().toDate().withMessage('End must be valid'),
-  ],
+  [body('shiftOptions').notEmpty().withMessage('Begin must be provided')],
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),

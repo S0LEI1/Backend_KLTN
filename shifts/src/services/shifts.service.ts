@@ -1,19 +1,20 @@
-import { BadRequestError, NotFoundError } from '@share-package/common';
+import {
+  BadRequestError,
+  NotFoundError,
+  UserShiftStatus,
+} from '@share-package/common';
 import { Shift, ShiftAttrs } from '../models/shift';
 import { ShiftPublishers } from './publishers/shifts.publisher.service';
 
 export class ShiftServices {
-  static async newShift(begin: Date, end: Date, description: string) {
+  static async newShift(attrs: ShiftAttrs) {
     const existShift = await Shift.findOne({
-      begin: begin,
-      end: end,
-      isDeleted: false,
+      shiftOptions: attrs.shiftOptions,
     });
     if (existShift) throw new BadRequestError('Shift is exist');
     const shift = Shift.build({
-      begin: begin,
-      end: end,
-      description: description,
+      shiftOptions: attrs.shiftOptions,
+      description: attrs.description,
     });
     await shift.save();
     ShiftPublishers.newShift(shift);

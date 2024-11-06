@@ -25,6 +25,7 @@ export class ServiceServices {
     const imageUrl = await AwsServices.uploadFile(file);
     const existService = await Service.findOne({
       $or: [{ name: name }, { code: code }],
+      isDeleted: false,
     });
     if (existService)
       throw new BadRequestError('service name or service code already exists');
@@ -206,10 +207,10 @@ export class ServiceServices {
   }
   static async exportService() {
     const workbook = new exceljs.Workbook();
-    const sheet = workbook.addWorksheet('Suplier');
+    const sheet = workbook.addWorksheet('Dịch vụ');
     const services = await Service.find({ isDeleted: false });
     if (services.length <= 0) {
-      throw new BadRequestError('Supliers not found');
+      throw new BadRequestError('Services not found');
     }
     sheet.columns = [
       { header: 'Mã dịch vụ', key: 'code', width: 25 },

@@ -3,7 +3,7 @@ import {
   NotFoundError,
   Pagination,
 } from '@share-package/common';
-import { Package } from '../models/package';
+import { Package, PackageLookupDoc } from '../models/package';
 import { Check } from '../utils/check-type';
 import { AwsServices } from './aws.service';
 import { PackagePublisher } from './package.publisher.service';
@@ -13,6 +13,10 @@ import { select } from '../utils/convert';
 import mongoose, { ObjectId } from 'mongoose';
 import exceljs from 'exceljs';
 const PER_PAGE = process.env.PER_PAGE!;
+interface ServiceInterface {
+  code: string;
+  name: string;
+}
 export class PackageServices {
   static async newPackage(
     name: string,
@@ -20,15 +24,17 @@ export class PackageServices {
     file: Express.Multer.File,
     description: string,
     count: number,
-    expire: number
+    expire: number,
+    code: string
   ) {
     // check package exitst
     const existPackage = await Package.findOne({
-      name: name,
+      $or: [{ name: name }, { code: code }],
       isDeleted: false,
     });
     // if exist => throw error
-    if (existPackage) throw new BadRequestError('Package name is exist');
+    if (existPackage)
+      throw new BadRequestError('Package name or package code is exist');
     // define imageUrls
     // check file type
     Check.checkImage(file);
@@ -43,6 +49,7 @@ export class PackageServices {
       imageUrl: imageUrl,
       count: count,
       expire: expire,
+      code: code,
     });
     // save package on database
     await newPackage.save();
@@ -172,6 +179,7 @@ export class PackageServices {
     file: Express.Multer.File;
     featured: boolean;
     description: string;
+    code: string;
   }) {
     const existPackage = await Package.findOne({
       _id: packageAttrs.id,
@@ -194,34 +202,75 @@ export class PackageServices {
       count: packageAttrs.count,
       featured: packageAttrs.featured,
       description: packageAttrs.description,
+      code: packageAttrs.code,
     });
     await existPackage.save();
     return existPackage;
   }
   static async exportPackage() {
     const workbook = new exceljs.Workbook();
-    const sheet = workbook.addWorksheet('Suplier');
-    const packages = await Package.find({ isDeleted: false });
+    const sheet = workbook.addWorksheet('Gói dịch vụ');
+    const packages = await Package.aggregate<PackageLookupDoc>([
+      {
+        $lookup: {
+          from: 'packageservices',
+          localField: '_id',
+          foreignField: 'package',
+          as: 'packageservices',
+        },
+      },
+      {
+        $lookup: {
+          from: 'services',
+          localField: 'packageservices.service',
+          foreignField: '_id',
+          as: 'services',
+        },
+      },
+    ]);
     if (packages.length <= 0) {
       throw new BadRequestError('Packages not found');
     }
+
     sheet.columns = [
-      { header: 'Mã nhà cung cấp', key: 'code', width: 15 },
-      { header: 'Tên nhà cung cấp', key: 'name', width: 35 },
+      { header: 'Mã gói dịch vụ', key: 'code', width: 25 },
+      { header: 'Tên gói dịch vụ', key: 'name', width: 35 },
       {
-        header: 'Số điện thoại',
-        key: 'phoneNumber',
+        header: 'Hình ảnh',
+        key: 'imageUrl',
+        width: 50,
+      },
+      {
+        header: 'Giá gốc (đ)',
+        key: 'costPrice',
         width: 15,
       },
       {
-        header: 'Email',
-        key: 'email',
+        header: 'Giá bán (đ)',
+        key: 'salePrice',
+        width: 15,
+      },
+      { header: 'Mã dịch vụ', key: 'serviceCode', width: 25 },
+      { header: 'Tên dịch vụ', key: 'serviceName', width: 35 },
+      {
+        header: 'Giảm giá (%)',
+        key: 'discount',
+        width: 15,
+      },
+      {
+        header: 'Lộ trình',
+        key: 'count',
         width: 25,
       },
       {
-        header: 'Địa chỉ',
-        key: 'address',
+        header: 'Hạn sử dụng (ngày)',
+        key: 'expire',
         width: 25,
+      },
+      {
+        header: 'Bán chạy',
+        key: 'featured',
+        width: 10,
       },
       {
         header: 'Mô tả',
@@ -231,12 +280,19 @@ export class PackageServices {
     ];
     packages.map((value, index) => {
       sheet.addRow({
-        // code: value.code,
-        // name: value.name,
-        // phoneNumber: value.phoneNumber,
-        // email: value.email,
-        // address: value.address,
-        // description: value.description,
+        code: value.code,
+        name: value.name,
+        imageUrl: value.imageUrl,
+        costPrice: value.costPrice,
+        salePrice: value.salePrice,
+        discount: value.discount,
+        count: value.count,
+        expire: value.expire,
+        featured: value.featured === true ? 'Có' : 'Không',
+        description: value.description,
+        // isDeleted: value.isDeleted,
+        // serviceCode: ,
+        // serviceName: service.name,
       });
       let rowIndex = 1;
       for (rowIndex; rowIndex <= sheet.rowCount; rowIndex++) {

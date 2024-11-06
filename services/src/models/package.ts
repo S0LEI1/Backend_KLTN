@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { calcSalePrice } from '../utils/calcSalePrice';
+import { ServiceDoc } from './service';
 
 interface PackageAttrs {
   name: string;
@@ -10,20 +11,37 @@ interface PackageAttrs {
   salePrice?: number;
   count: number;
   expire: number;
+  code: string;
   featured?: boolean;
   discount?: number;
   isDeleted?: boolean;
 }
 export interface PackageDoc extends mongoose.Document {
   name: string;
-  description: string;
-  costPrice: number;
   imageUrl: string;
+  costPrice: number;
   salePrice: number;
-  featured?: boolean;
   discount?: number;
   count: number;
   expire: number;
+  featured?: boolean;
+  code: string;
+  description: string;
+  isDeleted?: boolean;
+  version: number;
+}
+export interface PackageLookupDoc extends mongoose.Document {
+  name: string;
+  imageUrl: string;
+  costPrice: number;
+  salePrice: number;
+  discount?: number;
+  count: number;
+  expire: number;
+  featured?: boolean;
+  code: string;
+  services: ServiceDoc[];
+  description: string;
   isDeleted?: boolean;
   version: number;
 }
@@ -62,6 +80,10 @@ const packageSchema = new mongoose.Schema(
     featured: {
       type: Boolean,
       default: false,
+    },
+    code: {
+      type: String,
+      required: true,
     },
     isDeleted: {
       type: Boolean,

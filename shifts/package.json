@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@share-package/common": "^1.0.111",
+    "@share-package/common": "^1.0.131",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "cors": "^2.8.5",

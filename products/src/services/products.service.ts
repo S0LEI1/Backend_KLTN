@@ -377,7 +377,7 @@ export class ProductService {
       .populate('category')
       .populate('suplier');
 
-    const workbookData = await this.exportData(workbook, 'Products', products);
+    const workbookData = await this.exportData(workbook, 'Sản phẩm', products);
     return workbook;
   }
   static async exportProductBySuplier() {

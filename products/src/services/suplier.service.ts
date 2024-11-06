@@ -108,7 +108,7 @@ export class SuplierServices {
   }
   static async exportSuplier() {
     const workbook = new exceljs.Workbook();
-    const sheet = workbook.addWorksheet('Suplier');
+    const sheet = workbook.addWorksheet('Nhà cung cấp');
     const supliers = await Suplier.find({ isDeleted: false });
     if (supliers.length <= 0) {
       throw new BadRequestError('Supliers not found');

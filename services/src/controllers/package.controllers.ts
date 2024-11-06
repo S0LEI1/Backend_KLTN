@@ -7,14 +7,15 @@ export class PackageControllers {
   static async newPackage(req: Request, res: Response) {
     try {
       const { file } = req;
-      const { name, costPrice, description, count, expire } = req.body;
+      const { name, costPrice, description, count, expire, code } = req.body;
       const newPackage = await PackageServices.newPackage(
         name,
         costPrice,
         file as Express.Multer.File,
         description,
         count,
-        expire
+        expire,
+        code
       );
       res
         .status(201)
@@ -101,6 +102,7 @@ export class PackageControllers {
       time,
       featured,
       description,
+      code,
     } = req.body;
     const file = req.file;
     try {
@@ -115,6 +117,7 @@ export class PackageControllers {
         file: file!,
         featured: featured === 'true' ? true : false,
         description: description,
+        code: code,
       });
       res.status(200).send({
         message: 'Update package successfully',
@@ -128,9 +131,10 @@ export class PackageControllers {
     res.set({
       'Content-Type':
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename="package-services.xlsx"`,
+      'Content-Disposition': `attachment; filename="package.xlsx"`,
     });
     const workbook = await PackageServices.exportPackage();
     workbook.xlsx.write(res);
+    // res.status(200).send({ workbook });
   }
 }

@@ -24,27 +24,27 @@ build:
     #     manual:
     #       - src: 'src/**/*.ts'
     #         dest: .
-    - image: vannggoc/products
-      context: products
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          - src: 'src/**/*.ts'
-            dest: .
-    - image: vannggoc/services
-      context: services
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          - src: 'src/**/*.ts'
-            dest: .
-    # - image: vannggoc/shifts
-    #   context: shifts
+    # - image: vannggoc/products
+    #   context: products
     #   docker:
     #     dockerfile: Dockerfile
     #   sync:
     #     manual:
     #       - src: 'src/**/*.ts'
     #         dest: .
+    # - image: vannggoc/services
+    #   context: services
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       - src: 'src/**/*.ts'
+    #         dest: .
+    - image: vannggoc/shifts
+      context: shifts
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .

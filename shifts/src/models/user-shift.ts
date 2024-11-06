@@ -1,17 +1,21 @@
 import mongoose from 'mongoose';
 import { ShiftDoc } from './shift';
 import { UserDoc } from './user';
-import { ShiftStatus } from '@share-package/common';
+import { ShiftStatus, UserShiftStatus } from '@share-package/common';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 interface UserShiftAttrs {
   user: UserDoc;
   shiftDoc: ShiftDoc;
+  status: UserShiftStatus;
+  date: Date;
 }
 export interface UserShiftDoc extends mongoose.Document {
   user: UserDoc;
   shiftDoc: ShiftDoc;
-  status: ShiftStatus;
+  status: UserShiftStatus;
+  date: Date;
+  isDeleted: boolean;
 }
 interface UserShiftModel extends mongoose.Model<UserShiftDoc> {
   build(attrs: UserShiftAttrs): UserShiftDoc;
@@ -31,8 +35,12 @@ const userShiftSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ShiftStatus,
-      default: ShiftStatus.Created,
+      enum: UserShiftStatus,
+      default: UserShiftStatus.Created,
+    },
+    date: {
+      type: Date,
+      required: true,
     },
   },
   {

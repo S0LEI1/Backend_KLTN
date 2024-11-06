@@ -1,17 +1,15 @@
-import { Pagination } from '@share-package/common';
+import { Pagination, ShiftOptions } from '@share-package/common';
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 const PER_PAGE = process.env.PER_PAGE!;
 export interface ShiftAttrs {
-  begin: Date;
-  end: Date;
+  shiftOptions: ShiftOptions;
   description: string;
 }
 export interface ShiftDoc extends mongoose.Document {
-  begin: Date;
-  end: Date;
-  isDeleted: false;
+  shiftOptions: ShiftOptions;
   description: string;
+  isDeleted: false;
   version: number;
 }
 interface ShiftModel extends mongoose.Model<ShiftDoc> {
@@ -22,12 +20,9 @@ interface ShiftModel extends mongoose.Model<ShiftDoc> {
 
 const shiftSchema = new mongoose.Schema(
   {
-    begin: {
-      type: Date,
-      required: true,
-    },
-    end: {
-      type: Date,
+    shiftOptions: {
+      type: String,
+      enum: ShiftOptions,
       required: true,
     },
     isDeleted: {
@@ -60,15 +55,15 @@ shiftSchema.statics.findShift = async (
   const shift = await Shift.findOne({ _id: id, isDeleted: false });
   return shift;
 };
-shiftSchema.statics.findShifts = async (
-  query: Record<string, any>,
-  pages: string,
-  sortBy: string
-): Promise<ShiftDoc[] | null> => {
-  const options = Pagination.options(pages, PER_PAGE, sortBy);
-  const shifts = await Shift.find(query, null, options);
-  return shifts;
-};
+// shiftSchema.statics.findShifts = async (
+//   query: Record<string, any>,
+//   pages: string,
+//   sortBy: string
+// ): Promise<ShiftDoc[] | null> => {
+//   const options = Pagination.options(pages, PER_PAGE, sortBy);
+//   const shifts = await Shift.find(query, null, options);
+//   return shifts;
+// };
 
 const Shift = mongoose.model<ShiftDoc, ShiftModel>('Shift', shiftSchema);
 export { Shift };

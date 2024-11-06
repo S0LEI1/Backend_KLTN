@@ -88,7 +88,7 @@ export class CategoriesServices {
   }
   static async exportCategories() {
     const workbook = new exceljs.Workbook();
-    const sheet = workbook.addWorksheet('Suplier');
+    const sheet = workbook.addWorksheet('Loại sản phẩm');
     const categories = await Category.find({ isDeleted: false });
     if (categories.length <= 0) {
       throw new BadRequestError('Categories not found');

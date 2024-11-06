@@ -67,7 +67,7 @@ packageServiceSchema.statics.findByServiceAndPackage = async (
   return PS;
 };
 const PackageService = mongoose.model<PackageServiceDoc, PackageServiceModel>(
-  'PackageSerive',
+  'PackageService',
   packageServiceSchema
 );
 export { PackageService };

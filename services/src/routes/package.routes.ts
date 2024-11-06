@@ -1,6 +1,7 @@
 import {
   ListPermission,
   UserType,
+  codeRegex,
   multipleUploadMiddleware,
   requireAuth,
   requirePermission,
@@ -11,6 +12,9 @@ import {
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { PackageControllers } from '../controllers/package.controllers';
+const CODE_MESSAGE =
+  'Password must contain digit from 1 to 9, uppercase letter, no space, and it must be 3-7 characters long.';
+
 const router = express.Router();
 router.post(
   '/services/package/new',
@@ -28,6 +32,7 @@ router.post(
     body('time')
       .isFloat({ min: 5 })
       .withMessage('Time must be greater than equal 5 minute'),
+    body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
   ],
   validationRequest,
   requireAuth,
@@ -60,6 +65,7 @@ router.patch(
     body('expire')
       .isFloat({ min: 5 })
       .withMessage('Expire must be greater than equal 1 day'),
+    body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
   ],
   validationRequest,
   requireAuth,
@@ -67,11 +73,11 @@ router.patch(
   requirePermission([ListPermission.PackageUpdate]),
   PackageControllers.updatePackage
 );
-// router.get(
-//   '/services/package/export/data',
-//   requireAuth,
-//   requireType([UserType.Manager]),
-//   requirePermission([ListPermission.PackageRead]),
-//   PackageControllers.exportPackage
-// );
+router.get(
+  '/services/package/export/data',
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.PackageRead]),
+  PackageControllers.exportPackage
+);
 export { router as packageRouter };
