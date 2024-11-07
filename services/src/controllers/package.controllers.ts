@@ -7,19 +7,23 @@ export class PackageControllers {
   static async newPackage(req: Request, res: Response) {
     try {
       const { file } = req;
-      const { name, costPrice, description, count, expire, code } = req.body;
-      const newPackage = await PackageServices.newPackage(
+      const { name, costPrice, description, count, expire, code, serviceIds } =
+        req.body;
+      const { newPackage, packageServices } = await PackageServices.newPackage(
         name,
         costPrice,
         file as Express.Multer.File,
         description,
         count,
         expire,
-        code
+        code,
+        serviceIds as string[]
       );
-      res
-        .status(201)
-        .send({ message: 'POST: new package successfully', newPackage });
+      res.status(201).send({
+        message: 'POST: new package successfully',
+        newPackage,
+        packageServices,
+      });
     } catch (error) {
       console.log(error);
     }

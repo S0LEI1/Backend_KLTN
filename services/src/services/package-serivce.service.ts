@@ -18,8 +18,6 @@ export class PackageServiceServices {
       service: { $in: serviceIds },
       package: packageId,
     });
-    console.log(services);
-
     if (existPSs.length > 0)
       throw new BadRequestError('Package Service is exist');
     const packageServices: PackageServiceDoc[] = [];

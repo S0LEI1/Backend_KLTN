@@ -12,7 +12,7 @@ const PER_PAGE = process.env.PER_PAGE;
 export class CategoriesServices {
   static async create(name: string, description: string, code: string) {
     const existCategory = await Category.findOne({
-      $or: [{ name: name }, { code: code }],
+      name: name,
     });
     if (existCategory) throw new BadRequestError('Category existing');
     const category = Category.build({

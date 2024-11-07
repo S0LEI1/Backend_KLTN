@@ -12,6 +12,7 @@ import { Service } from '../models/service';
 import { select } from '../utils/convert';
 import mongoose, { ObjectId } from 'mongoose';
 import exceljs from 'exceljs';
+import { PackageServiceServices } from './package-serivce.service';
 const PER_PAGE = process.env.PER_PAGE!;
 interface ServiceInterface {
   code: string;
@@ -25,8 +26,11 @@ export class PackageServices {
     description: string,
     count: number,
     expire: number,
-    code: string
+    code: string,
+    serviceIds: string[]
   ) {
+    console.log(serviceIds);
+
     // check package exitst
     const existPackage = await Package.findOne({
       $or: [{ name: name }, { code: code }],
@@ -53,10 +57,14 @@ export class PackageServices {
     });
     // save package on database
     await newPackage.save();
+    const packageServices = await PackageServiceServices.newPackageService(
+      serviceIds,
+      newPackage.id
+    );
     // publish created event
     PackagePublisher.newPackage(newPackage);
     // return package for controller
-    return newPackage;
+    return { newPackage, packageServices };
   }
   static async readAll(
     pages: string,
