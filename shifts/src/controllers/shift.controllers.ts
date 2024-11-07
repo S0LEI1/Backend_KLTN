@@ -14,6 +14,20 @@ export class ShiftControllers {
     }
   }
   static async readAll(req: Request, res: Response) {
-    res.status(200).send({ message: 'GET: Shift successfully' });
+    const shifts = await ShiftServices.readAll();
+    res.status(200).send({ message: 'GET: Shifts successfully', shifts });
+  }
+  static async readOne(req: Request, res: Response) {
+    const shift = await ShiftServices.readOne(req.params.id);
+    res.status(200).send({ message: 'GET: Shift successfully', shift });
+  }
+  static async updateShift(req: Request, res: Response) {
+    const { id } = req.params;
+    const { description } = req.body;
+    const shift = await ShiftServices.updateShift({
+      id: id,
+      description: description,
+    });
+    res.status(200).send({ message: 'PATCH: shift successfully', shift });
   }
 }

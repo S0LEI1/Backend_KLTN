@@ -67,10 +67,14 @@ export class AccountControllers {
   }
   static async importUser(req: Request, res: Response) {
     const file = req.file;
-    Check.checkExcel(file!);
-    const { users, existUsers } = await AuthService.importUser(file!);
-    res
-      .status(201)
-      .send({ message: 'Import users successfully', users, existUsers });
+    try {
+      Check.checkExcel(file!);
+      const { users, existUsers } = await AuthService.importUser(file!);
+      res
+        .status(201)
+        .send({ message: 'Import users successfully', users, existUsers });
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

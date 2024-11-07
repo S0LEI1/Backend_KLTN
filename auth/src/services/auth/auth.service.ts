@@ -151,11 +151,6 @@ export class AuthService {
         width: 30,
       },
       {
-        header: 'Password',
-        key: 'password',
-        width: 50,
-      },
-      {
         header: 'Ảnh đại diện',
         key: 'avatar',
         width: 35,
@@ -193,7 +188,6 @@ export class AuthService {
         // id: value.id,
         name: value.fullName,
         email: value.email,
-        password: value.password,
         phoneNumber: value.phoneNumber,
         avatar: value.avatar,
         gender: gender,
@@ -257,28 +251,38 @@ export class AuthService {
           continue;
         }
         const gender =
-          (row.getCell(6).value as string) === 'Nam' ? true : false;
+          (row.getCell(5).value as string) === 'Nam' ? true : false;
         let type: UserType = UserType.Customer;
-        if ((row.getCell(8).value as string) === 'Nhân viên')
+        if ((row.getCell(7).value as string) === 'Nhân viên')
           type = UserType.Employee;
-        if ((row.getCell(8).value as string) === 'Khách hàng')
+        if ((row.getCell(7).value as string) === 'Khách hàng')
           type = UserType.Customer;
-        if ((row.getCell(8).value as string) === 'Người quản lý')
+        if ((row.getCell(7).value as string) === 'Người quản lý')
           type = UserType.Manager;
+        const generatePassword = Password.generate();
+        const password = 'Spa@1' + generatePassword;
+        const hashPass = await Password.toHash(password);
         const user = User.build({
           fullName: row.getCell(1).value as string,
           email: row.getCell(2).value as string,
-          password: row.getCell(3).value as string,
-          avatar: row.getCell(4).value as string,
-          phoneNumber: row.getCell(5).value as string,
+          password: hashPass,
+          avatar: row.getCell(3).value as string,
+          phoneNumber: row.getCell(4).value as string,
           gender: gender,
-          address: row.getCell(7).value as string,
+          address: row.getCell(6).value as string,
           type: type,
-          point: row.getCell(9).value as number,
+          point: parseInt(row.getCell(8).value as string),
         });
         await user.save();
         UserPublisher.newUser(user);
         users.push(user);
+        const html = templatePassword.getOtpHtml(password);
+        await Mail.send(
+          row.getCell(2).value as string,
+          password,
+          html,
+          `Chào mừng ${row.getCell(1).value as string} đến với Kim Beauty Spa`
+        );
       }
     }
     return { users, existUsers };

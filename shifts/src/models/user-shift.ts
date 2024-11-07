@@ -6,13 +6,13 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 interface UserShiftAttrs {
   user: UserDoc;
-  shiftDoc: ShiftDoc;
+  shift: ShiftDoc;
   status: UserShiftStatus;
   date: Date;
 }
 export interface UserShiftDoc extends mongoose.Document {
   user: UserDoc;
-  shiftDoc: ShiftDoc;
+  shift: ShiftDoc;
   status: UserShiftStatus;
   date: Date;
   isDeleted: boolean;

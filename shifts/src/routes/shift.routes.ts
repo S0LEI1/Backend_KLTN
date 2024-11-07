@@ -23,8 +23,22 @@ router.post(
 router.get(
   '/shifts/',
   requireAuth,
-  requireType([UserType.Employee, UserType.Manager]),
+  requireType([UserType.Manager]),
   requirePermission([ListPermission.ShiftRead]),
   ShiftControllers.readAll
+);
+router.get(
+  '/shifts/:id',
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.ShiftRead]),
+  ShiftControllers.readOne
+);
+router.patch(
+  '/shifts/:id',
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.ShiftUpdate]),
+  ShiftControllers.updateShift
 );
 export { router as shiftRouter };
