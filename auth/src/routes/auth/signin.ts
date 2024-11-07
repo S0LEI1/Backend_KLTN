@@ -6,17 +6,8 @@ import {
   NotFoundError,
 } from '@share-package/common';
 import jwt from 'jsonwebtoken';
-import mongoose, { ObjectId } from 'mongoose';
 import { Password } from '../../services/password';
-import {
-  RolePermission,
-  RolePermissionDoc,
-} from '../../models/role-permission';
 import { RolePermissionServices } from '../../services/role-permission.service';
-import { Role, RoleDoc } from '../../models/role';
-import { Permission, PermissionDoc } from '../../models/permission';
-import { PermissionServices } from '../../services/permission.service';
-import { RoleServices } from '../../services/roles.service';
 import { User } from './../../models/user';
 import { UserRole } from './../../models/user-role-mapping';
 const router = express.Router();
@@ -74,6 +65,7 @@ router.post(
           type: existUser.type,
           roles: roles,
           permissions: permissions,
+          fullName: existUser.fullName,
         },
         process.env.JWT_KEY!,
         { expiresIn: '3h' }
@@ -86,9 +78,9 @@ router.post(
       };
       res.status(200).send({
         token: userJWT,
-        type: existUser.type,
-        roles,
-        permissions,
+        // type: existUser.type,
+        // roles,
+        // permissions,
       });
     } catch (error) {
       console.log(error);

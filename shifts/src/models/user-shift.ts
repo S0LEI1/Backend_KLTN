@@ -59,7 +59,12 @@ userShiftSchema.plugin(updateIfCurrentPlugin);
 userShiftSchema.statics.build = (attrs: UserShiftAttrs) => {
   return new UserShift(attrs);
 };
-
+userShiftSchema.pre('save', async function (done) {
+  if (this.isModified('date')) {
+    this.date.setHours(0, 0, 0, 0);
+  }
+  done();
+});
 const UserShift = mongoose.model<UserShiftDoc, UserShiftModel>(
   'UserShift',
   userShiftSchema
