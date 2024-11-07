@@ -31,9 +31,10 @@ export class ProductService {
     try {
       const existProduct = await Product.findByName(productAttrs.name);
       const existCode = await Product.findOne({
-        code: productAttrs.code,
+        name: productAttrs.code,
         isDeleted: false,
       });
+      if (existProduct) throw new BadRequestError('Product is exist');
       if (existCode) throw new BadRequestError('Product code is exist');
       const category = await Category.findCategory(productAttrs.categoryId);
       const suplier = await Suplier.findSuplier(productAttrs.suplierId);
@@ -296,19 +297,9 @@ export class ProductService {
         width: 15,
       },
       {
-        header: 'Mã nhà cung cấp',
-        key: 'suplierCode',
-        width: 25,
-      },
-      {
         header: 'Tên nhà cung cấp',
         key: 'suplierName',
         width: 20,
-      },
-      {
-        header: 'Mã loại sản phẩm',
-        key: 'categoryCode',
-        width: 25,
       },
       {
         header: 'Tên loại sản phẩm',
@@ -346,9 +337,7 @@ export class ProductService {
         name: value.name,
         costPrice: value.costPrice,
         salePrice: value.salePrice,
-        suplierCode: value?.suplier?.code ?? '',
         suplierName: value?.suplier?.name ?? '',
-        categoryCode: value?.category?.code ?? '',
         categoryName: value?.category?.name ?? '',
         imageUrl: value.imageUrl,
         quantity: value.quantity,
@@ -443,22 +432,22 @@ export class ProductService {
           continue;
         }
         const category = await Category.findOne({
-          code: row.getCell(7).value as string,
+          name: row.getCell(6).value as string,
         });
         const suplier = await Suplier.findOne({
-          code: row.getCell(5).value as string,
+          name: row.getCell(5).value as string,
         });
         const product = Product.build({
           name: row.getCell(2).value as string,
           description: row.getCell(14).value as string,
           category: category!,
           suplier: suplier!,
-          imageUrl: row.getCell(9).value as string,
-          expire: row.getCell(11).value as Date,
+          imageUrl: row.getCell(7).value as string,
+          expire: row.getCell(8).value as Date,
           costPrice: row.getCell(3).value as number,
-          quantity: row.getCell(10).value as number,
-          discount: row.getCell(12).value as number,
-          featured: row.getCell(13).value === 'có' ? true : false,
+          quantity: row.getCell(9).value as number,
+          discount: row.getCell(10).value as number,
+          featured: row.getCell(11).value === 'có' ? true : false,
           code: row.getCell(1).value as string,
         });
         await product.save();
