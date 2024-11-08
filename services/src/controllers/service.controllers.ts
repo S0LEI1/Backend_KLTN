@@ -32,19 +32,15 @@ export class ServiceControllers {
   static async readAll(req: Request, res: Response) {
     const {
       pages = 1,
-      sortBy,
-      lteDiscount,
-      gteDiscount,
-      ltePrice,
-      gtePrice,
+      name,
       price,
+      priceRange,
+      discountRange,
       discount,
       featured,
-      lteTime,
-      gteTime,
+      timeRange,
       time,
-      lteExpire,
-      gteExpire,
+      expireRange,
       expire,
     } = req.query;
     let isManager = false;
@@ -56,20 +52,16 @@ export class ServiceControllers {
     }
     const { services, totalItems } = await ServiceServices.readAll(
       pages as string,
-      sortBy as string,
+      name as string,
       isManager,
-      parseInt(lteDiscount as string),
-      parseInt(gteDiscount as string),
-      parseInt(ltePrice as string),
-      parseInt(gtePrice as string),
+      priceRange as string,
       price as string,
+      discountRange as string,
       discount as string,
       featured as string,
-      parseInt(lteTime as string),
-      parseInt(gteTime as string),
+      timeRange as string,
       time as string,
-      parseInt(lteExpire as string),
-      parseInt(gteExpire as string),
+      expireRange as string,
       expire as string
     );
     res

@@ -41,17 +41,16 @@ export class ProductControllers {
   static async readAll(req: Request, res: Response) {
     const {
       pages = 1,
-      sortBy,
       category,
       suplier,
-      lteDiscount,
-      gteDiscount,
-      ltePrice,
-      gtePrice,
-      createdAt,
       quantity,
       expire,
       name,
+      discount,
+      price,
+      priceRange,
+      discountRange,
+      featured,
     } = req.query;
     let isManager = false;
     if (req.currentUser) {
@@ -63,18 +62,17 @@ export class ProductControllers {
     try {
       const { products, totalItems } = await ProductService.readAll(
         pages as string,
-        sortBy as string,
         isManager,
         category as string,
         suplier as string,
-        parseInt(lteDiscount as string),
-        parseInt(gteDiscount as string),
-        parseInt(ltePrice as string),
-        parseInt(gtePrice as string),
-        // Date(createdAt as string),
         quantity as string,
         expire as string,
-        name as string
+        name as string,
+        price as string,
+        discount as string,
+        priceRange as string,
+        discountRange as string,
+        featured as string
       );
       const convertProducts = Convert.products(products);
       res.status(200).send({

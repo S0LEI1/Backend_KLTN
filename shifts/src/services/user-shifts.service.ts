@@ -9,6 +9,7 @@ import { User } from '../models/user';
 import { Shift } from '../models/shift';
 import { format } from 'date-fns';
 import { FilterQuery } from 'mongoose';
+import { UserShiftPublisher } from './publishers/user-shift.publisher.service';
 
 export class UserShiftServices {
   static async newUS(attrs: { empId: string; shiftId: string; date: Date }) {
@@ -31,6 +32,7 @@ export class UserShiftServices {
       date: attrs.date,
     });
     await us.save();
+    UserShiftPublisher.newUS(us);
     return us;
   }
   static async readAll(date: string) {

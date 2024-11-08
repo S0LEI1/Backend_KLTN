@@ -62,32 +62,39 @@ export class ProductService {
   }
   static async readAll(
     pages: string,
-    sortBy: string,
     isManager: boolean,
     category: string,
     suplier: string,
-    lteDiscount: number,
-    gteDiscount: number,
-    ltePrice: number,
-    gtePrice: number,
     // createdAt: Date,
     quantity: string,
     expire: string,
-    name: string
+    name: string,
+    price: string,
+    discount: string,
+    priceRange: string,
+    discountRange: string,
+    featured: string
   ) {
+    console.log(price);
+
     const query = Pagination.query();
     const sort = Pagination.query();
     query.isDeleted = false;
     if (category) query.category = category;
     if (suplier) query.suplier = suplier;
-    if (gteDiscount) query.discount = { $gte: gteDiscount };
-    if (lteDiscount) query.discount = { $lte: lteDiscount };
-    if (gteDiscount && lteDiscount)
-      query.discount = { $gte: gteDiscount, $lte: lteDiscount };
-    if (gtePrice) query.salePrice = { $gte: gtePrice };
-    if (ltePrice) query.salePrice = { $lte: ltePrice };
-    if (gtePrice && ltePrice)
-      query.salePrice = { $gte: gtePrice, $lte: ltePrice };
+    const highDiscount = 50;
+    const lowDiscount = 15;
+    if (discountRange === 'highdiscount')
+      query.discount = { $gt: highDiscount };
+    if (discountRange === 'lowdiscount') query.discount = { $lt: lowDiscount };
+    if (discountRange === 'mediumdiscount')
+      query.discount = { $gte: lowDiscount, $lte: highDiscount };
+    const highPrice = 3000000;
+    const lowPrice = 500000;
+    if (priceRange === 'highprice') query.salePrice = { $gt: highPrice };
+    if (priceRange === 'lowprice') query.salePrice = { $lt: lowPrice };
+    if (priceRange === 'mediumprice')
+      query.salePrice = { $gte: lowPrice, $lte: highPrice };
 
     // if (createdAt) {
     //   createdAt.setHours(0, 0, 0, 0);
@@ -97,12 +104,25 @@ export class ProductService {
     if (quantity === 'outofstock') query.quantity = 0;
     if (quantity === 'runninglow') query.quantity = { $lt: 10, $gte: 1 };
 
-    // sort
-    sort.featured = -1;
-    sort.name = 1;
+    // // sort
+    if (name === 'asc') sort.name = 1;
+    if (name === 'desc') sort.name = -1;
+    // // sale price
+    if (price === 'asc') sort.salePrice = 1;
+    if (price === 'desc') sort.salePrice = -1;
+    // expire
     if (expire === 'asc') sort.expire = 1;
     if (expire === 'desc') sort.expire = -1;
+    // discount
+    if (discount === 'asc') sort.discount = 1;
+    if (discount === 'desc') sort.discount = -1;
+    // featured
+    if (featured === 'asc') sort.featured = 1;
+    if (featured === 'desc') sort.featured = -1;
+
     const options = Pagination.options(pages, PER_PAGE!, sort);
+    console.log('otpion', options);
+
     const totalItems = await Product.find(query).countDocuments();
     const products = await Product.find(
       query,

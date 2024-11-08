@@ -11,7 +11,7 @@ import { Check } from '../utils/check-type';
 import { calcSalePrice } from '../utils/calcSalePrice';
 import { ServicePublishers } from './services.publisher.service';
 import exceljs from 'exceljs';
-const PER_PAGES = process.env.PER_PAGES;
+const PER_PAGE = process.env.PER_PAGE;
 export class ServiceServices {
   static async new(
     name: string,
@@ -44,46 +44,49 @@ export class ServiceServices {
   }
   static async readAll(
     pages: string,
-    sortBy: string,
+    name: string,
     isManager: boolean,
-    lteDiscount: number,
-    gteDiscount: number,
-    ltePrice: number,
-    gtePrice: number,
+    priceRange: string,
     price: string,
+    discountRange: string,
     discount: string,
     featured: string,
-    lteTime: number,
-    gteTime: number,
+    timeRange: string,
     time: string,
-    lteExpire: number,
-    gteExpire: number,
+    expireRange: string,
     expire: string
   ) {
-    console.log(featured);
-
     const query = Pagination.query();
     const sort = Pagination.query();
     query.isDeleted = false;
-    if (gteDiscount) query.discount = { $gte: gteDiscount };
-    if (lteDiscount) query.discount = { $lte: lteDiscount };
-    if (gteDiscount && lteDiscount)
-      query.discount = { $gte: gteDiscount, $lte: lteDiscount };
-    if (gtePrice) query.salePrice = { $gte: gtePrice };
-    if (ltePrice) query.salePrice = { $lte: ltePrice };
-    if (gtePrice && ltePrice) {
-      query.salePrice = { $gte: gtePrice, $lte: ltePrice };
-    }
-    if (gteTime) query.time = { $gte: gteTime };
-    if (lteTime) query.time = { $lte: lteTime };
-    if (lteTime && gteTime) query.time = { $gte: gteTime, $lte: lteTime };
-    if (gteExpire) query.expire = { $gte: gteExpire };
-    if (lteExpire) query.expire = { $lte: lteExpire };
-    if (lteExpire && gteExpire)
-      query.expire = { $gte: gteExpire, $lte: lteExpire };
+    const highDiscount = 50;
+    const lowDiscount = 15;
+    if (discountRange === 'highdiscount')
+      query.discount = { $gt: highDiscount };
+    if (discountRange === 'lowdiscount') query.discount = { $lt: lowDiscount };
+    if (discountRange === 'mediumdiscount')
+      query.discount = { $gte: lowDiscount, $lte: highDiscount };
+    const highPrice = 3000000;
+    const lowPrice = 500000;
+    if (priceRange === 'highprice') query.salePrice = { $gt: highPrice };
+    if (priceRange === 'lowprice') query.salePrice = { $lt: lowPrice };
+    if (priceRange === 'mediumprice')
+      query.salePrice = { $gte: lowPrice, $lte: highPrice };
+    const highTime = 90;
+    const lowTime = 30;
+    if (timeRange === 'hightime') query.time = { $gt: highTime };
+    if (timeRange === 'lowtime') query.time = { $lt: lowTime };
+    if (timeRange === 'mediumtime')
+      query.time = { $gte: lowTime, $lte: highTime };
+    const highExpire = 30;
+    const lowExpire = 15;
+    if (expireRange === 'highexpire') query.expire = { $gt: highExpire };
+    if (expireRange === 'lowexpire') query.expire = { $lt: lowExpire };
+    if (expireRange === 'mediumexpire')
+      query.expire = { $gte: lowExpire, $lte: highExpire };
     // sort
-    if (sortBy === 'asc') sort.name = 1;
-    if (sortBy === 'desc') sort.name = -1;
+    if (name === 'asc') sort.name = 1;
+    if (name === 'desc') sort.name = -1;
     if (price === 'asc') sort.salePrice = 1;
     if (price === 'desc') sort.salePrice = -1;
     if (discount === 'asc') sort.discount = 1;
@@ -102,7 +105,9 @@ export class ServiceServices {
       description: 1,
     };
 
-    const options = Pagination.options(pages, PER_PAGES!, sort);
+    const options = Pagination.options(pages, PER_PAGE!, sort);
+    console.log('options', options);
+    console.log('query', query);
     const services = await Service.find(
       query,
       isManager ? null : select,
@@ -196,7 +201,7 @@ export class ServiceServices {
     const sort = Pagination.query();
     if (sortBy === 'asc') sort.name = 1;
     if (sortBy === 'desc') sort.name = -1;
-    const options = Pagination.options(pages, PER_PAGES!, sort);
+    const options = Pagination.options(pages, PER_PAGE!, sort);
     const totalItems = await Service.find(query).countDocuments();
     const services = await Service.find(
       query,

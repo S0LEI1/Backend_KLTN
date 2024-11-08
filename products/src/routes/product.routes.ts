@@ -22,8 +22,12 @@ router.post(
     body('categoryId').isMongoId().withMessage('Category Id must be valid'),
     body('suplierId').isMongoId().withMessage('Suplier Id must be valid'),
     body('expire').isISO8601().toDate().withMessage('Expire must be valid'),
-    body('costPrice').isNumeric().withMessage('Cost price must be valid'),
-    body('quantity').isNumeric().withMessage('Quanity must be valid'),
+    body('costPrice')
+      .isFloat({ min: 1000 })
+      .withMessage('Cost price must be greater than equal 1000đ'),
+    body('quantity')
+      .isFloat({ min: 1, max: 999 })
+      .withMessage('Quanity must be greater than equal 1'),
     body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
   ],
   validationRequest,
@@ -47,8 +51,12 @@ router.patch(
     body('categoryId').isMongoId().withMessage('Category Id must be valid'),
     body('suplierId').isMongoId().withMessage('Suplier Id must be valid'),
     body('expire').isISO8601().toDate().withMessage('Expire must be valid'),
-    body('costPrice').isNumeric().withMessage('Cost price must be valid'),
-    body('quantity').isNumeric().withMessage('Quanity must be valid'),
+    body('costPrice')
+      .isFloat({ min: 1000 })
+      .withMessage('Cost price must be greater than equal 1000đ'),
+    body('quantity')
+      .isFloat({ min: 1, max: 999 })
+      .withMessage('Quanity must be greater than equal 1'),
     body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
   ],
   validationRequest,
