@@ -68,61 +68,67 @@ export class PackageServices {
   }
   static async readAll(
     pages: string,
-    sortBy: string,
-    lteDiscount: number,
-    gteDiscount: number,
-    ltePrice: number,
-    gtePrice: number,
+    name: string,
     isManager: boolean,
+    priceRange: string,
     price: string,
+    discountRange: string,
     discount: string,
-    featured: boolean,
-    lteCount: number,
-    gteCount: number,
+    featured: string,
+    countRange: string,
     count: string,
-    lteExpire: number,
-    gteExpire: number,
+    expireRange: string,
     expire: string
   ) {
     // define query
     const query = Pagination.query();
     query.isDeleted = false;
     // if gteDiscount => find package had discount >= gteDiscount
-    if (gteDiscount) query.discount = { $gte: gteDiscount };
-    if (lteDiscount) query.discount = { $lte: lteDiscount };
-    if (gteDiscount && lteDiscount)
-      query.discount = { $gte: gteDiscount, $lte: lteDiscount };
-    if (gtePrice) query.salePrice = { $gte: gtePrice };
-    if (ltePrice) query.salePrice = { $lte: ltePrice };
-    if (gtePrice && ltePrice)
-      query.salePrice = { $gte: gtePrice, $lte: ltePrice };
-
-    if (gteCount) query.count = { $gte: gteCount };
-    if (lteCount) query.count = { $lte: lteCount };
-    if (gteCount && lteCount) query.count = { $gte: gteCount, $lte: lteCount };
-
-    if (gteExpire) query.expire = { $gte: gteExpire };
-    if (lteExpire) query.expire = { $lte: lteExpire };
-    if (lteExpire && gteExpire)
-      query.expire = { $gte: gteExpire, $lte: lteExpire };
+    const highDiscount = 50;
+    const lowDiscount = 15;
+    if (discountRange === 'highdiscount')
+      query.discount = { $gt: highDiscount };
+    if (discountRange === 'lowdiscount') query.discount = { $lt: lowDiscount };
+    if (discountRange === 'mediumdiscount')
+      query.discount = { $gte: lowDiscount, $lte: highDiscount };
+    const highPrice = 3000000;
+    const lowPrice = 500000;
+    if (priceRange === 'highprice') query.salePrice = { $gt: highPrice };
+    if (priceRange === 'lowprice') query.salePrice = { $lt: lowPrice };
+    if (priceRange === 'mediumprice')
+      query.salePrice = { $gte: lowPrice, $lte: highPrice };
+    const highCount = 7;
+    const lowCount = 3;
+    if (countRange === 'highcount') query.count = { $gt: highCount };
+    if (countRange === 'lowcount') query.count = { $lt: lowCount };
+    if (countRange === 'mediumcount')
+      query.count = { $gte: lowCount, $lte: highCount };
+    const highExpire = 30;
+    const lowExpire = 15;
+    if (expireRange === 'highexpire') query.expire = { $gt: highExpire };
+    if (expireRange === 'lowexpire') query.expire = { $lt: lowExpire };
+    if (expireRange === 'mediumexpire')
+      query.expire = { $gte: lowExpire, $lte: highExpire };
+    if (featured === 'true') query.featured = true;
+    if (featured === 'false') query.featured = false;
     // console.log(query);
     // console.log('isManager', isManager);
 
     const sort = Pagination.query();
-    if (sortBy === 'asc') sort.name = 1;
-    if (sortBy === 'desc') sort.name = -1;
+    if (name === 'asc') sort.name = 1;
+    if (name === 'desc') sort.name = -1;
     if (price === 'asc') sort.salePrice = 1;
     if (price === 'desc') sort.salePrice = -1;
     if (discount === 'asc') sort.discount = 1;
     if (discount === 'asc') sort.discount = -1;
-    if (featured === true) sort.discount = -1;
-    if (featured === false) sort.discount = -1;
     if (expire === 'asc') sort.expire = 1;
     if (expire === 'desc') sort.expire = -1;
     if (count === 'asc') sort.count = 1;
     if (count === 'desc') sort.count = -1;
     // get total package by query
     const options = Pagination.options(pages, PER_PAGE, sort);
+    console.log(options);
+
     const totalItems = await Package.find(query).countDocuments();
     // get packages
     const packages = await Package.find(
@@ -154,12 +160,14 @@ export class PackageServices {
       serviceIds.push(new mongoose.Types.ObjectId(ps.service.id))
     );
     // find services attach with package
-    const services = await Service.find({ _id: { $in: serviceIds } });
+    const services = await Service.find({ _id: { $in: serviceIds } }).sort({
+      name: 1,
+    });
     // if user = manager => return services not attach with package
     const notInSerivce = await Service.find(
       { _id: { $nin: serviceIds }, isDeleted: false },
       isManager ? null : select
-    );
+    ).sort({ name: 1 });
     return { existPackage, notInSerivce, services };
   }
   static async deletedPackage(id: string) {

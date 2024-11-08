@@ -104,6 +104,9 @@ export class ProductService {
     if (quantity === 'outofstock') query.quantity = 0;
     if (quantity === 'runninglow') query.quantity = { $lt: 10, $gte: 1 };
 
+    // featured
+    if (featured === 'true') sort.featured = true;
+    if (featured === 'false') sort.featured = false;
     // // sort
     if (name === 'asc') sort.name = 1;
     if (name === 'desc') sort.name = -1;
@@ -116,9 +119,6 @@ export class ProductService {
     // discount
     if (discount === 'asc') sort.discount = 1;
     if (discount === 'desc') sort.discount = -1;
-    // featured
-    if (featured === 'asc') sort.featured = 1;
-    if (featured === 'desc') sort.featured = -1;
 
     const options = Pagination.options(pages, PER_PAGE!, sort);
     console.log('otpion', options);

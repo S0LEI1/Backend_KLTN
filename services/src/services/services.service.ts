@@ -84,6 +84,8 @@ export class ServiceServices {
     if (expireRange === 'lowexpire') query.expire = { $lt: lowExpire };
     if (expireRange === 'mediumexpire')
       query.expire = { $gte: lowExpire, $lte: highExpire };
+    if (featured === 'true') query.featured = true;
+    if (featured === 'false') query.featured = false;
     // sort
     if (name === 'asc') sort.name = 1;
     if (name === 'desc') sort.name = -1;
@@ -91,8 +93,6 @@ export class ServiceServices {
     if (price === 'desc') sort.salePrice = -1;
     if (discount === 'asc') sort.discount = 1;
     if (discount === 'desc') sort.discount = -1;
-    if (featured === 'true') sort.featured = -1;
-    if (featured === 'false') sort.featured = 1;
     if (time === 'asc') sort.time = 1;
     if (time === 'desc') sort.time = -1;
     if (expire === 'asc') sort.expire = 1;

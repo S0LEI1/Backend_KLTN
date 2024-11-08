@@ -31,19 +31,15 @@ export class PackageControllers {
   static async readAll(req: Request, res: Response) {
     const {
       pages = 1,
-      sortBy,
-      lteDiscount,
-      gteDiscount,
-      ltePrice,
-      gtePrice,
+      name,
+      priceRange,
       price,
+      discountRange,
       discount,
       featured,
-      lteCount,
-      gteCount,
+      countRange,
       count,
-      lteExpire,
-      gteExpire,
+      expireRange,
       expire,
     } = req.query;
     const { type, permissions } = req.currentUser!;
@@ -52,20 +48,16 @@ export class PackageControllers {
     ]);
     const { packages, totalItems } = await PackageServices.readAll(
       pages as string,
-      sortBy as string,
-      parseInt(lteDiscount as string),
-      parseInt(gteDiscount as string),
-      parseInt(ltePrice as string),
-      parseInt(gtePrice as string),
+      name as string,
       isManager,
+      priceRange as string,
       price as string,
+      discountRange as string,
       discount as string,
-      (featured as string) === 'true' ? true : false,
-      parseInt(lteCount as string),
-      parseInt(gteCount as string),
+      featured as string,
+      countRange as string,
       count as string,
-      parseInt(lteExpire as string),
-      parseInt(gteExpire as string),
+      expireRange as string,
       expire as string
     );
     res
