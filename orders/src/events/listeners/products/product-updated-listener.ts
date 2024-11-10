@@ -30,7 +30,7 @@ export class ProductUpdatedListener extends Listener<ProductUpdatedEvent> {
       quantity: data.quantity,
       featured: data.featured,
       discount: data.discount,
-      active: data.active,
+      code: data.code,
     });
     await product.save();
     msg.ack();

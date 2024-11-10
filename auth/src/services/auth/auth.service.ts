@@ -1,6 +1,7 @@
 import {
   BadRequestError,
   NotFoundError,
+  PhoneFormat,
   Publisher,
   UserType,
   getOtp,
@@ -16,6 +17,7 @@ import { UserRole } from '../../models/user-role-mapping';
 import { Role } from '../../models/role';
 import { UserRoleService } from '../user-role.service';
 import exceljs from 'exceljs';
+import { FilterQuery } from 'mongoose';
 const SUBJECT = 'Đây là mã OTP của bạn';
 export class AuthService {
   static async createCustomer(attrs: UserAttrs) {
@@ -96,6 +98,7 @@ export class AuthService {
     if (passwordMatch) {
       throw new BadRequestError('Password is used');
     }
+    // const hashPass = await Password.toHash(password)
     user.set({ password: password });
     await user.save();
     UserPublisher.updateUser(user);
@@ -156,9 +159,9 @@ export class AuthService {
         width: 35,
       },
       {
-        header: 'Số điện thoại',
+        header: 'Số điện thoại: 0111-111-111',
         key: 'phoneNumber',
-        width: 20,
+        width: 30,
       },
       {
         header: 'Giới tính',
@@ -184,11 +187,12 @@ export class AuthService {
       if (value.type === UserType.Employee) type = 'Nhân viên';
       if (value.type === UserType.Manager) type = 'Người quản lý';
       const gender = value.gender === true ? 'Nam' : 'Nữ';
+      const formatPhone = PhoneFormat.format(value.phoneNumber);
       sheet.addRow({
         // id: value.id,
         name: value.fullName,
         email: value.email,
-        phoneNumber: value.phoneNumber,
+        phoneNumber: formatPhone,
         avatar: value.avatar,
         gender: gender,
         address: value.address,
@@ -209,7 +213,16 @@ export class AuthService {
   }
   static async exportUser() {
     const workbook = new exceljs.Workbook();
-    const users = await User.find({ isDeleted: false });
+    // const users = await User.find({ isDeleted: false });
+    const users = await User.aggregate<UserDoc>([
+      {
+        $addFields: {
+          lastName: { $arrayElemAt: [{ $split: ['$fullName', ' '] }, -1] },
+        },
+      },
+      { $sort: { lastName: 1 } },
+      { $project: { lastName: 0, password: 0 } },
+    ]);
     await this.exportData(workbook, 'Users', users, '');
     return workbook;
   }
@@ -221,7 +234,17 @@ export class AuthService {
     ]);
     const types = groupedData.map((item) => item.type);
     for (const type of types) {
-      const users = await User.find({ type: type, isDeleted: false });
+      let filter: FilterQuery<UserDoc> = { type: type, isDeleted: false };
+      const users = await User.aggregate([
+        { $match: filter },
+        {
+          $addFields: {
+            lastName: { $arrayElemAt: [{ $split: ['$fullName', ' '] }, -1] },
+          },
+        },
+        { $sort: { lastName: 1 } },
+        { $project: { lastName: 0, password: 0 } },
+      ]);
       let wsName;
       if (type === UserType.Employee) wsName = 'Nhân viên';
       if (type === UserType.Customer) wsName = 'Khách hàng';
@@ -262,12 +285,15 @@ export class AuthService {
         const generatePassword = Password.generate();
         const password = 'Spa@1' + generatePassword;
         const hashPass = await Password.toHash(password);
+        const formatPhone = PhoneFormat.unformat(
+          row.getCell(4).value as string
+        );
         const user = User.build({
           fullName: row.getCell(1).value as string,
           email: row.getCell(2).value as string,
           password: hashPass,
           avatar: row.getCell(3).value as string,
-          phoneNumber: row.getCell(4).value as string,
+          phoneNumber: formatPhone,
           gender: gender,
           address: row.getCell(6).value as string,
           type: type,

@@ -35,7 +35,7 @@ export class UserShiftServices {
     UserShiftPublisher.newUS(us);
     return us;
   }
-  static async readAll(date: string) {
+  static async readAllForManager(date: string) {
     let filter: FilterQuery<UserShiftDoc> = {};
     let sort: FilterQuery<UserShiftDoc> = {};
     console.log(date);
@@ -46,9 +46,7 @@ export class UserShiftServices {
       filter = { date: convertDate };
       sort = { shiftOption: 1, lastName: 1 };
     }
-
     const us = await UserShift.aggregate([
-      { $match: filter },
       {
         $lookup: {
           from: 'shifts',
@@ -69,6 +67,7 @@ export class UserShiftServices {
       {
         $unwind: '$shiftDescription',
       },
+      { $match: filter },
       {
         $project: { shift: 0 },
       },

@@ -10,6 +10,7 @@ import {
   errorHandler,
   NotFoundError,
 } from '@share-package/common';
+import { orderRouter } from './routes/order.routes';
 
 const app = express();
 app.use(json());
@@ -24,7 +25,7 @@ app.use(
 
 app.use(cors());
 app.use(currentUser);
-
+app.use(orderRouter);
 app.all('*', async (req, res) => {
   throw new BadRequestError('Route must be define');
 });

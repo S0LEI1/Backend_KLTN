@@ -11,7 +11,7 @@ export class PackageCreatedListener extends Listener<PackageCreatedEvent> {
       id: data.id,
       name: data.name,
       description: data.description,
-      imageUrls: data.imageUrls,
+      imageUrl: data.imageUrl,
       salePrice: data.salePrice,
     });
     await newPackage.save();

@@ -18,10 +18,14 @@ export class AccountControllers {
   }
   static async updatePassword(req: Request, res: Response) {
     const { email, password } = req.body;
-    await AuthService.updatePassword(email, password);
-    res
-      .status(200)
-      .send({ message: 'PATCH: password successfully', update: true });
+    try {
+      await AuthService.updatePassword(email, password);
+      res
+        .status(200)
+        .send({ message: 'PATCH: password successfully', update: true });
+    } catch (error) {
+      console.log(error);
+    }
   }
   static async verifyOtp(req: Request, res: Response) {
     const { email, otp } = req.body;

@@ -7,16 +7,16 @@ import { BadRequestError, NotFoundError } from '@share-package/common';
 export interface ProductAttrs {
   id: string;
   name: string;
-  description: string;
   category: CategoryDoc;
   suplier: SuplierDoc;
-  imageUrl: string;
-  expire: Date;
   salePrice: number;
+  imageUrl: string;
   quantity: number;
-  discount?: number;
-  featured?: boolean;
-  active?: boolean;
+  expire: Date;
+  discount: number;
+  featured: boolean;
+  description: string;
+  code: string;
 }
 export interface ProductDoc extends mongoose.Document {
   name: string;
@@ -25,14 +25,14 @@ export interface ProductDoc extends mongoose.Document {
   suplier: SuplierDoc;
   imageUrl: string;
   expire: Date;
-  costPrice: number;
-  salePrice?: number;
+  salePrice: number;
   quantity: number;
-  featured?: boolean;
-  discount?: number;
-  active?: boolean;
+  featured: boolean;
+  discount: number;
+  code: string;
   version: number;
-  isDeleted?: boolean;
+  isDeleted: boolean;
+  createdAt: Date;
 }
 interface ProductModel extends mongoose.Model<ProductDoc> {
   build(attrs: ProductAttrs): ProductDoc;
@@ -67,9 +67,12 @@ const productSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    salePrice: {
+    costPrice: {
       type: Number,
       required: true,
+    },
+    salePrice: {
+      type: Number,
     },
     quantity: {
       type: Number,
@@ -83,9 +86,9 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    active: {
-      type: Boolean,
-      default: true,
+    code: {
+      type: String,
+      required: true,
     },
     isDeleted: {
       type: Boolean,
@@ -118,6 +121,9 @@ productSchema.statics.build = (attrs: ProductAttrs) => {
     quantity: attrs.quantity,
     salePrice: attrs.salePrice,
     expire: attrs.expire,
+    code: attrs.code,
+    discount: attrs.discount,
+    featured: attrs.featured,
   });
 };
 

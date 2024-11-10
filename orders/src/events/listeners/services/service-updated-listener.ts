@@ -25,7 +25,6 @@ export class ServiceUpdatedListener extends Listener<ServiceUpdatedEvent> {
       salePrice: data.salePrice,
       description: data.description,
       discount: data.discount,
-      active: data.active,
       featured: data.featured,
     });
     await service.save();

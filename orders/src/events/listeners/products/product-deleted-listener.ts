@@ -7,8 +7,6 @@ import {
 import { Message } from 'node-nats-streaming';
 import { queueGroupName } from '../queueGroupName';
 import { Product } from '../../../models/product';
-import { Category } from '../../../models/category';
-import { Suplier } from '../../../models/suplier';
 
 export class ProductDeletedListener extends Listener<ProductDeletedEvent> {
   subject: Subjects.ProductDeleted = Subjects.ProductDeleted;

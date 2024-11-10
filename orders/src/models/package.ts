@@ -5,18 +5,17 @@ interface PackageAttrs {
   id: string;
   name: string;
   description: string;
-  imageUrls: string[];
+  imageUrl: string;
   salePrice: number;
 }
 export interface PackageDoc extends mongoose.Document {
   name: string;
   description: string;
   costPrice: number;
-  imageUrls: string[];
+  imageUrl: string;
   salePrice: number;
   featured?: boolean;
   discount?: number;
-  active?: boolean;
   isDeleted?: boolean;
   version: number;
 }
@@ -42,7 +41,7 @@ const packageSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    imageUrls: [{ type: String, required: true }],
+    imageUrl: { type: String, required: true },
     discount: {
       type: Number,
       default: 0,
@@ -78,7 +77,7 @@ packageSchema.statics.build = (attrs: PackageAttrs) => {
     _id: attrs.id,
     name: attrs.name,
     description: attrs.description,
-    imageUrls: attrs.imageUrls,
+    imageUrl: attrs.imageUrl,
     salePrice: attrs.salePrice,
   });
 };

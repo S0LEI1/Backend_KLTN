@@ -100,8 +100,7 @@ userSchema.statics.checkExists = async (id: string) => {
   return user;
 };
 userSchema.statics.findUser = async (id: string) => {
-  const user = await User.findById(id);
-  if (!user) throw new NotFoundError('User');
+  const user = await User.findOne({ _id: id, isDeleted: false });
   return user;
 };
 userSchema.statics.findUserByEvent = async (event: {

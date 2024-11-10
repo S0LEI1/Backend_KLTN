@@ -16,6 +16,8 @@ export class ProductPublisher {
       salePrice: product.salePrice!,
       quantity: product.quantity,
       code: product.code,
+      featured: product.featured,
+      discount: product.discount,
     });
   }
   static update(productDoc: ProductDoc) {

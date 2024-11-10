@@ -2,6 +2,7 @@ import {
   BadRequestError,
   NotFoundError,
   Pagination,
+  PhoneFormat,
 } from '@share-package/common';
 import { Suplier, SuplierDoc } from '../models/suplier';
 import { ProductService } from './products.service';
@@ -117,7 +118,7 @@ export class SuplierServices {
       { header: 'Mã nhà cung cấp', key: 'code', width: 15 },
       { header: 'Tên nhà cung cấp', key: 'name', width: 35 },
       {
-        header: 'Số điện thoại',
+        header: ['Số điện thoại', '0111-111-111'],
         key: 'phoneNumber',
         width: 15,
       },
@@ -138,10 +139,11 @@ export class SuplierServices {
       },
     ];
     supliers.map((value, index) => {
+      const formatPhone = PhoneFormat.format(value.phoneNumber);
       sheet.addRow({
         code: value.code,
         name: value.name,
-        phoneNumber: value.phoneNumber,
+        phoneNumber: formatPhone,
         email: value.email,
         address: value.address,
         description: value.description,
@@ -182,9 +184,12 @@ export class SuplierServices {
           existSupliers.push(existSuplier);
           continue;
         }
+        const formatPhone = PhoneFormat.unformat(
+          row.getCell(3).value as string
+        );
         const suplier = Suplier.build({
           name: row.getCell(2).value as string,
-          phoneNumber: row.getCell(3).value as string,
+          phoneNumber: formatPhone,
           email: row.getCell(4).value as string,
           address: row.getCell(5).value as string,
           description: row.getCell(6).value as string,
