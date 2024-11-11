@@ -7,8 +7,7 @@ interface OrderAttrs {
   customer: UserDoc;
   creEmp: UserDoc;
   execEmp?: UserDoc;
-  preTaxTotal: number;
-  tax: number;
+  preTaxTotal?: number;
   // postTaxTotal: number;
   status: OrderStatus;
 }

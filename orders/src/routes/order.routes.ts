@@ -13,7 +13,7 @@ router.post(
   '/orders/new',
   [body('customerId').isMongoId().withMessage('Customer Id must be ObjectId')],
   requireAuth,
-  requireType([UserType.Employee, UserType.Manager]),
+  // requireType([UserType.Employee, UserType.Manager]),
   requirePermission([ListPermission.OrderCreate]),
   OrderController.newOrder
 );
@@ -43,5 +43,11 @@ router.get(
   requireType([UserType.Employee, UserType.Manager]),
   requirePermission([ListPermission.OrdersRead]),
   OrderController.findByUserPhone
+);
+router.post(
+  '/orders/add/:orderId',
+  requireAuth,
+  requirePermission([ListPermission.OrderCreate]),
+  OrderController.add
 );
 export { router as orderRouter };

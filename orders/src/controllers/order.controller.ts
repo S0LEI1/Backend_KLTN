@@ -4,22 +4,25 @@ import { OrderService } from '../services/order.service';
 export class OrderController {
   static async newOrder(req: Request, res: Response) {
     const creEmpId = req.currentUser!.id;
-    const { execEmpId, customerId, services, packages, products, tax } =
-      req.body;
+    const { type } = req.currentUser!;
+    const { execEmpId, customerId } = req.body;
     try {
       const order = await OrderService.newOrder({
         creEmpId: creEmpId,
         execEmpId: execEmpId,
         customerId: customerId,
-        services: services,
-        packages: packages,
-        products: products,
-        tax: tax,
+        type,
       });
       res.status(201).send({ message: 'POST: Order successfully', order });
     } catch (error) {
       console.log(error);
     }
+  }
+  static async add(req: Request, res: Response) {
+    const { services, packages, products } = req.body;
+    const { orderId } = req.params;
+    const order = await OrderService.add(orderId, services, packages, products);
+    res.status(201).send({ message: 'POST:Add successfullt', order });
   }
   static async readOrders(req: Request, res: Response) {
     const {

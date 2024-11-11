@@ -30,55 +30,57 @@ export class OrderService {
     creEmpId: string;
     execEmpId: string;
     customerId: string;
-    services: Attrs[];
-    packages: Attrs[];
-    products: Attrs[];
-    tax: number;
+    type: string;
   }) {
     const createEmp = await User.findUser(order.creEmpId);
     if (!createEmp) throw new NotFoundError('Create Employee');
+    if (order.type === UserType.Customer) order.customerId = order.creEmpId;
     // check execute employy
     // check customer
     const customer = await User.findUser(order.customerId);
     if (!customer) throw new NotFoundError('Customer');
     // check product, service, package must be define one
-    if (!order.services && !order.products && !order.packages)
-      throw new BadRequestError('Product, service, package, must be least 1');
     // define previous tax price
-    let preTaxTotal = 0;
     let orderDoc: OrderDoc;
     orderDoc = Order.build({
       customer: customer,
       creEmp: createEmp,
-      preTaxTotal: 0,
-      tax: order.tax,
       status: OrderStatus.Created,
     });
     if (order.execEmpId) {
       const execEmp = await User.findUser(order.execEmpId);
       if (!execEmp) throw new NotFoundError('Execute Employee');
-      orderDoc = Order.build({
-        customer: customer,
-        creEmp: createEmp,
+      orderDoc.set({
         execEmp: execEmp,
-        preTaxTotal: 0,
-        tax: order.tax,
-        status: OrderStatus.Created,
       });
     }
-    if (order.products) {
+    await orderDoc.save();
+    return orderDoc;
+  }
+  static async add(
+    orderId: String,
+    services: Attrs[],
+    packages: Attrs[],
+    products: Attrs[]
+  ) {
+    let preTaxTotal = 0;
+    const orderDoc = await Order.findOne({ _id: orderId, isDeleted: false });
+    if (!orderDoc) throw new NotFoundError('Order');
+    if (!services && !products && !packages)
+      throw new BadRequestError('Product, service, package, must be least 1');
+    if (products) {
       const { orderProducts, productTotalPrice } =
-        await OrderProductService.newOrderProduct(orderDoc, order.products);
+        await OrderProductService.newOrderProduct(orderDoc, products);
       preTaxTotal += productTotalPrice;
     }
-    if (order.services) {
+    if (services) {
       const { orderServices, serviceTotalPrice } =
-        await OrderServiceService.newOrderService(orderDoc, order.services);
+        await OrderServiceService.newOrderService(orderDoc, services);
       preTaxTotal += serviceTotalPrice;
     }
-    if (order.packages) {
+    if (packages) {
       const { orderPackages, packageTotalPrice } =
-        await OrderPackageService.newOrderPacakage(orderDoc, order.packages);
+        await OrderPackageService.newOrderPacakage(orderDoc, packages);
       preTaxTotal += packageTotalPrice;
     }
     orderDoc.set({ preTaxTotal: preTaxTotal });
@@ -190,65 +192,65 @@ export class OrderService {
     const orderServices = await OrderServiceService.findByOrderId(order);
     return { order, orderPackages, orderProducts, orderServices };
   }
-  static async updateOrder(order: {
-    creEmpId: string;
-    execEmpId: string;
-    customerId: string;
-    services: Attrs[];
-    packages: Attrs[];
-    products: Attrs[];
-    tax: number;
-  }) {
-    const createEmp = await User.findUser(order.creEmpId);
-    if (!createEmp) throw new NotFoundError('Create Employee');
-    // check execute employy
-    // check customer
-    const customer = await User.findUser(order.customerId);
-    if (!customer) throw new NotFoundError('Customer');
-    // check product, service, package must be define one
-    if (!order.services && !order.products && !order.packages)
-      throw new BadRequestError('Product, service, package, must be least 1');
-    // define previous tax price
-    let preTaxTotal = 0;
-    let orderDoc: OrderDoc;
-    orderDoc = Order.build({
-      customer: customer,
-      creEmp: createEmp,
-      preTaxTotal: 0,
-      tax: order.tax,
-      status: OrderStatus.Created,
-    });
-    if (order.execEmpId) {
-      const execEmp = await User.findUser(order.execEmpId);
-      if (!execEmp) throw new NotFoundError('Execute Employee');
-      orderDoc = Order.build({
-        customer: customer,
-        creEmp: createEmp,
-        execEmp: execEmp,
-        preTaxTotal: 0,
-        tax: order.tax,
-        status: OrderStatus.Created,
-      });
-    }
-    if (order.products) {
-      const { orderProducts, productTotalPrice } =
-        await OrderProductService.newOrderProduct(orderDoc, order.products);
-      preTaxTotal += productTotalPrice;
-    }
-    if (order.services) {
-      const { orderServices, serviceTotalPrice } =
-        await OrderServiceService.newOrderService(orderDoc, order.services);
-      preTaxTotal += serviceTotalPrice;
-    }
-    if (order.packages) {
-      const { orderPackages, packageTotalPrice } =
-        await OrderPackageService.newOrderPacakage(orderDoc, order.packages);
-      preTaxTotal += packageTotalPrice;
-    }
-    orderDoc.set({ preTaxTotal: preTaxTotal });
-    await orderDoc.save();
-    return orderDoc;
-  }
+  // static async updateOrder(order: {
+  //   creEmpId: string;
+  //   execEmpId: string;
+  //   customerId: string;
+  //   services: Attrs[];
+  //   packages: Attrs[];
+  //   products: Attrs[];
+  //   tax: number;
+  // }) {
+  //   const createEmp = await User.findUser(order.creEmpId);
+  //   if (!createEmp) throw new NotFoundError('Create Employee');
+  //   // check execute employy
+  //   // check customer
+  //   const customer = await User.findUser(order.customerId);
+  //   if (!customer) throw new NotFoundError('Customer');
+  //   // check product, service, package must be define one
+  //   if (!order.services && !order.products && !order.packages)
+  //     throw new BadRequestError('Product, service, package, must be least 1');
+  //   // define previous tax price
+  //   let preTaxTotal = 0;
+  //   let orderDoc: OrderDoc;
+  //   orderDoc = Order.build({
+  //     customer: customer,
+  //     creEmp: createEmp,
+  //     preTaxTotal: 0,
+  //     tax: order.tax,
+  //     status: OrderStatus.Created,
+  //   });
+  //   if (order.execEmpId) {
+  //     const execEmp = await User.findUser(order.execEmpId);
+  //     if (!execEmp) throw new NotFoundError('Execute Employee');
+  //     orderDoc = Order.build({
+  //       customer: customer,
+  //       creEmp: createEmp,
+  //       execEmp: execEmp,
+  //       preTaxTotal: 0,
+  //       tax: order.tax,
+  //       status: OrderStatus.Created,
+  //     });
+  //   }
+  //   if (order.products) {
+  //     const { orderProducts, productTotalPrice } =
+  //       await OrderProductService.newOrderProduct(orderDoc, order.products);
+  //     preTaxTotal += productTotalPrice;
+  //   }
+  //   if (order.services) {
+  //     const { orderServices, serviceTotalPrice } =
+  //       await OrderServiceService.newOrderService(orderDoc, order.services);
+  //     preTaxTotal += serviceTotalPrice;
+  //   }
+  //   if (order.packages) {
+  //     const { orderPackages, packageTotalPrice } =
+  //       await OrderPackageService.newOrderPacakage(orderDoc, order.packages);
+  //     preTaxTotal += packageTotalPrice;
+  //   }
+  //   orderDoc.set({ preTaxTotal: preTaxTotal });
+  //   await orderDoc.save();
+  //   return orderDoc;
+  // }
   static async cancelOrder(orderId: string, userId: string, type: string) {
     const order = await Order.findOne({ _id: orderId, isDeleted: false });
     if (!order) throw new NotFoundError('Order');
