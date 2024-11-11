@@ -44,4 +44,40 @@ export class OrderPackageService {
     }
     return packages;
   }
+  static async findByOrder(orderDoc: OrderDoc) {
+    const orderPkgs = await OrderPackage.aggregate([
+      { $match: { order: orderDoc._id } },
+      {
+        $lookup: {
+          from: 'packages',
+          localField: 'package',
+          foreignField: '_id',
+          as: 'package',
+        },
+      },
+      {
+        $unwind: '$package',
+      },
+      {
+        $lookup: {
+          from: 'services',
+          localField: 'services.serviceId',
+          foreignField: '_id',
+          as: 'servicesLookup',
+        },
+      },
+      {
+        $addFields: {
+          'services.name': { $arrayElemAt: ['$servicesLookup.name', -1.0] },
+          'services.imageUrl': {
+            $arrayElemAt: ['$servicesLookup.imageUrl', -1.0],
+          },
+        },
+      },
+      {
+        $project: { order: 0, servicesLookup: 0 },
+      },
+    ]);
+    return orderPkgs;
+  }
 }

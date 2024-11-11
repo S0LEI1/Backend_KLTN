@@ -22,4 +22,18 @@ export class OrderProductService {
     }
     return { orderProducts, productTotalPrice };
   }
+  static async findByOrderId(orderDoc: OrderDoc) {
+    const orderProducts = await OrderProduct.aggregate([
+      { $match: { order: orderDoc._id } },
+      {
+        $lookup: {
+          from: 'products',
+          localField: 'product',
+          foreignField: '_id',
+          as: 'product',
+        },
+      },
+    ]);
+    return orderProducts;
+  }
 }

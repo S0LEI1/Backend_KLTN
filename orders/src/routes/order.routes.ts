@@ -25,9 +25,23 @@ router.get(
   OrderController.readOrders
 );
 router.get(
-  '/order/:id',
+  '/orders/:id',
   requireAuth,
   requirePermission([ListPermission.OrdersRead]),
-  OrderController.readOne
+  OrderController.getOrder
+);
+router.patch(
+  '/orders/cancel/:orderId',
+  requireAuth,
+  // requireType([UserType.Employee, UserType.Manager]),
+  requirePermission([ListPermission.OrderDelete]),
+  OrderController.cancelOrder
+);
+router.get(
+  '/orders/find/phone',
+  requireAuth,
+  requireType([UserType.Employee, UserType.Manager]),
+  requirePermission([ListPermission.OrdersRead]),
+  OrderController.findByUserPhone
 );
 export { router as orderRouter };

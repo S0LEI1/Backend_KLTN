@@ -78,9 +78,9 @@ router.post(
       };
       res.status(200).send({
         token: userJWT,
-        // type: existUser.type,
-        // roles,
-        // permissions,
+        type: existUser.type,
+        roles,
+        permissions,
       });
     } catch (error) {
       console.log(error);

@@ -32,7 +32,7 @@ export class ManagerService {
         },
       },
       { $skip: parseInt(pages as string) - 1 },
-      { $limit: parseInt(PER_PAGE as string, 10) },
+      { $limit: parseInt(PER_PAGE as string, 25) },
       { $sort: sort },
       { $project: { lastName: 0, password: 0 } },
     ]);
