@@ -193,7 +193,7 @@ export class OrderService {
         $project: { customer: 0, creEmp: 0 },
       },
       { $skip: pages - 1 },
-      { $limit: parseInt(PER_PAGE as string, 10) },
+      { $limit: parseInt(PER_PAGE as string, 25) },
       { $sort: sort },
     ]);
     return { orders, totalDocuments };

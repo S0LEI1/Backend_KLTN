@@ -98,11 +98,8 @@ export class ServiceServices {
     if (expire === 'asc') sort.expire = 1;
     if (expire === 'desc') sort.expire = -1;
     const select = {
-      _id: 1,
-      name: 1,
-      imageUrl: 1,
-      salePrice: 1,
-      description: 1,
+      costPrice: 0,
+      isDeleted: 0,
     };
 
     const options = Pagination.options(pages, PER_PAGE!, sort);
