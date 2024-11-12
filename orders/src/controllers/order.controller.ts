@@ -80,10 +80,31 @@ export class OrderController {
       .send({ message: 'PATCH: Cancel order successfully', order });
   }
   static async findByUserPhone(req: Request, res: Response) {
-    const { phoneNumber } = req.query;
-    const orders = await OrderService.findByPhoneNumer(phoneNumber as string);
+    const { phoneNumber, name } = req.query;
+    const orders = await OrderService.findByPhoneNumer(
+      phoneNumber as string,
+      name as string
+    );
     res
       .status(200)
       .send({ message: 'GET: Order by customer phone successfully', orders });
+  }
+  static async deleteOrder(req: Request, res: Response) {
+    const { orderId } = req.params;
+    const order = await OrderService.deleteOrder(orderId);
+    res.status(200).send({ message: 'PATCH:Delete order successfully' });
+  }
+  static async updateOrder(req: Request, res: Response) {
+    const { services, packages, products } = req.body;
+    const { orderId } = req.params;
+    const order = await OrderService.updateOrder(
+      orderId,
+      services,
+      packages,
+      products
+    );
+    res
+      .status(200)
+      .send({ message: 'PATCH: Update order successfully', order });
   }
 }

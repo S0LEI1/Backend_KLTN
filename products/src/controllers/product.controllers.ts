@@ -111,13 +111,12 @@ export class ProductControllers {
       quantity,
       featured,
       discount,
-      active,
       code,
     } = req.body;
     const { type } = req.currentUser!;
     const { file } = req;
     const isFeatured = featured === 'true' ? true : false;
-    const isActive = active === 'true' ? true : false;
+    // const isActive = active === 'true' ? true : false;
     const updateProduct = await ProductService.update(
       id,
       {
@@ -131,8 +130,7 @@ export class ProductControllers {
         code: code,
       },
       isFeatured,
-      parseInt(discount as string),
-      isActive
+      parseInt(discount as string)
     );
     ProductPublisher.update(updateProduct);
     const convertProduct = Convert.product(updateProduct);

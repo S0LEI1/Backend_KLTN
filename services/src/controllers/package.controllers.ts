@@ -5,28 +5,24 @@ import { Check } from '../utils/check-type';
 
 export class PackageControllers {
   static async newPackage(req: Request, res: Response) {
-    try {
-      const { file } = req;
-      const { name, costPrice, description, count, expire, code, serviceIds } =
-        req.body;
-      const { newPackage, packageServices } = await PackageServices.newPackage(
-        name,
-        costPrice,
-        file as Express.Multer.File,
-        description,
-        count,
-        expire,
-        code,
-        serviceIds as string[]
-      );
-      res.status(201).send({
-        message: 'POST: new package successfully',
-        newPackage,
-        packageServices,
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    const { file } = req;
+    const { name, costPrice, description, count, expire, code, serviceIds } =
+      req.body;
+    const { newPackage, packageServices } = await PackageServices.newPackage(
+      name,
+      costPrice,
+      file as Express.Multer.File,
+      description,
+      count,
+      expire,
+      code,
+      serviceIds as string[]
+    );
+    res.status(201).send({
+      message: 'POST: new package successfully',
+      newPackage,
+      packageServices,
+    });
   }
   static async readAll(req: Request, res: Response) {
     const {
@@ -101,27 +97,23 @@ export class PackageControllers {
       code,
     } = req.body;
     const file = req.file;
-    try {
-      const updatePackage = await PackageServices.updatePackage({
-        id: id,
-        name: name,
-        costPrice: parseInt(costPrice as string),
-        // salePrice: parseInt(salePrice as string),
-        discount: parseInt(discount as string),
-        count: parseInt(count as string),
-        expire: parseInt(time as string),
-        file: file!,
-        featured: featured === 'true' ? true : false,
-        description: description,
-        code: code,
-      });
-      res.status(200).send({
-        message: 'Update package successfully',
-        package: updatePackage,
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    const updatePackage = await PackageServices.updatePackage({
+      id: id,
+      name: name,
+      costPrice: parseInt(costPrice as string),
+      // salePrice: parseInt(salePrice as string),
+      discount: parseInt(discount as string),
+      count: parseInt(count as string),
+      expire: parseInt(time as string),
+      file: file!,
+      featured: featured === 'true' ? true : false,
+      description: description,
+      code: code,
+    });
+    res.status(200).send({
+      message: 'Update package successfully',
+      package: updatePackage,
+    });
   }
   static async exportPackage(req: Request, res: Response) {
     res.set({

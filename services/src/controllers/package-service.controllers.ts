@@ -3,21 +3,17 @@ import { PackageServiceServices } from '../services/package-serivce.service';
 
 export class PackageServiceControllers {
   static async newPackageService(req: Request, res: Response) {
-    try {
-      const { serviceIds, packageId } = req.body;
-      console.log(serviceIds as string[]);
+    const { serviceIds, packageId } = req.body;
+    console.log(serviceIds as string[]);
 
-      const packageServices = await PackageServiceServices.newPackageService(
-        serviceIds,
-        packageId
-      );
-      res.status(201).send({
-        message: 'POST: Package service successfully',
-        packageServices,
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    const packageServices = await PackageServiceServices.newPackageService(
+      serviceIds,
+      packageId
+    );
+    res.status(201).send({
+      message: 'POST: Package service successfully',
+      packageServices,
+    });
   }
   static async deletePackageService(req: Request, res: Response) {
     const { serviceIds, packageId } = req.body;

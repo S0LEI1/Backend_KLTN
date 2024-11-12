@@ -168,8 +168,7 @@ export class ProductService {
     id: string,
     productAttrs: ProductAttrs,
     featured: boolean,
-    discount: number,
-    active: boolean
+    discount: number
   ) {
     const query = Pagination.query();
     query._id = id;
@@ -195,7 +194,7 @@ export class ProductService {
       quantity: productAttrs.quantity,
       featured: featured,
       discount: discount,
-      active: active,
+      code: productAttrs.code,
     });
     await product.save();
     return product;
