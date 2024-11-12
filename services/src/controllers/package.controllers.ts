@@ -101,29 +101,33 @@ export class PackageControllers {
       salePrice,
       discount,
       count,
-      time,
+      expire,
       featured,
       description,
       code,
     } = req.body;
     const file = req.file;
-    const updatePackage = await PackageServices.updatePackage({
-      id: id,
-      name: name,
-      costPrice: parseInt(costPrice as string),
-      // salePrice: parseInt(salePrice as string),
-      discount: parseInt(discount as string),
-      count: parseInt(count as string),
-      expire: parseInt(time as string),
-      file: file!,
-      featured: featured === 'true' ? true : false,
-      description: description,
-      code: code,
-    });
-    res.status(200).send({
-      message: 'Update package successfully',
-      package: updatePackage,
-    });
+    try {
+      const updatePackage = await PackageServices.updatePackage({
+        id: id,
+        name: name,
+        costPrice: parseInt(costPrice as string),
+        // salePrice: parseInt(salePrice as string),
+        discount: parseInt(discount as string),
+        count: parseInt(count as string),
+        expire: parseInt(expire as string),
+        file: file!,
+        featured: featured === 'true' ? true : false,
+        description: description,
+        code: code,
+      });
+      res.status(200).send({
+        message: 'Update package successfully',
+        package: updatePackage,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
   static async exportPackage(req: Request, res: Response) {
     res.set({
