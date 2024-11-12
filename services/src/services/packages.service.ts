@@ -64,7 +64,7 @@ export class PackageServices {
     // publish created event
     PackagePublisher.newPackage(newPackage);
     // return package for controller
-    return { newPackage, packageServices };
+    return { newPackage };
   }
   static async readAll(
     pages: string,

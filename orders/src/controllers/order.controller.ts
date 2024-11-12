@@ -19,10 +19,19 @@ export class OrderController {
     }
   }
   static async add(req: Request, res: Response) {
-    const { services, packages, products } = req.body;
-    const { orderId } = req.params;
-    const order = await OrderService.add(orderId, services, packages, products);
-    res.status(201).send({ message: 'POST:Add successfullt', order });
+    try {
+      const { services, packages, products } = req.body;
+      const { orderId } = req.params;
+      const order = await OrderService.add(
+        orderId,
+        services,
+        packages,
+        products
+      );
+      res.status(201).send({ message: 'POST:Add successfullt', order });
+    } catch (error) {
+      console.log(error);
+    }
   }
   static async readOrders(req: Request, res: Response) {
     const {

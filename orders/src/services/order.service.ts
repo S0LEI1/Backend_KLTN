@@ -66,7 +66,7 @@ export class OrderService {
   ) {
     const orderDoc = await Order.findOne({ _id: orderId, isDeleted: false });
     if (!orderDoc) throw new NotFoundError('Order');
-    let preTaxTotal = orderDoc.preTaxTotal;
+    let preTaxTotal = orderDoc.preTaxTotal | 0;
     if (!services && !products && !packages)
       throw new BadRequestError('Product, service, package, must be least 1');
     if (products) {
@@ -96,6 +96,8 @@ export class OrderService {
   ) {
     const orderDoc = await Order.findOne({ _id: orderId, isDeleted: false });
     if (!orderDoc) throw new NotFoundError('Order');
+    if (orderDoc.status === OrderStatus.Complete)
+      throw new BadRequestError('Order completed, cannot update');
     let preTaxTotal = orderDoc.preTaxTotal;
     if (!services && !products && !packages)
       throw new BadRequestError('Product, service, package, must be least 1');
