@@ -66,6 +66,7 @@ router.post(
           roles: roles,
           permissions: permissions,
           fullName: existUser.fullName,
+          avatar: existUser.avatar,
         },
         process.env.JWT_KEY!,
         { expiresIn: '3h' }
@@ -81,6 +82,7 @@ router.post(
         type: existUser.type,
         roles,
         permissions,
+        avatar: existUser.avatar,
       });
     } catch (error) {
       console.log(error);
