@@ -31,7 +31,10 @@ export class ManagerService {
           lastName: { $arrayElemAt: [{ $split: ['$fullName', ' '] }, -1] },
         },
       },
-      { $skip: parseInt(pages as string) - 1 },
+      {
+        $skip:
+          (parseInt(pages as string) - 1) * parseInt(PER_PAGE as string, 25),
+      },
       { $limit: parseInt(PER_PAGE as string, 25) },
       { $sort: sort },
       { $project: { lastName: 0, password: 0 } },

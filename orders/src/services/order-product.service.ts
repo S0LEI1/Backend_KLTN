@@ -1,4 +1,4 @@
-import { NotFoundError } from '@share-package/common';
+import { BadRequestError, NotFoundError } from '@share-package/common';
 import { OrderDoc } from '../models/order';
 import { OrderProduct, OrderProductDoc } from '../models/order-product';
 import { ProductDoc } from '../models/product';
@@ -7,6 +7,12 @@ import { ProductService } from './product.service';
 
 export class OrderProductService {
   static async newOrderProduct(order: OrderDoc, attr: Attrs) {
+    const orderProdctExist = await OrderProduct.findOne({
+      order: order.id,
+      product: attr.id,
+      isDeleted: false,
+    });
+    if (!orderProdctExist) throw new BadRequestError('Order-Product exist');
     const { product, price } = await ProductService.getProduct(attr);
     const orderProduct = OrderProduct.build({
       order: order,
@@ -29,6 +35,21 @@ export class OrderProductService {
   }
   static async updateOrderProduct(order: OrderDoc, productAttrs: Attrs[]) {
     const orderProducts: OrderProductDoc[] = [];
+    const orderProductExist = await OrderProduct.find({
+      order: order.id,
+      isDeleted: false,
+    });
+    const productExistIds = orderProductExist.map((od) => od.product._id);
+    const productIds: string[] = productAttrs.map((pro) => pro.id);
+    // const difference = productExistIds.filter(
+    //   (element) => !productIds.includes(element)
+    // );
+    console.log('productExistIds', productExistIds);
+
+    console.log('productIds', productIds);
+
+    // console.log('difference', difference);
+
     let productTotalPrice: number = 0;
     let { preTaxTotal } = order;
     for (const attr of productAttrs) {

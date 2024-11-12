@@ -126,6 +126,7 @@ export class PackageServices {
     // get total package by query
     const options = Pagination.options(pages, PER_PAGE, sort);
     console.log(options);
+    console.log(query);
 
     const totalItems = await Package.find(query).countDocuments();
     // get packages
