@@ -40,12 +40,12 @@ export class OrderProductService {
         const orderProduct = await this.newOrderProduct(order, attr);
         preTaxTotal += orderProduct.totalPrice;
         orderProducts.push(orderProduct);
+        console.log('new product');
         continue;
       }
       const quantity = orderProduct.quantity - attr.quantity;
       let { totalPrice } = orderProduct;
       if (quantity === 0) continue;
-      // quantoi
       if (quantity === orderProduct.quantity)
         orderProduct!.set({ isDeleted: false });
       if (quantity < 0) {

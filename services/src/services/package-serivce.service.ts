@@ -1,5 +1,5 @@
 import { BadRequestError, NotFoundError } from '@share-package/common';
-import { Service } from '../models/service';
+import { Service, ServiceDoc } from '../models/service';
 import { Package } from '../models/package';
 import { PackageService, PackageServiceDoc } from '../models/package-service';
 import { PackageServicePublisher } from './package-service.publisher.service';
@@ -21,6 +21,7 @@ export class PackageServiceServices {
     if (existPSs.length > 0)
       throw new BadRequestError('Package Service is exist');
     const packageServices: PackageServiceDoc[] = [];
+    const serviceList: ServiceDoc[] = [];
     for (const service of services) {
       const newPS = PackageService.build({
         service: service,
@@ -31,7 +32,7 @@ export class PackageServiceServices {
       packageServices.push(newPS);
     }
     // publish create event
-    return packageServices;
+    return { packageServices, services };
   }
   static async deletePackageSevice(attrs: {
     serviceIds: string[];

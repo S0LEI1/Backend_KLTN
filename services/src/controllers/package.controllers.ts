@@ -8,7 +8,7 @@ export class PackageControllers {
     const { file } = req;
     const { name, costPrice, description, count, expire, code, serviceIds } =
       req.body;
-    const { newPackage } = await PackageServices.newPackage(
+    const { newPackage, services } = await PackageServices.newPackage(
       name,
       costPrice,
       file as Express.Multer.File,
@@ -21,7 +21,7 @@ export class PackageControllers {
     res.status(201).send({
       message: 'POST: new package successfully',
       pakage: newPackage,
-      // packageServices,
+      services: services,
     });
   }
   static async readAll(req: Request, res: Response) {

@@ -57,14 +57,12 @@ export class PackageServices {
     });
     // save package on database
     await newPackage.save();
-    const packageServices = await PackageServiceServices.newPackageService(
-      serviceIds,
-      newPackage.id
-    );
+    const { packageServices, services } =
+      await PackageServiceServices.newPackageService(serviceIds, newPackage.id);
     // publish created event
     PackagePublisher.newPackage(newPackage);
     // return package for controller
-    return { newPackage };
+    return { newPackage, services };
   }
   static async readAll(
     pages: string,

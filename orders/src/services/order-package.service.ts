@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongoose';
-import { OrderDoc } from '../models/order';
+import { Order, OrderDoc } from '../models/order';
 import { OrderPackage, OrderPackageDoc } from '../models/order-package';
 import { Attrs } from './order.service';
 import { PackageService } from './package.service';
@@ -80,4 +80,12 @@ export class OrderPackageService {
     ]);
     return orderPkgs;
   }
+  // static async findByOrderId(orderId: string){
+  //   // const order =await Order.findOne({_id: orderId, isDeleted: false});
+  //   const orderPackages = await OrderPackage.find({order: orderId, isDeleted: false}).populate('package');
+  //   const packages: PackageDoc[] = [];
+  //   for (const orderPkg of orderPackages) {
+  //     packages.push
+  //   }
+  // }
 }

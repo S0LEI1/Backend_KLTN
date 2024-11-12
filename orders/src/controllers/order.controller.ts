@@ -71,10 +71,14 @@ export class OrderController {
   static async getOrder(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const response = await OrderService.getOne(id);
+      const { order, orderPackages, orderProducts, orderServices } =
+        await OrderService.getOne(id);
       res.status(200).send({
         message: 'GET: Order successfully',
-        response,
+        order,
+        orderPackages,
+        orderProducts,
+        orderServices,
       });
     } catch (error) {
       console.log(error);
