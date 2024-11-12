@@ -13,7 +13,15 @@ export class Check {
     const isPermission = requirePermission.every((per) =>
       permissions.includes(per)
     );
-    if (type === UserType.Manager) if (isPermission) return true;
+    console.log(permissions);
+
+    // const currentPermissions = req.currentUser!.permissions;
+    // const isIncluded = permissions.every((per) =>
+    //   currentPermissions.includes(per)
+    // );
+    console.log(isPermission);
+
+    if (type === UserType.Manager && isPermission) return true;
     return false;
   }
   static checkImage = (file: Express.Multer.File) => {

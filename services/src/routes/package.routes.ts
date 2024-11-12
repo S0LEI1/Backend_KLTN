@@ -40,8 +40,8 @@ router.post(
   requirePermission([ListPermission.PackageCreate]),
   PackageControllers.newPackage
 );
-router.get('/services/packages/all', requireAuth, PackageControllers.readAll);
-router.get('/services/package/:id', requireAuth, PackageControllers.readOne);
+router.get('/services/packages/all', PackageControllers.readAll);
+router.get('/services/package/:id', PackageControllers.readOne);
 router.patch(
   '/services/package/:id',
   requireAuth,

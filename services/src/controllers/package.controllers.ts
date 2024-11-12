@@ -38,10 +38,17 @@ export class PackageControllers {
       expireRange,
       expire,
     } = req.query;
-    const { type, permissions } = req.currentUser!;
-    const isManager = Check.isManager(type, permissions, [
-      ListPermission.PackageRead,
-    ]);
+    // const { type, permissions } = req.currentUser!;
+    // const isManager = Check.isManager(type, permissions, [
+    //   ListPermission.PackageRead,
+    // ]);
+    let isManager = false;
+    if (req.currentUser) {
+      const { type, permissions } = req.currentUser!;
+      isManager = Check.isManager(type, permissions, [
+        ListPermission.PackageRead,
+      ]);
+    }
     const { packages, totalItems } = await PackageServices.readAll(
       pages as string,
       name as string,
@@ -62,10 +69,13 @@ export class PackageControllers {
   }
   static async readOne(req: Request, res: Response) {
     const { id } = req.params;
-    const { type, permissions } = req.currentUser!;
-    const isManager = Check.isManager(type, permissions, [
-      ListPermission.PackageRead,
-    ]);
+    let isManager = false;
+    if (req.currentUser) {
+      const { type, permissions } = req.currentUser!;
+      isManager = Check.isManager(type, permissions, [
+        ListPermission.PackageRead,
+      ]);
+    }
     const { existPackage, notInSerivce, services } =
       await PackageServices.readOne(id, isManager);
     res.status(200).send({

@@ -110,6 +110,8 @@ export class ServiceServices {
       isManager ? null : select,
       options
     );
+    console.log(isManager);
+
     const totalItems = await Service.find(query).countDocuments();
     return { services, totalItems };
   }
