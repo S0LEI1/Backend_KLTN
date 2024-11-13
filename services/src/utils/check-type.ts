@@ -16,9 +16,8 @@ export class Check {
     console.log(permissions);
 
     // const currentPermissions = req.currentUser!.permissions;
-    // const isIncluded = permissions.every((per) =>
-    //   currentPermissions.includes(per)
-    // );
+    //
+
     console.log(isPermission);
 
     if (type === UserType.Manager && isPermission) return true;

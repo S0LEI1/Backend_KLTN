@@ -105,10 +105,11 @@ export class PackageControllers {
       featured,
       description,
       code,
+      serviceIds,
     } = req.body;
     const file = req.file;
     try {
-      const updatePackage = await PackageServices.updatePackage({
+      const { existPackage, services } = await PackageServices.updatePackage({
         id: id,
         name: name,
         costPrice: parseInt(costPrice as string),
@@ -120,10 +121,12 @@ export class PackageControllers {
         featured: featured === 'true' ? true : false,
         description: description,
         code: code,
+        serviceIds: serviceIds as string[],
       });
       res.status(200).send({
         message: 'Update package successfully',
-        package: updatePackage,
+        package: existPackage,
+        services: services,
       });
     } catch (error) {
       console.log(error);

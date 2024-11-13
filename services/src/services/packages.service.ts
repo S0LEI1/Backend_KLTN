@@ -8,11 +8,12 @@ import { Check } from '../utils/check-type';
 import { AwsServices } from './aws.service';
 import { PackagePublisher } from './package.publisher.service';
 import { PackageService } from '../models/package-service';
-import { Service } from '../models/service';
+import { Service, ServiceDoc } from '../models/service';
 import { select } from '../utils/convert';
 import mongoose, { ObjectId } from 'mongoose';
 import exceljs from 'exceljs';
 import { PackageServiceServices } from './package-serivce.service';
+import _ from 'lodash';
 const PER_PAGE = process.env.PER_PAGE!;
 interface ServiceInterface {
   code: string;
@@ -195,6 +196,7 @@ export class PackageServices {
     featured: boolean;
     description: string;
     code: string;
+    serviceIds: string[];
   }) {
     const existPackage = await Package.findOne({
       _id: packageAttrs.id,
@@ -219,8 +221,47 @@ export class PackageServices {
       description: packageAttrs.description,
       code: packageAttrs.code,
     });
+    const servicesInPackage =
+      await PackageServiceServices.findServiceInPackageId(existPackage.id);
+    console.log(servicesInPackage);
+
+    const servicesInPackageIds = servicesInPackage.map((srv) => srv.id);
+    // const setExistSrvIds = new Set(existSrvIds);
+    // const setSrvIds = new Set(packageAttrs.serviceIds);
+    const { serviceIds } = packageAttrs;
+    // const addIds = serviceIds.filter(
+    //   (element) => !servicesInPackageIds.includes(element)
+    // );
+    const addIds = _.difference(serviceIds, servicesInPackageIds);
+    let services: ServiceDoc[] = [];
+    if (addIds.length > 0) {
+      const response = await PackageServiceServices.newPackageService(
+        addIds,
+        existPackage.id
+      );
+      services = response.services;
+    }
+    const deleteIds = _.difference(servicesInPackageIds, serviceIds);
+    if (deleteIds.length > 0) {
+      await PackageServiceServices.deletePackageSevice({
+        serviceIds: deleteIds,
+        packageId: existPackage.id,
+      });
+    }
+    console.log('servicesInPackageIds', servicesInPackageIds);
+    console.log('serviceIds', serviceIds);
+
+    console.log('addIds', addIds);
+    console.log('deleteIds', deleteIds);
+
+    const midSrvs = servicesInPackage.filter((srv) =>
+      serviceIds.includes(srv.id)
+    );
     await existPackage.save();
-    return existPackage;
+    return {
+      existPackage,
+      services: [...midSrvs, ...services],
+    };
   }
   static async exportPackage() {
     const workbook = new exceljs.Workbook();
