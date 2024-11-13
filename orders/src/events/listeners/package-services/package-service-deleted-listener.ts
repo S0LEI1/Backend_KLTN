@@ -19,7 +19,7 @@ export class PacakgeServiceDeletedListener extends Listener<PackageServiceDelete
       version: data.version,
     });
     if (!packageService) throw new NotFoundError('Package-Service');
-    await PackageService.deleteOne({ _id: packageService.id });
+    packageService.set({ isDeleted: data.isDeleted });
     msg.ack();
   }
 }

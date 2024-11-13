@@ -12,6 +12,7 @@ interface PackageServiceAttrs {
 export interface PackageServiceDoc extends mongoose.Document {
   service: ServiceDoc;
   package: PackageDoc;
+  isDeleted: boolean;
   version: number;
 }
 interface PackageServiceModel extends mongoose.Model<PackageServiceDoc> {
@@ -38,6 +39,10 @@ const packageServiceSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       required: true,
       ref: 'Package',
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

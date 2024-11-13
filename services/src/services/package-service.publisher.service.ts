@@ -15,6 +15,7 @@ export class PackageServicePublisher {
     new PackageServiceDeletedPublisher(natsWrapper.client).publish({
       id: packageService.id,
       version: packageService.version,
+      isDeleted: packageService.isDeleted,
     });
   }
 }

@@ -9,7 +9,8 @@ export class ManagerService {
     type: string,
     sortBy: string,
     pages: string,
-    gender: string
+    gender: string,
+    isManager: boolean
   ) {
     const query = Pagination.query();
     let filter: FilterQuery<UserDoc> = {};
@@ -22,7 +23,18 @@ export class ManagerService {
     if (sortBy === 'asc') sort.lastName = 1;
     if (sortBy === 'desc') sort.lastName = -1;
     console.log(filter);
-
+    const project = isManager
+      ? { password: 0 }
+      : {
+          password: 0,
+          address: 0,
+          type: 0,
+          phoneNumber: 0,
+          email: 0,
+          point: 0,
+          createdAt: 0,
+          updateAt: 0,
+        };
     const totalItems = await User.find(filter).countDocuments();
     const users = await User.aggregate<UserDoc>([
       { $match: filter },
@@ -38,6 +50,9 @@ export class ManagerService {
       { $limit: parseInt(PER_PAGE as string, 25) },
       { $sort: sort },
       { $project: { lastName: 0, password: 0 } },
+      {
+        $project: project,
+      },
     ]);
 
     return { users, totalItems };

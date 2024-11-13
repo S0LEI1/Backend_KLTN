@@ -4,7 +4,10 @@ import { OrderProduct, OrderProductDoc } from '../models/order-product';
 import { ProductDoc } from '../models/product';
 import { Attrs } from './order.service';
 import { ProductService } from './product.service';
-
+interface ProductInPackage {
+  productDoc: ProductDoc;
+  quantity: number;
+}
 export class OrderProductService {
   static async newOrderProduct(order: OrderDoc, attr: Attrs) {
     const orderProdctExist = await OrderProduct.findOne({
@@ -25,13 +28,18 @@ export class OrderProductService {
   }
   static async newOrderProducts(order: OrderDoc, productAttrs: Attrs[]) {
     const orderProducts: OrderProductDoc[] = [];
+    const products: ProductInPackage[] = [];
     let productTotalPrice: number = 0;
     for (const attr of productAttrs) {
       const orderProduct = await this.newOrderProduct(order, attr);
       orderProducts.push(orderProduct);
+      products.push({
+        productDoc: orderProduct.product,
+        quantity: orderProduct.quantity,
+      });
       productTotalPrice += orderProduct.totalPrice;
     }
-    return { orderProducts, productTotalPrice };
+    return { orderProducts, productTotalPrice, products };
   }
   static async updateOrderProduct(order: OrderDoc, productAttrs: Attrs[]) {
     const orderProducts: OrderProductDoc[] = [];

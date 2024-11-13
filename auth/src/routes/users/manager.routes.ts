@@ -12,8 +12,8 @@ const router = express.Router();
 router.get(
   '/users/manager/',
   requireAuth,
-  requireType([UserType.Manager, UserType.Employee]),
-  requirePermission([ListPermission.EmployeeRead, ListPermission.CustomerRead]),
+  // requireType([UserType.Manager, UserType.Employee]),
+  // requirePermission([ListPermission.EmployeeRead, ListPermission.CustomerRead]),
   ManagerControllers.readAll
 );
 router.get(

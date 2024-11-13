@@ -1,6 +1,11 @@
 import express, { Request, Response } from 'express';
 import { User } from '../models/user';
-import { NotFoundError, UserType } from '@share-package/common';
+import {
+  Check,
+  ListPermission,
+  NotFoundError,
+  UserType,
+} from '@share-package/common';
 import { Convert } from '../utils/convert';
 import { ManagerService } from '../services/user/manager.service';
 import { UserPublisher } from '../services/publishers/user.publisher.service';
@@ -33,11 +38,20 @@ export class ManagerControllers {
   static async readAll(req: Request, res: Response) {
     const { pages = 1, type, sortBy, gender, name } = req.query;
     try {
+      let isManager = false;
+      if (req.currentUser) {
+        const { type, permissions } = req.currentUser!;
+        isManager = Check.isManager(type, permissions, [
+          ListPermission.CustomerRead,
+          ListPermission.EmployeeRead,
+        ]);
+      }
       const { users, totalItems } = await ManagerService.readAll(
         type as string,
         sortBy as string,
         pages as string,
-        gender as string
+        gender as string,
+        isManager
       );
       res
         .status(200)

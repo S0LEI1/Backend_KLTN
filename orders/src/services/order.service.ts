@@ -6,21 +6,12 @@ import {
   UserType,
 } from '@share-package/common';
 import { User, UserDoc } from '../models/user';
-import { ProductService } from './product.service';
-import { ServiceService } from './service.service';
-import { ProductDoc } from '../models/product';
-import { ServiceDoc } from '../models/service';
-import { PackageDoc } from '../models/package';
 import { Order, OrderDoc } from '../models/order';
 import { OrderProductService } from './order-product.service';
 import { OrderServiceService } from './order-service.service';
 import { OrderPackageService } from './order-package.service';
 import mongoose, { FilterQuery } from 'mongoose';
 import { format } from 'date-fns';
-import { OrderPackage } from '../models/order-package';
-import { OrderProduct } from '../models/order-product';
-import { OrderServiceM } from '../models/order-service';
-import { ObjectId } from 'mongoose';
 const PER_PAGE = process.env.PER_PAGE;
 export interface Attrs {
   id: string;
@@ -62,18 +53,17 @@ export class OrderService {
     orderId: String,
     services: Attrs[],
     packages: Attrs[],
-    products: Attrs[]
+    productAttrs: Attrs[]
   ) {
     const orderDoc = await Order.findOne({ _id: orderId, isDeleted: false });
     if (!orderDoc) throw new NotFoundError('Order');
     let preTaxTotal = orderDoc.preTaxTotal | 0;
-    if (!services && !products && !packages)
+    if (!services && !productAttrs && !packages)
       throw new BadRequestError('Product, service, package, must be least 1');
-    if (products) {
-      const { orderProducts, productTotalPrice } =
-        await OrderProductService.newOrderProducts(orderDoc, products);
-      preTaxTotal += productTotalPrice;
-    }
+    if (!productAttrs) console.log('');
+    const { orderProducts, productTotalPrice, products } =
+      await OrderProductService.newOrderProducts(orderDoc, productAttrs);
+    preTaxTotal += productTotalPrice;
     if (services) {
       const { orderServices, serviceTotalPrice } =
         await OrderServiceService.newOrderService(orderDoc, services);
@@ -86,7 +76,7 @@ export class OrderService {
     }
     orderDoc.set({ preTaxTotal: preTaxTotal });
     await orderDoc.save();
-    return orderDoc;
+    return { orderDoc, products };
   }
   static async updateOrder(
     orderId: String,
