@@ -18,20 +18,22 @@ export class OrderController {
       console.log(error);
     }
   }
-  static async add(req: Request, res: Response) {
-    try {
-      const { services, packages, products } = req.body;
-      const { orderId } = req.params;
-      const order = await OrderService.add(
-        orderId,
-        services,
-        packages,
-        products
-      );
-      res.status(201).send({ message: 'POST:Add successfullt', order });
-    } catch (error) {
-      console.log(error);
-    }
+  static async addAndDelete(req: Request, res: Response) {
+    const { services, packages, products } = req.body;
+    const { orderId } = req.params;
+    const order = await OrderService.addAndRemove(
+      orderId,
+      services,
+      packages,
+      products
+    );
+    res.status(201).send({
+      message: 'POST:Add successfullt',
+      order: order.orderDoc,
+      products: order.products,
+      services: order.services,
+      package: order.packages,
+    });
   }
   static async readOrders(req: Request, res: Response) {
     const {
@@ -106,18 +108,5 @@ export class OrderController {
     const { orderId } = req.params;
     const order = await OrderService.deleteOrder(orderId);
     res.status(200).send({ message: 'PATCH:Delete order successfully' });
-  }
-  static async updateOrder(req: Request, res: Response) {
-    const { services, packages, products } = req.body;
-    const { orderId } = req.params;
-    const order = await OrderService.updateOrder(
-      orderId,
-      services,
-      packages,
-      products
-    );
-    res
-      .status(200)
-      .send({ message: 'PATCH: Update order successfully', order });
   }
 }

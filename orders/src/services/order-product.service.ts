@@ -4,19 +4,33 @@ import { OrderProduct, OrderProductDoc } from '../models/order-product';
 import { ProductDoc } from '../models/product';
 import { Attrs } from './order.service';
 import { ProductService } from './product.service';
-interface ProductInPackage {
-  productDoc: ProductDoc;
+export interface ProductInOrder {
+  infor: ProductDoc;
   quantity: number;
 }
 export class OrderProductService {
   static async newOrderProduct(order: OrderDoc, attr: Attrs) {
-    const orderProdctExist = await OrderProduct.findOne({
+    const orderProductExist = await OrderProduct.findOne({
       order: order.id,
       product: attr.id,
       isDeleted: false,
-    });
-    if (!orderProdctExist) throw new BadRequestError('Order-Product exist');
+    }).populate('product');
     const { product, price } = await ProductService.getProduct(attr);
+    if (attr.quantity <= 0)
+      throw new BadRequestError(
+        'Product quantity must be greater than or equal  1'
+      );
+    if (attr.quantity > product.quantity)
+      throw new BadRequestError(
+        `Insufficient quantity of product: ${product.name}`
+      );
+
+    if (orderProductExist) {
+      if (attr.quantity === 0) orderProductExist.set({ isDeleted: true });
+      orderProductExist.set({ quantity: attr.quantity });
+      await orderProductExist.save();
+      return orderProductExist;
+    }
     const orderProduct = OrderProduct.build({
       order: order,
       product: product,
@@ -28,18 +42,19 @@ export class OrderProductService {
   }
   static async newOrderProducts(order: OrderDoc, productAttrs: Attrs[]) {
     const orderProducts: OrderProductDoc[] = [];
-    const products: ProductInPackage[] = [];
+    const productsInPackage: ProductInOrder[] = [];
     let productTotalPrice: number = 0;
     for (const attr of productAttrs) {
       const orderProduct = await this.newOrderProduct(order, attr);
+      if (orderProduct.isDeleted === true) continue;
       orderProducts.push(orderProduct);
-      products.push({
-        productDoc: orderProduct.product,
+      productsInPackage.push({
+        infor: orderProduct.product,
         quantity: orderProduct.quantity,
       });
       productTotalPrice += orderProduct.totalPrice;
     }
-    return { orderProducts, productTotalPrice, products };
+    return { orderProducts, productTotalPrice, productsInPackage };
   }
   static async updateOrderProduct(order: OrderDoc, productAttrs: Attrs[]) {
     const orderProducts: OrderProductDoc[] = [];
@@ -94,7 +109,7 @@ export class OrderProductService {
   }
   static async findByOrderId(orderDoc: OrderDoc) {
     const orderProducts = await OrderProduct.aggregate([
-      { $match: { order: orderDoc._id } },
+      { $match: { order: orderDoc._id, isDeleted: false } },
       {
         $lookup: {
           from: 'products',

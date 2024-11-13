@@ -5,28 +5,64 @@ import { Attrs } from './order.service';
 import { PackageService } from './package.service';
 import { ServiceService } from './service.service';
 import { Package, PackageDoc } from '../models/package';
-import { NotFoundError } from '@share-package/common';
-
+import { BadRequestError, NotFoundError } from '@share-package/common';
+import { Service, ServiceDoc } from '../models/service';
+export interface PackageInOrder {
+  infor: PackageDoc;
+  services: ServiceDoc[];
+  quantity: number;
+}
 export class OrderPackageService {
-  static async newOrderPacakage(order: OrderDoc, packageAttrs: Attrs[]) {
+  static async newOrderPacakage(order: OrderDoc, attr: Attrs) {
+    const orderPackageExist = await OrderPackage.findOne({
+      order: order.id,
+      package: attr.id,
+      isDeleted: false,
+    }).populate('package');
+    const { existPackage, price } = await PackageService.getPackage(attr);
+    const serviceEmbedded = await ServiceService.getServiceInPackage(
+      existPackage.id
+    );
+    const serviceIds = serviceEmbedded.map((srv) => srv.serviceId);
+    const services = await Service.find({ _id: { $in: serviceIds } });
+    if (orderPackageExist) {
+      if (attr.quantity === 0) orderPackageExist.set({ isDeleted: true });
+      orderPackageExist.set({ quantity: attr.quantity });
+      await orderPackageExist.save();
+      return { orderPackage: orderPackageExist, services };
+    }
+    if (attr.quantity <= 0)
+      throw new BadRequestError(
+        'Package quantity must be greater than or equal  1'
+      );
+    const orderPackage = OrderPackage.build({
+      order: order,
+      package: existPackage,
+      services: serviceEmbedded,
+      quantity: attr.quantity,
+      totalPrice: price,
+    });
+    await orderPackage.save();
+    return { orderPackage, services };
+  }
+  static async newOrderPacakages(order: OrderDoc, packageAttrs: Attrs[]) {
     const orderPackages: OrderPackageDoc[] = [];
+    const packagesInOrder: PackageInOrder[] = [];
     let packageTotalPrice: number = 0;
     for (const attr of packageAttrs) {
-      const { existPackage, price } = await PackageService.getPackage(attr);
-      const services = await ServiceService.getServiceInPackage(
-        existPackage.id
+      const { orderPackage, services } = await this.newOrderPacakage(
+        order,
+        attr
       );
-      const orderPackage = OrderPackage.build({
-        order: order,
-        package: existPackage,
+      if (orderPackage.isDeleted === true) continue;
+      packageTotalPrice += orderPackage.totalPrice;
+      packagesInOrder.push({
+        infor: orderPackage.package,
         services: services,
-        quantity: attr.quantity,
-        totalPrice: price,
+        quantity: orderPackage.quantity,
       });
-      await orderPackage.save();
-      packageTotalPrice += price;
     }
-    return { orderPackages, packageTotalPrice };
+    return { orderPackages, packageTotalPrice, packagesInOrder };
   }
   static async getPackage(packageId: string) {
     const existPackage = await Package.findOne({
@@ -46,7 +82,7 @@ export class OrderPackageService {
   }
   static async findByOrder(orderDoc: OrderDoc) {
     const orderPkgs = await OrderPackage.aggregate([
-      { $match: { order: orderDoc._id } },
+      { $match: { order: orderDoc._id, isDelete: false } },
       {
         $lookup: {
           from: 'packages',

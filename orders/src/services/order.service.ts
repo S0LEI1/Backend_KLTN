@@ -7,9 +7,9 @@ import {
 } from '@share-package/common';
 import { User, UserDoc } from '../models/user';
 import { Order, OrderDoc } from '../models/order';
-import { OrderProductService } from './order-product.service';
-import { OrderServiceService } from './order-service.service';
-import { OrderPackageService } from './order-package.service';
+import { OrderProductService, ProductInOrder } from './order-product.service';
+import { OrderServiceService, ServiceInOrder } from './order-service.service';
+import { OrderPackageService, PackageInOrder } from './order-package.service';
 import mongoose, { FilterQuery } from 'mongoose';
 import { format } from 'date-fns';
 const PER_PAGE = process.env.PER_PAGE;
@@ -49,66 +49,41 @@ export class OrderService {
     await orderDoc.save();
     return orderDoc;
   }
-  static async add(
+  static async addAndRemove(
     orderId: String,
-    services: Attrs[],
-    packages: Attrs[],
+    serviceAttrs: Attrs[],
+    packageAttrs: Attrs[],
     productAttrs: Attrs[]
   ) {
     const orderDoc = await Order.findOne({ _id: orderId, isDeleted: false });
     if (!orderDoc) throw new NotFoundError('Order');
     let preTaxTotal = orderDoc.preTaxTotal | 0;
-    if (!services && !productAttrs && !packages)
+    if (!serviceAttrs && !productAttrs && !packageAttrs)
       throw new BadRequestError('Product, service, package, must be least 1');
-    if (!productAttrs) console.log('');
-    const { orderProducts, productTotalPrice, products } =
-      await OrderProductService.newOrderProducts(orderDoc, productAttrs);
-    preTaxTotal += productTotalPrice;
-    if (services) {
-      const { orderServices, serviceTotalPrice } =
-        await OrderServiceService.newOrderService(orderDoc, services);
+    let products: ProductInOrder[] = [];
+    if (productAttrs) {
+      const { orderProducts, productTotalPrice, productsInPackage } =
+        await OrderProductService.newOrderProducts(orderDoc, productAttrs);
+      preTaxTotal += productTotalPrice;
+      products = productsInPackage;
+    }
+    let services: ServiceInOrder[] = [];
+    if (serviceAttrs) {
+      const { orderServices, serviceTotalPrice, servicesInPackage } =
+        await OrderServiceService.newOrderServices(orderDoc, serviceAttrs);
       preTaxTotal += serviceTotalPrice;
+      services = servicesInPackage;
     }
-    if (packages) {
-      const { orderPackages, packageTotalPrice } =
-        await OrderPackageService.newOrderPacakage(orderDoc, packages);
+    let packages: PackageInOrder[] = [];
+    if (packageAttrs) {
+      const { orderPackages, packageTotalPrice, packagesInOrder } =
+        await OrderPackageService.newOrderPacakages(orderDoc, packageAttrs);
       preTaxTotal += packageTotalPrice;
+      packages = packagesInOrder;
     }
     orderDoc.set({ preTaxTotal: preTaxTotal });
     await orderDoc.save();
-    return { orderDoc, products };
-  }
-  static async updateOrder(
-    orderId: String,
-    services: Attrs[],
-    packages: Attrs[],
-    products: Attrs[]
-  ) {
-    const orderDoc = await Order.findOne({ _id: orderId, isDeleted: false });
-    if (!orderDoc) throw new NotFoundError('Order');
-    if (orderDoc.status === OrderStatus.Complete)
-      throw new BadRequestError('Order completed, cannot update');
-    let preTaxTotal = orderDoc.preTaxTotal;
-    if (!services && !products && !packages)
-      throw new BadRequestError('Product, service, package, must be least 1');
-    if (products) {
-      const { orderProducts, productTotalPrice } =
-        await OrderProductService.updateOrderProduct(orderDoc, products);
-      preTaxTotal -= productTotalPrice;
-    }
-    // if (services) {
-    //   const { orderServices, serviceTotalPrice } =
-    //     await OrderServiceService.newOrderService(orderDoc, services);
-    //   preTaxTotal -= serviceTotalPrice;
-    // }
-    // if (packages) {
-    //   const { orderPackages, packageTotalPrice } =
-    //     await OrderPackageService.newOrderPacakage(orderDoc, packages);
-    //   preTaxTotal -= packageTotalPrice;
-    // }
-    orderDoc.set({ preTaxTotal: preTaxTotal });
-    await orderDoc.save();
-    return orderDoc;
+    return { orderDoc, products, services, packages };
   }
   static async readOrders(
     pages: number,

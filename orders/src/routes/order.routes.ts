@@ -48,7 +48,7 @@ router.post(
   '/orders/add/:orderId',
   requireAuth,
   requirePermission([ListPermission.OrderCreate]),
-  OrderController.add
+  OrderController.addAndDelete
 );
 router.patch(
   '/orders/delete/:orderId',
@@ -57,11 +57,5 @@ router.patch(
   requirePermission([ListPermission.OrderDelete]),
   OrderController.deleteOrder
 );
-router.patch(
-  '/orders/update/:orderId',
-  requireAuth,
-  // requireType([UserType.Manager]),
-  requirePermission([ListPermission.OrderUpdate]),
-  OrderController.updateOrder
-);
+
 export { router as orderRouter };
