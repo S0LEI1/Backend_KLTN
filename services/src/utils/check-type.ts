@@ -13,7 +13,7 @@ export class Check {
     const isPermission = requirePermission.every((per) =>
       permissions.includes(per)
     );
-    console.log(permissions);
+    // console.log(permissions);
 
     // const currentPermissions = req.currentUser!.permissions;
     //

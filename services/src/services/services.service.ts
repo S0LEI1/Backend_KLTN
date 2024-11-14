@@ -11,6 +11,7 @@ import { Check } from '../utils/check-type';
 import { calcSalePrice } from '../utils/calcSalePrice';
 import { ServicePublishers } from './services.publisher.service';
 import exceljs from 'exceljs';
+import Websocket from '../socket';
 const PER_PAGE = process.env.PER_PAGE;
 export class ServiceServices {
   static async new(
@@ -40,6 +41,10 @@ export class ServiceServices {
     });
     await service.save();
     ServicePublishers.new(service);
+    Websocket.getInstance().emit('services', {
+      action: 'create',
+      service: service,
+    });
     return service;
   }
   static async readAll(

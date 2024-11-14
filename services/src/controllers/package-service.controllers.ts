@@ -4,7 +4,7 @@ import { PackageServiceServices } from '../services/package-serivce.service';
 export class PackageServiceControllers {
   static async newPackageService(req: Request, res: Response) {
     const { serviceIds, packageId } = req.body;
-    console.log(serviceIds as string[]);
+    // console.log(serviceIds as string[]);
 
     const packageServices = await PackageServiceServices.newPackageService(
       serviceIds,

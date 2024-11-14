@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
-import { app } from './app';
+import { app, httpServer } from './app';
 import { natsWrapper } from './nats-wrapper';
+import { Socket, Server } from 'socket.io';
+import Websocket from './socket';
 const start = async () => {
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
@@ -46,15 +48,25 @@ const start = async () => {
     process.on('SIGTERM', () => natsWrapper.client!.close());
     // declare listenr
 
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('Connecting mongo!!');
+    mongoose
+      .connect(process.env.MONGO_URI)
+      .then((result) => {
+        console.log('Connecting mongo!!');
+        const io = Websocket.init(httpServer);
+        io.on('connection', (socket: Socket) => {
+          console.log('Client connected', socket.id);
+        });
+        httpServer.listen(3000, () => {
+          console.log('Listening on port 3000');
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   } catch (error) {
     console.log(error);
   }
 };
 
-app.listen(3000, () => {
-  console.log('Listening on port 3000');
-});
 // start db mongo
 start();
