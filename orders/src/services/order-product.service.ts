@@ -5,7 +5,7 @@ import { ProductDoc } from '../models/product';
 import { Attrs } from './order.service';
 import { ProductService } from './product.service';
 export interface ProductInOrder {
-  infor: ProductDoc;
+  productInfor: ProductDoc;
   quantity: number;
 }
 export class OrderProductService {
@@ -49,7 +49,7 @@ export class OrderProductService {
       if (orderProduct.isDeleted === true) continue;
       orderProducts.push(orderProduct);
       productsInPackage.push({
-        infor: orderProduct.product,
+        productInfor: orderProduct.product,
         quantity: orderProduct.quantity,
       });
       productTotalPrice += orderProduct.totalPrice;
@@ -107,18 +107,17 @@ export class OrderProductService {
     }
     return { orderProducts, productTotalPrice };
   }
-  static async findByOrderId(orderDoc: OrderDoc) {
-    const orderProducts = await OrderProduct.aggregate([
-      { $match: { order: orderDoc._id, isDeleted: false } },
-      {
-        $lookup: {
-          from: 'products',
-          localField: 'product',
-          foreignField: '_id',
-          as: 'product',
-        },
-      },
-    ]);
-    return orderProducts;
+  static async findByOrder(orderDoc: OrderDoc) {
+    const orderProducts = await OrderProduct.find({
+      order: orderDoc.id,
+    }).populate('product');
+    const products: ProductInOrder[] = [];
+    for (const od of orderProducts) {
+      products.push({
+        productInfor: od.product,
+        quantity: od.quantity,
+      });
+    }
+    return products;
   }
 }

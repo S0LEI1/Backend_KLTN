@@ -1,6 +1,10 @@
 import { ObjectId } from 'mongoose';
 import { Order, OrderDoc } from '../models/order';
-import { OrderPackage, OrderPackageDoc } from '../models/order-package';
+import {
+  OrderPackage,
+  OrderPackageDoc,
+  ServiceEmbedded,
+} from '../models/order-package';
 import { Attrs } from './order.service';
 import { PackageService } from './package.service';
 import { ServiceService } from './service.service';
@@ -8,9 +12,20 @@ import { Package, PackageDoc } from '../models/package';
 import { BadRequestError, NotFoundError } from '@share-package/common';
 import { Service, ServiceDoc } from '../models/service';
 export interface PackageInOrder {
-  infor: PackageDoc;
+  packageInfor: PackageDoc;
   services: ServiceDoc[];
   quantity: number;
+  totalPrice?: number;
+}
+interface ServiceInPackage {
+  serviceInfor: ServiceDoc;
+  status: boolean;
+}
+export interface PackagePopulate {
+  packageInfor: PackageDoc;
+  services: ServiceInPackage[];
+  quantity: number;
+  totalPrice?: number;
 }
 export class OrderPackageService {
   static async newOrderPacakage(order: OrderDoc, attr: Attrs) {
@@ -20,11 +35,14 @@ export class OrderPackageService {
       isDeleted: false,
     }).populate('package');
     const { existPackage, price } = await PackageService.getPackage(attr);
-    const serviceEmbedded = await ServiceService.getServiceInPackage(
-      existPackage.id
-    );
-    const serviceIds = serviceEmbedded.map((srv) => srv.serviceId);
-    const services = await Service.find({ _id: { $in: serviceIds } });
+    const services = await ServiceService.getServiceInPackage(existPackage.id);
+    console.log(services);
+
+    const serviceEmbedded: ServiceEmbedded[] = [];
+    services.map((srv) => {
+      serviceEmbedded.push({ service: srv, status: false });
+    });
+    // const services = await Service.find({ _id: { $in: serviceIds } });
     if (orderPackageExist) {
       if (attr.quantity === 0) orderPackageExist.set({ isDeleted: true });
       orderPackageExist.set({ quantity: attr.quantity });
@@ -38,7 +56,7 @@ export class OrderPackageService {
     const orderPackage = OrderPackage.build({
       order: order,
       package: existPackage,
-      services: serviceEmbedded,
+      serviceEmbedded: serviceEmbedded,
       quantity: attr.quantity,
       totalPrice: price,
     });
@@ -57,7 +75,7 @@ export class OrderPackageService {
       if (orderPackage.isDeleted === true) continue;
       packageTotalPrice += orderPackage.totalPrice;
       packagesInOrder.push({
-        infor: orderPackage.package,
+        packageInfor: orderPackage.package,
         services: services,
         quantity: orderPackage.quantity,
       });
@@ -81,40 +99,29 @@ export class OrderPackageService {
     return packages;
   }
   static async findByOrder(orderDoc: OrderDoc) {
-    const orderPkgs = await OrderPackage.aggregate([
-      { $match: { order: orderDoc._id, isDelete: false } },
-      {
-        $lookup: {
-          from: 'packages',
-          localField: 'package',
-          foreignField: '_id',
-          as: 'package',
-        },
-      },
-      {
-        $unwind: '$package',
-      },
-      {
-        $lookup: {
-          from: 'services',
-          localField: 'services.serviceId',
-          foreignField: '_id',
-          as: 'servicesLookup',
-        },
-      },
-      {
-        $addFields: {
-          'services.name': { $arrayElemAt: ['$servicesLookup.name', -1.0] },
-          'services.imageUrl': {
-            $arrayElemAt: ['$servicesLookup.imageUrl', -1.0],
-          },
-        },
-      },
-      {
-        $project: { order: 0, servicesLookup: 0 },
-      },
-    ]);
-    return orderPkgs;
+    const orderPkgs = await OrderPackage.find({
+      order: orderDoc.id,
+      isDeleted: false,
+    })
+      .populate('package')
+      .populate({ path: 'serviceEmbedded.service' });
+    const packages: PackagePopulate[] = [];
+    const servicesInPackage: ServiceInPackage[] = [];
+    for (const op of orderPkgs) {
+      op.serviceEmbedded.map((srv) => {
+        servicesInPackage.push({
+          serviceInfor: srv.service,
+          status: srv.status,
+        });
+      });
+      packages.push({
+        packageInfor: op.package,
+        services: servicesInPackage,
+        quantity: op.quantity,
+        // totalPrice: 0,
+      });
+    }
+    return packages;
   }
   // static async findByOrderId(orderId: string){
   //   // const order =await Order.findOne({_id: orderId, isDeleted: false});

@@ -51,18 +51,18 @@ export class OrderServiceService {
     }
     return { orderServices, serviceTotalPrice, servicesInPackage };
   }
-  static async findByOrderId(orderDoc: OrderDoc) {
-    const orderServices = await OrderServiceM.aggregate([
-      { $match: { order: orderDoc._id, isDeleted: false } },
-      {
-        $lookup: {
-          from: 'services',
-          localField: 'service',
-          foreignField: '_id',
-          as: 'service',
-        },
-      },
-    ]);
-    return orderServices;
+  static async findByOrder(orderDoc: OrderDoc) {
+    const orderServices = await OrderServiceM.find({
+      order: orderDoc.id,
+      isDeleted: false,
+    }).populate('service');
+    const services: ServiceInOrder[] = [];
+    for (const os of orderServices) {
+      services.push({
+        infor: os.service,
+        quantity: os.quantity,
+      });
+    }
+    return services;
   }
 }

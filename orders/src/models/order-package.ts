@@ -2,14 +2,15 @@ import mongoose, { mongo } from 'mongoose';
 import { OrderDoc } from './order';
 import { PackageDoc } from './package';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+import { ServiceDoc } from './service';
 export interface ServiceEmbedded {
-  serviceId: mongoose.Types.ObjectId;
+  service: ServiceDoc;
   status: boolean;
 }
 interface OrderPackageAttrs {
   order: OrderDoc;
   package: PackageDoc;
-  services: ServiceEmbedded[];
+  serviceEmbedded: ServiceEmbedded[];
   quantity: number;
   totalPrice: number;
 }
@@ -17,7 +18,7 @@ interface OrderPackageAttrs {
 export interface OrderPackageDoc extends mongoose.Document {
   order: OrderDoc;
   package: PackageDoc;
-  services: ServiceEmbedded[];
+  serviceEmbedded: ServiceEmbedded[];
   quantity: number;
   totalPrice: number;
   isDeleted: boolean;
@@ -40,10 +41,11 @@ const orderPackageSchema = new mongoose.Schema(
       required: true,
       ref: 'Package',
     },
-    services: [
+    serviceEmbedded: [
       {
-        serviceId: {
+        service: {
           type: mongoose.Types.ObjectId,
+          ref: 'Service',
         },
         status: {
           type: Boolean,

@@ -169,26 +169,35 @@ export class OrderService {
     filter.isDeleted = false;
     const order = await Order.findOne({ _id: id, isDeleted: false });
     if (!order) throw new NotFoundError('Order');
-    const createEmp = await User.findOne({
-      _id: order.creEmp,
-      isDeleted: false,
-    });
+    const createEmp = await User.findOne(
+      {
+        _id: order.creEmp,
+        isDeleted: false,
+      },
+      { id: 1, fullName: 1, imageUrl: 1, phoneNumber: 1, type: 1 }
+    );
     if (!createEmp) throw new NotFoundError('Create Employee');
-    const customer = await User.findOne({
-      _id: order.customer,
-      isDeleted: false,
-    });
+    const customer = await User.findOne(
+      {
+        _id: order.customer,
+        isDeleted: false,
+      },
+      { id: 1, fullName: 1, imageUrl: 1, phoneNumber: 1, type: 1 }
+    );
     if (!customer) throw new NotFoundError('Customer');
     let execEmp: UserDoc | null;
     if (order.execEmp) {
-      execEmp = await User.findOne({ _id: order.execEmp, isDeleted: false });
+      execEmp = await User.findOne(
+        { _id: order.execEmp, isDeleted: false },
+        { id: 1, fullName: 1, imageUrl: 1, phoneNumber: 1, type: 1 }
+      );
       if (execEmp === null) throw new NotFoundError('Execute Employee');
     }
 
-    const orderPackages = await OrderPackageService.findByOrder(order);
-    const orderProducts = await OrderProductService.findByOrderId(order);
-    const orderServices = await OrderServiceService.findByOrderId(order);
-    return { order, orderPackages, orderProducts, orderServices };
+    const packages = await OrderPackageService.findByOrder(order);
+    const products = await OrderProductService.findByOrder(order);
+    const services = await OrderServiceService.findByOrder(order);
+    return { order, packages, services, products };
   }
 
   static async cancelOrder(orderId: string, userId: string, type: string) {

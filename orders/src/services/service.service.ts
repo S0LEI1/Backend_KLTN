@@ -22,15 +22,22 @@ export class ServiceService {
     return { services, totalPrice };
   }
   static async getServiceInPackage(packageId: string) {
-    const packageSrvs = await PackageService.find({ package: packageId });
-    const services: ServiceEmbedded[] = [];
-    packageSrvs.map((pSrv) => {
-      const service: ServiceEmbedded = {
-        serviceId: new mongoose.Types.ObjectId(pSrv.service.id),
-        status: false,
-      };
-      services.push(service);
-    });
+    console.log('packageId', packageId);
+
+    const packageSrvs = await PackageService.find({
+      package: packageId,
+      isDeleted: false,
+    }).populate('service');
+
+    const services: ServiceDoc[] = [];
+    // packageSrvs.map((pSrv) => {
+    //   services.push(pSrv.service);
+    // });
+    for (const ps of packageSrvs) {
+      services.push(ps.service);
+    }
+    console.log(services);
+
     return services;
   }
 }
