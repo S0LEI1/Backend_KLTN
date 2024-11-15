@@ -12,6 +12,7 @@ import { OrderServiceService, ServiceInOrder } from './order-service.service';
 import { OrderPackageService, PackageInOrder } from './order-package.service';
 import mongoose, { FilterQuery } from 'mongoose';
 import { format } from 'date-fns';
+import { OrderPublisher } from './orders.publisher.service';
 const PER_PAGE = process.env.PER_PAGE;
 export interface Attrs {
   id: string;
@@ -47,6 +48,7 @@ export class OrderService {
       });
     }
     await orderDoc.save();
+    OrderPublisher.newOrder(orderDoc);
     return orderDoc;
   }
   static async addAndRemove(
@@ -83,6 +85,7 @@ export class OrderService {
     }
     orderDoc.set({ preTaxTotal: preTaxTotal });
     await orderDoc.save();
+    OrderPublisher.updateOrder(orderDoc);
     return { orderDoc, products, services, packages };
   }
   static async readOrders(
@@ -212,6 +215,7 @@ export class OrderService {
         throw new BadRequestError('You cannot cancel order');
     order.set({ status: OrderStatus.Cancelled });
     await order.save();
+    OrderPublisher.updateOrder(order);
     return order;
   }
   static async findByPhoneNumer(phoneNumber: string, name: string) {
@@ -247,6 +251,7 @@ export class OrderService {
     if (!order) throw new NotFoundError('Order');
     order.set({ isDeleted: false });
     await order.save();
+    OrderPublisher.deleteOrder(order);
     return order;
   }
 }

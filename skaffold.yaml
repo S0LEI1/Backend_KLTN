@@ -32,14 +32,30 @@ build:
     #     manual:
     #       - src: 'src/**/*.ts'
     #         dest: .
-    - image: vannggoc/services
-      context: services
+    # - image: vannggoc/services
+    #   context: services
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       - src: 'src/**/*.ts'
+    #         dest: .
+    - image: vannggoc/payments
+      context: payments
       docker:
         dockerfile: Dockerfile
       sync:
         manual:
           - src: 'src/**/*.ts'
             dest: .
+    # - image: vannggoc/expiration
+    #   context: expiration
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       - src: 'src/**/*.ts'
+    #         dest: .
     # - image: vannggoc/shifts
     #   context: shifts
     #   docker:
