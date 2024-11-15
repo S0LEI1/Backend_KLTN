@@ -10,7 +10,10 @@ import { CartProduct } from '../models/cart-product';
 import { CartProductService } from './cart-product.service';
 import { ProductDoc } from '../models/product';
 interface ProductInCart {
-  info: ProductDoc;
+  productId: string;
+  name: string;
+  imageUrl: string;
+  salePrice: number;
   quantity: number;
   totalPrice: number;
 }
@@ -73,7 +76,10 @@ export class CartService {
     cartProducts.map((cp) => {
       totalPrice += cp.totalPrice;
       products.push({
-        info: cp.product,
+        productId: cp.product.id,
+        name: cp.product.name,
+        imageUrl: cp.product.imageUrl,
+        salePrice: cp.product.salePrice,
         quantity: cp.quantity,
         totalPrice: cp.totalPrice,
       });
@@ -104,7 +110,10 @@ export class CartService {
       });
       await cartProduct.save();
       products.push({
-        info: cartProduct.product,
+        productId: cartProduct.product.id,
+        name: cartProduct.product.name,
+        imageUrl: cartProduct.product.imageUrl,
+        salePrice: cartProduct.product.salePrice,
         quantity: cartProduct.quantity,
         totalPrice: cartProduct.totalPrice,
       });

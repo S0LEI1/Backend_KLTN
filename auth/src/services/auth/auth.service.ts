@@ -65,10 +65,10 @@ export class AuthService {
     }
     const generatePassword = Password.generate();
     const password = 'employee@1' + generatePassword;
-    const hashPass = await Password.toHash(password);
+    // const hashPass = await Password.toHash(password);
     const user = User.build({
       email: email,
-      password: hashPass,
+      password: password,
       fullName: fullName,
       gender: gender,
       phoneNumber: phoneNumber,
@@ -77,9 +77,17 @@ export class AuthService {
     });
     await user.save();
     UserPublisher.newUser(user);
-    const role = await Role.findOne({ systemName: new RegExp('shift', 'i') });
-    if (!role) throw new NotFoundError('Role');
-    const userRole = await UserRoleService.newUR(user.id, [role.id]);
+    const shiftRole = await Role.findOne({ systemName: 'shift.manage' });
+    if (!shiftRole) throw new NotFoundError('Role');
+    const orderRole = await Role.findOne({ systemName: 'order.manage' });
+    if (!orderRole) throw new NotFoundError('Order role');
+    const customerRole = await Role.findOne({ systemName: 'customer.manage' });
+    if (!customerRole) throw new NotFoundError('Role');
+    const userRole = await UserRoleService.newUR(user.id, [
+      shiftRole.id,
+      orderRole.id,
+      customerRole.id,
+    ]);
     const html = templatePassword.getOtpHtml(password);
     await Mail.send(
       email,
@@ -115,9 +123,13 @@ export class AuthService {
       throw new BadRequestError('Invalid OTP');
     }
     await redisClient.del(email);
-    const userRole = await UserRole.findOne({ user: user.id });
-    if (!userRole) {
+    const userRoleExist = await UserRole.findOne({ user: user.id });
+    if (!userRoleExist) {
       UserPublisher.newUser(user);
+      const orderRole = await Role.findOne({ systemName: 'order.manage' });
+      if (!orderRole) throw new NotFoundError('Order role');
+      const userRole = await UserRoleService.newUR(user.id, [orderRole.id]);
+      console.log(userRole);
     }
   }
   static async sendOtp(email: string) {

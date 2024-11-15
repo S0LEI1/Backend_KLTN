@@ -5,9 +5,12 @@ export class ProductService {
     const query = Pagination.query();
     query._id = id;
     query.isDeleted = false;
-    const product = await Product.findOne(query)
-      .populate({ path: 'category', select: 'id name' })
-      .populate({ path: 'suplier', select: 'id name' });
+    const product = await Product.findOne(query, {
+      id: 1,
+      name: 1,
+      imageUrl: 1,
+      salePrice: 1,
+    });
     if (!product) throw new NotFoundError('Product');
     return product;
   }
