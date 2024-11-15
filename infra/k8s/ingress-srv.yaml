@@ -52,6 +52,13 @@ spec:
                 name: payments-srv
                 port:
                   number: 3000
+          - path: /cart/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cart-srv
+                port:
+                  number: 3000
           - path: /?(.*)
             pathType: ImplementationSpecific
             backend:

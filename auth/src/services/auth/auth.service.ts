@@ -30,11 +30,11 @@ export class AuthService {
     if (existsUser) {
       throw new BadRequestError('Phone number is used');
     }
-    const hashPass = await Password.toHash(attrs.password);
+    // const hashPass = await Password.toHash(attrs.password);
     const user = User.build({
       fullName: attrs.fullName,
       email: attrs.email,
-      password: hashPass,
+      password: attrs.password,
       phoneNumber: attrs.phoneNumber,
       gender: attrs.gender,
       address: attrs.address,
