@@ -16,22 +16,22 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    # - image: vannggoc/orders
-    #   context: orders
-    #   docker:
-    #     dockerfile: Dockerfile
-    #   sync:
-    #     manual:
-    #       - src: 'src/**/*.ts'
-    #         dest: .
-    - image: vannggoc/products
-      context: products
+    - image: vannggoc/orders
+      context: orders
       docker:
         dockerfile: Dockerfile
       sync:
         manual:
           - src: 'src/**/*.ts'
             dest: .
+    # - image: vannggoc/products
+    #   context: products
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       - src: 'src/**/*.ts'
+    #         dest: .
     # - image: vannggoc/services
     #   context: services
     #   docker:

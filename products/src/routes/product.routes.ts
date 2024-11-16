@@ -106,4 +106,22 @@ router.post(
   requirePermission([ListPermission.ProductCreate]),
   ProductControllers.importData
 );
+router.patch(
+  '/products/add/quantity/:id',
+  [
+    body('quantity')
+      .isInt({ min: 1 })
+      .withMessage('Add quantity must be type Integer greater than or equal 1'),
+    body('costPrice')
+      .isInt({ min: 1000 })
+      .withMessage(
+        'Add quantity must be type Integer and greater than or equal 1000đ'
+      ),
+  ],
+  validationRequest,
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.ProductCreate]),
+  ProductControllers.addQuantity
+);
 export { router as productRouter };

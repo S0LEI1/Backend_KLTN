@@ -476,4 +476,20 @@ export class ProductService {
     }
     return { products, existProducts };
   }
+  static async addQuantity(
+    id: string,
+    quantity: number,
+    costPrice: number,
+    salePrice: number
+  ) {
+    const product = await Product.findOne({ _id: id, isDeleted: false });
+    if (!product) throw new NotFoundError('Product');
+    product.set({
+      quantity: product.quantity + quantity,
+      costPrice: costPrice,
+      salePrice: salePrice,
+    });
+    await product.save();
+    return product;
+  }
 }

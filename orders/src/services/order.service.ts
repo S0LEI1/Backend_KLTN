@@ -200,7 +200,7 @@ export class OrderService {
     const packages = await OrderPackageService.findByOrder(order);
     const products = await OrderProductService.findByOrder(order);
     const services = await OrderServiceService.findByOrder(order);
-    return { order, packages, services, products };
+    return { order, createEmp, customer, packages, services, products };
   }
 
   static async cancelOrder(orderId: string, userId: string, type: string) {
