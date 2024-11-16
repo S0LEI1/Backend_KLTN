@@ -79,10 +79,24 @@ export class OrderController {
         message: 'GET: Order successfully',
         products,
         services,
-        order,
+        order: {
+          customerId: customer.id,
+          customerName: customer.fullName,
+          customerPhone: customer.phoneNumber,
+          creatorId: createEmp.id,
+          creatorName: createEmp.fullName,
+          creatorPhone: createEmp.phoneNumber,
+          preTaxTotal: order.preTaxTotal,
+          tax: order.tax,
+          status: order.status,
+          isDeleted: order.isDeleted,
+          createdAt: order.createdAt,
+          postTaxTotal: order.postTaxTotal,
+          id: order.id,
+        },
         packages,
-        creator: createEmp,
-        customer: customer,
+        // creator: createEmp,
+        // customer: customer,
       });
     } catch (error) {
       console.log(error);

@@ -5,8 +5,12 @@ import { ServiceDoc } from '../models/service';
 import { Attrs } from './order.service';
 import { ServiceService } from './service.service';
 export interface ServiceInOrder {
-  infor: ServiceDoc;
+  serviceId: string;
+  name: string;
+  imageUrl: string;
+  salePrice: number;
   quantity: number;
+  totalPrice: number;
 }
 export class OrderServiceService {
   static async newOrderService(order: OrderDoc, attr: Attrs) {
@@ -45,8 +49,12 @@ export class OrderServiceService {
       orderServices.push(orderService);
       serviceTotalPrice += orderService.totalPrice;
       servicesInPackage.push({
-        infor: orderService.service,
+        serviceId: orderService.service.id,
+        name: orderService.service.name,
+        imageUrl: orderService.service.imageUrl,
+        salePrice: orderService.service.salePrice,
         quantity: orderService.quantity,
+        totalPrice: orderService.totalPrice,
       });
     }
     return { orderServices, serviceTotalPrice, servicesInPackage };
@@ -59,8 +67,12 @@ export class OrderServiceService {
     const services: ServiceInOrder[] = [];
     for (const os of orderServices) {
       services.push({
-        infor: os.service,
+        serviceId: os.service.id,
+        name: os.service.name,
+        imageUrl: os.service.imageUrl,
+        salePrice: os.service.salePrice,
         quantity: os.quantity,
+        totalPrice: os.totalPrice,
       });
     }
     return services;

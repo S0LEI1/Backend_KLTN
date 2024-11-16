@@ -5,8 +5,12 @@ import { ProductDoc } from '../models/product';
 import { Attrs } from './order.service';
 import { ProductService } from './product.service';
 export interface ProductInOrder {
-  productInfor: ProductDoc;
+  productId: string;
+  name: string;
+  imageUrl: string;
+  salePrice: number;
   quantity: number;
+  totalPrice: number;
 }
 export class OrderProductService {
   static async newOrderProduct(order: OrderDoc, attr: Attrs) {
@@ -49,8 +53,12 @@ export class OrderProductService {
       if (orderProduct.isDeleted === true) continue;
       orderProducts.push(orderProduct);
       productsInPackage.push({
-        productInfor: orderProduct.product,
+        productId: orderProduct.product.id,
+        name: orderProduct.product.name,
+        imageUrl: orderProduct.product.imageUrl,
+        salePrice: orderProduct.product.salePrice,
         quantity: orderProduct.quantity,
+        totalPrice: orderProduct.totalPrice,
       });
       productTotalPrice += orderProduct.totalPrice;
     }
@@ -114,8 +122,12 @@ export class OrderProductService {
     const products: ProductInOrder[] = [];
     for (const od of orderProducts) {
       products.push({
-        productInfor: od.product,
+        productId: od.product.id,
+        name: od.product.name,
+        imageUrl: od.product.imageUrl,
+        salePrice: od.product.salePrice,
         quantity: od.quantity,
+        totalPrice: od.totalPrice,
       });
     }
     return products;

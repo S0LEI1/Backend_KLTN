@@ -18,11 +18,17 @@ export interface PackageInOrder {
   totalPrice?: number;
 }
 interface ServiceInPackage {
-  serviceInfor: ServiceDoc;
+  serviceId: string;
+  name: string;
+  imageUrl: string;
+  // salePrice: number;
   status: boolean;
 }
 export interface PackagePopulate {
-  packageInfor: PackageDoc;
+  packageId: string;
+  name: string;
+  imageUrl: string;
+  salePrice: number;
   services: ServiceInPackage[];
   quantity: number;
   totalPrice?: number;
@@ -110,15 +116,20 @@ export class OrderPackageService {
     for (const op of orderPkgs) {
       op.serviceEmbedded.map((srv) => {
         servicesInPackage.push({
-          serviceInfor: srv.service,
+          serviceId: srv.service.id,
+          name: srv.service.name,
+          imageUrl: srv.service.imageUrl,
+          // salePrice: srv.service,
           status: srv.status,
         });
       });
       packages.push({
-        packageInfor: op.package,
+        packageId: op.package.id,
+        name: op.package.name,
+        imageUrl: op.package.imageUrl,
+        salePrice: op.package.salePrice,
         services: servicesInPackage,
         quantity: op.quantity,
-        // totalPrice: 0,
       });
     }
     return packages;
