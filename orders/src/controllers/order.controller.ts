@@ -125,4 +125,9 @@ export class OrderController {
     const order = await OrderService.deleteOrder(orderId);
     res.status(200).send({ message: 'PATCH:Delete order successfully' });
   }
+  static async updateServiceInOrderPackage(req: Request, res: Response) {
+    const { orderId, serviceId } = req.body;
+    await OrderService.updateServiceInOrderPackage(orderId, serviceId);
+    res.status(200).send({ message: 'PATCH: Update successfully' });
+  }
 }

@@ -1,13 +1,14 @@
 import { OrderStatus } from '@share-package/common';
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+import { UserDoc } from './user';
 
 interface OrderAttrs {
   id: string;
   customer: string;
   creEmp: string;
   execEmp?: string;
-  postTaxTotal?: number;
+  postTaxTotal: number;
   // postTaxTotal: number;
   status: OrderStatus;
   createdAt: Date;
@@ -41,9 +42,6 @@ const orderSchema = new mongoose.Schema(
     creEmp: {
       type: String,
       required: true,
-    },
-    execEmp: {
-      type: String,
     },
     tax: {
       type: Number,

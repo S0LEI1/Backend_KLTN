@@ -24,10 +24,11 @@ export class PaymentServices {
     var partnerCode = 'MOMO';
     var redirectUrl =
       'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b';
-    var ipnUrl = 'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b';
+    var ipnUrl =
+      'https://f8c7-14-234-138-4.ngrok-free.app/payments/callback/data';
     var requestType = 'payWithMethod';
     var amount = order.postTaxTotal;
-    var orderId = orderId;
+    var orderId = orderId + new Date().getTime();
     var requestId = orderId;
     var extraData = '';
     var paymentCode =

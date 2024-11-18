@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 import { app, httpServer } from './app';
 import { natsWrapper } from './nats-wrapper';
 import { Socket, Server } from 'socket.io';
-import Websocket from './socket';
 const start = async () => {
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
@@ -52,10 +51,10 @@ const start = async () => {
       .connect(process.env.MONGO_URI)
       .then((result) => {
         console.log('Connecting mongo!!');
-        const io = Websocket.init(httpServer);
-        io.on('connection', (socket: Socket) => {
-          console.log('Client connected', socket.id);
-        });
+        // const io = require('./socket').init();
+        // io.on('connection', (socket: Socket) => {
+        //   console.log('Client connected', socket.id);
+        // });
         httpServer.listen(3000, () => {
           console.log('Listening on port 3000');
         });

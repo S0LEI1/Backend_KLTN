@@ -7,4 +7,13 @@ export class PaymentControllers {
     const result = await PaymentServices.payment(id, orderId);
     res.status(200).send({ message: 'Payment successfully', result });
   }
+  static async callback(req: Request, res: Response) {
+    try {
+      console.log('callback::');
+      console.log(req.body);
+      res.status(200).send({ message: 'Done' });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }

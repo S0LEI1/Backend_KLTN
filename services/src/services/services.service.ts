@@ -41,10 +41,10 @@ export class ServiceServices {
     });
     await service.save();
     ServicePublishers.new(service);
-    Websocket.getInstance().emit('services', {
-      action: 'create',
-      service: service,
-    });
+    // Websocket.getInstance().emit('services', {
+    //   action: 'create',
+    //   service: service,
+    // });
     return service;
   }
   static async readAll(

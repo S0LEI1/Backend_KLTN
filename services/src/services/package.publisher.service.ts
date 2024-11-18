@@ -16,6 +16,7 @@ export class PackagePublisher {
       expire: packageDoc.expire,
       discount: packageDoc.discount,
       featured: packageDoc.featured,
+      code: packageDoc.code,
     });
   }
   static async deletePackage(packageDoc: PackageDoc) {
@@ -36,6 +37,7 @@ export class PackagePublisher {
       expire: packageDoc.expire,
       discount: packageDoc.discount!,
       featured: packageDoc.featured!,
+      code: packageDoc.code,
       version: packageDoc.version,
     });
   }

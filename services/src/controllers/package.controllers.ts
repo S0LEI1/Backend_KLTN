@@ -2,6 +2,8 @@ import { BadRequestError, ListPermission } from '@share-package/common';
 import { Request, Response } from 'express';
 import { PackageServices } from '../services/packages.service';
 import { Check } from '../utils/check-type';
+import { Package } from '../models/package';
+import { PackagePublisher } from '../services/package.publisher.service';
 
 export class PackageControllers {
   static async newPackage(req: Request, res: Response) {
@@ -86,12 +88,16 @@ export class PackageControllers {
     });
   }
   static async deletePackage(req: Request, res: Response) {
-    const { id } = req.params;
-    const deletePackage = await PackageServices.deletedPackage(id);
-    res.status(200).send({
-      message: 'PATCH: Delete package successfully',
-      package: deletePackage,
-    });
+    try {
+      const { id } = req.params;
+      const deletePackage = await PackageServices.deletedPackage(id);
+      res.status(200).send({
+        message: 'PATCH: Delete package successfully',
+        package: deletePackage,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
   static async updatePackage(req: Request, res: Response) {
     const { id } = req.params;
@@ -141,5 +147,14 @@ export class PackageControllers {
     const workbook = await PackageServices.exportPackage();
     workbook.xlsx.write(res);
     // res.status(200).send({ workbook });
+  }
+  static async updateCode(req: Request, res: Response) {
+    const packages = await Package.find();
+    for (let i = 0; i < packages.length; i++) {
+      packages[i].set({ code: `PKG${i}` });
+      await packages[i].save();
+      PackagePublisher.updatedPackage(packages[i]);
+    }
+    res.status(200).send({ message: 'Done' });
   }
 }

@@ -18,13 +18,14 @@ export class OrderUpdatedListener extends Listener<OrderUpdatedEvent> {
       id: data.id,
       version: data.version,
     });
+    console.log(data);
     if (!existOrder) throw new NotFoundError('Order not found');
     existOrder.set({
-      id: data.id,
       customer: data.customer,
       creEmp: data.creEmp,
       status: data.status,
       createdAt: data.createdAt,
+      postTaxTotal: data.postTaxTotal,
     });
     await existOrder.save();
     msg.ack();

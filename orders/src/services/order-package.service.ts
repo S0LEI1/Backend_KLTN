@@ -113,6 +113,7 @@ export class OrderPackageService {
       .populate({ path: 'serviceEmbedded.service' });
     const packages: PackagePopulate[] = [];
     const servicesInPackage: ServiceInPackage[] = [];
+    let totalPrice = 0;
     for (const op of orderPkgs) {
       op.serviceEmbedded.map((srv) => {
         servicesInPackage.push({
@@ -123,6 +124,7 @@ export class OrderPackageService {
           status: srv.status,
         });
       });
+      totalPrice += op.package.salePrice * op.quantity;
       packages.push({
         packageId: op.package.id,
         name: op.package.name,
@@ -130,6 +132,7 @@ export class OrderPackageService {
         salePrice: op.package.salePrice,
         services: servicesInPackage,
         quantity: op.quantity,
+        totalPrice: totalPrice,
       });
     }
     return packages;

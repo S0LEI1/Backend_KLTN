@@ -32,8 +32,24 @@ build:
     #     manual:
     #       - src: 'src/**/*.ts'
     #         dest: .
-    # - image: vannggoc/services
-    #   context: services
+    - image: vannggoc/services
+      context: services
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
+    # - image: thuthism/client
+    #   context: client
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       - src: 'src/**/*.tsx'
+    #         dest: .
+    # - image: vannggoc/cart
+    #   context: cart
     #   docker:
     #     dockerfile: Dockerfile
     #   sync:
@@ -48,11 +64,3 @@ build:
     #     manual:
     #       - src: 'src/**/*.ts'
     #         dest: .
-    - image: vannggoc/cart
-      context: cart
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          - src: 'src/**/*.ts'
-            dest: .

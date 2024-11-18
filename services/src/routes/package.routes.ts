@@ -43,7 +43,7 @@ router.post(
 router.get('/services/packages/all', PackageControllers.readAll);
 router.get('/services/package/:id', PackageControllers.readOne);
 router.patch(
-  '/services/package/:id',
+  '/services/delete/package/:id',
   requireAuth,
   requireType([UserType.Manager]),
   requirePermission([ListPermission.PackageDelete]),
@@ -80,4 +80,5 @@ router.get(
   requirePermission([ListPermission.PackageRead]),
   PackageControllers.exportPackage
 );
+router.patch('/services/package/update-code', PackageControllers.updateCode);
 export { router as packageRouter };

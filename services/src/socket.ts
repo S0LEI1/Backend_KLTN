@@ -6,23 +6,26 @@ const WEBSOCKET_CORS = {
 };
 
 class Websocket extends Server {
-  private static io: Websocket;
+  private static io: Server;
 
   constructor(httpServer: http.Server) {
     super(httpServer, {
-      cors: WEBSOCKET_CORS,
+      cors: {
+        origin: 'https://kimbeautyspa/client',
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+      },
     });
   }
-  static init(httpServer: http.Server) {
+  static init = (httpServer: http.Server) => {
     Websocket.io = require('socket.io')(httpServer);
     return Websocket.io;
-  }
-  public static getInstance(): Websocket {
+  };
+  static getIO = () => {
     if (!Websocket.io) {
       throw new Error('Socket.io not initialized!');
     }
     return Websocket.io;
-  }
+  };
 }
 
 export default Websocket;

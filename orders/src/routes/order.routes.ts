@@ -4,6 +4,7 @@ import {
   requireAuth,
   requirePermission,
   requireType,
+  validationRequest,
 } from '@share-package/common';
 import express, { Request, Response } from 'express';
 import { OrderController } from '../controllers/order.controller';
@@ -57,5 +58,18 @@ router.patch(
   requirePermission([ListPermission.OrderDelete]),
   OrderController.deleteOrder
 );
-
+router.patch(
+  '/orders/order-package',
+  [
+    body('orderId').isMongoId().withMessage('Order Id must be type ObjectId'),
+    body('serviceId')
+      .isMongoId()
+      .withMessage('Service Id must be type ObjectId'),
+  ],
+  validationRequest,
+  requireAuth,
+  requireType([UserType.Employee, UserType.Manager]),
+  requirePermission([ListPermission.OrderUpdate]),
+  OrderController.updateServiceInOrderPackage
+);
 export { router as orderRouter };

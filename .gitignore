@@ -4,3 +4,4 @@
 ./employees/node_modules
 ./products/node_modules
 ./accounts/node_modules
+./client

@@ -6,6 +6,7 @@ import { ServiceDoc } from './service';
 export interface ServiceEmbedded {
   service: ServiceDoc;
   status: boolean;
+  date?: Date;
 }
 interface OrderPackageAttrs {
   order: OrderDoc;
@@ -49,6 +50,9 @@ const orderPackageSchema = new mongoose.Schema(
         },
         status: {
           type: Boolean,
+        },
+        date: {
+          type: Date,
         },
       },
     ],

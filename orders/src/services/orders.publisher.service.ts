@@ -18,8 +18,8 @@ export class OrderPublisher {
   static updateOrder(orderDoc: OrderDoc) {
     new OrderUpdatedPublisher(natsWrapper.client).publish({
       id: orderDoc.id,
-      customer: orderDoc.customer.id,
-      creEmp: orderDoc.creEmp.id,
+      customer: orderDoc.customer.id.toString(),
+      creEmp: orderDoc.creEmp.id.toString(),
       postTaxTotal: orderDoc.postTaxTotal,
       status: orderDoc.status,
       createdAt: orderDoc.createdAt,

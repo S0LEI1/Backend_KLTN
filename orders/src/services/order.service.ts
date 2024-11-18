@@ -13,6 +13,7 @@ import { OrderPackageService, PackageInOrder } from './order-package.service';
 import mongoose, { FilterQuery } from 'mongoose';
 import { format } from 'date-fns';
 import { OrderPublisher } from './orders.publisher.service';
+import { OrderPackage } from '../models/order-package';
 
 const PER_PAGE = process.env.PER_PAGE;
 export interface Attrs {
@@ -58,7 +59,14 @@ export class OrderService {
     packageAttrs: Attrs[],
     productAttrs: Attrs[]
   ) {
-    const orderDoc = await Order.findOne({ _id: orderId, isDeleted: false });
+    const orderDoc = await Order.findOne<OrderDoc>({
+      _id: orderId,
+      isDeleted: false,
+    })
+      .populate('customer')
+      .populate('creEmp');
+    console.log(orderDoc);
+
     if (!orderDoc) throw new NotFoundError('Order');
     let preTaxTotal = orderDoc.preTaxTotal | 0;
     if (!serviceAttrs && !productAttrs && !packageAttrs)
@@ -86,6 +94,8 @@ export class OrderService {
     }
     orderDoc.set({ preTaxTotal: preTaxTotal });
     await orderDoc.save();
+    // console.log(orderDoc);
+
     OrderPublisher.updateOrder(orderDoc);
     return { orderDoc, products, services, packages };
   }
@@ -254,5 +264,36 @@ export class OrderService {
     await order.save();
     OrderPublisher.deleteOrder(order);
     return order;
+  }
+  static async updateServiceInOrderPackage(orderId: string, serviceId: string) {
+    const order = await Order.findOne({ _id: orderId, isDeleted: false });
+    if (!order) throw new NotFoundError('Order');
+    const orderPkg = await OrderPackage.findOne({
+      order: order.id,
+      isDeleted: false,
+    });
+    if (!orderPkg) throw new NotFoundError('Order-Package');
+    const { serviceEmbedded } = orderPkg;
+    const service = serviceEmbedded.filter(
+      (service) => service.service.id === serviceId
+    );
+    if (!service) throw new BadRequestError('Service not exist in package');
+    const date = new Date();
+    console.log(date);
+    const orderPackage = await OrderPackage.findOne({
+      order: orderId,
+      'serviceEmbedded.service': serviceId,
+    });
+    console.log(orderPackage);
+
+    await OrderPackage.updateOne(
+      { order: orderId, 'serviceEmbedded.service': serviceId },
+      {
+        $set: {
+          'serviceEmbedded.$.status': true,
+          'serviceEmbedded.$.date': date,
+        },
+      }
+    );
   }
 }

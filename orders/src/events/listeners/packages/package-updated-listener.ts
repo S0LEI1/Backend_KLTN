@@ -16,7 +16,8 @@ export class PackageUpdatedListener extends Listener<PackageUpdatedEvent> {
       id: data.id,
       version: data.version,
     });
-    if (!existPackage) throw new NotFoundError('Package');
+    if (!existPackage)
+      throw new NotFoundError(`Package not found: ${data.name}`);
     existPackage.set({
       name: data.name,
       // costPrice: data.costPrice,
