@@ -2,18 +2,23 @@ import mongoose, { mongo } from 'mongoose';
 import { OrderDoc } from './order';
 import { ServiceDoc } from './service';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
-
+export interface UsageLog {
+  date: Date;
+  status: boolean;
+}
 interface OrderServiceAttrs {
   order: OrderDoc;
   service: ServiceDoc;
   quantity: number;
   totalPrice: number;
+  usageLogs?: UsageLog[];
 }
 export interface OrderServiceDoc extends mongoose.Document {
   order: OrderDoc;
   service: ServiceDoc;
   quantity: number;
   totalPrice: number;
+  usageLogs?: UsageLog[];
   isDeleted: boolean;
   version: number;
 }
@@ -42,6 +47,16 @@ const orderServiceSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    usageLogs: [
+      {
+        date: {
+          type: Date,
+        },
+        status: {
+          type: Boolean,
+        },
+      },
+    ],
     isDeleted: {
       type: Boolean,
       default: false,

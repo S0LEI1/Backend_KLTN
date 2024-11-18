@@ -1,6 +1,10 @@
-import { BadRequestError } from '@share-package/common';
+import { BadRequestError, NotFoundError } from '@share-package/common';
 import { OrderDoc } from '../models/order';
-import { OrderServiceM, OrderServiceDoc } from '../models/order-service';
+import {
+  OrderServiceM,
+  OrderServiceDoc,
+  UsageLog,
+} from '../models/order-service';
 import { ServiceDoc } from '../models/service';
 import { Attrs } from './order.service';
 import { ServiceService } from './service.service';
@@ -11,6 +15,7 @@ export interface ServiceInOrder {
   salePrice: number;
   quantity: number;
   totalPrice: number;
+  usageLogs: UsageLog[] | null;
 }
 export class OrderServiceService {
   static async newOrderService(order: OrderDoc, attr: Attrs) {
@@ -55,6 +60,7 @@ export class OrderServiceService {
         salePrice: orderService.service.salePrice,
         quantity: orderService.quantity,
         totalPrice: orderService.totalPrice,
+        usageLogs: orderService.usageLogs ? orderService.usageLogs : null,
       });
     }
     return { orderServices, serviceTotalPrice, servicesInPackage };
@@ -64,6 +70,8 @@ export class OrderServiceService {
       order: orderDoc.id,
       isDeleted: false,
     }).populate('service');
+    console.log(orderServices);
+
     const services: ServiceInOrder[] = [];
     for (const os of orderServices) {
       services.push({
@@ -73,8 +81,62 @@ export class OrderServiceService {
         salePrice: os.service.salePrice,
         quantity: os.quantity,
         totalPrice: os.totalPrice,
+        usageLogs: os.usageLogs ?? null,
       });
     }
     return services;
   }
+  static async addUsageLog(orderId: string, serviceId: string) {
+    const orderService = await OrderServiceM.findOne({
+      order: orderId,
+      service: serviceId,
+    });
+    let count = 0;
+    if (!orderService) throw new NotFoundError('Order-Service');
+    let usageLogs: UsageLog[] = [];
+    if (orderService.usageLogs) {
+      usageLogs = orderService.usageLogs;
+      count = orderService.usageLogs.filter(
+        (item) => item.status === true
+      ).length;
+      console.log('count in:', count);
+
+      console.log('Count', count);
+      if (count >= orderService.quantity)
+        throw new BadRequestError('Number of Uses Exhausted.');
+    }
+    const date = new Date();
+    const newLog: UsageLog = {
+      date: date,
+      status: true,
+    };
+    usageLogs.push(newLog);
+    orderService.set({ usageLogs: usageLogs });
+    await orderService.save();
+    return { orderService, count };
+  }
+  // static async updateUsageLog(
+  //   orderId: string,
+  //   serviceId: string,
+  //   status: boolean,
+  //   usageLogId: string,
+  //   date: Date
+  // ) {
+  //   const orderService = await OrderServiceM.findOne({
+  //     order: orderId,
+  //     service: serviceId,
+  //   });
+  //   if (!orderService) throw new NotFoundError('Order-Service');
+  //   let usageLogs: UsageLog[] = [];
+  //   if (!orderService.usageLogs) throw new BadRequestError('Order-Servce have not usage log');
+  //   const newLog: UsageLog = {
+  //     date: date,
+  //     status: status,
+  //   };
+  //   const updateLog = orderService.usageLogs.find((log) => log._id)
+  //   usageLogs.push(newLog);
+  //   orderService.set({ usageLogs: usageLogs });
+  //   await orderService.save();
+  //   return { orderService, count };
+  // }
 }

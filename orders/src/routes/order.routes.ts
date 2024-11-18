@@ -72,4 +72,19 @@ router.patch(
   requirePermission([ListPermission.OrderUpdate]),
   OrderController.updateServiceInOrderPackage
 );
+router.patch(
+  '/orders/order-service/add',
+  [
+    body('orderId').isMongoId().withMessage('Order Id must be type ObjectId'),
+    body('serviceId')
+      .isMongoId()
+      .withMessage('Service Id must be type ObjectId'),
+  ],
+  validationRequest,
+  requireAuth,
+  requireType([UserType.Employee, UserType.Manager]),
+  requirePermission([ListPermission.OrderUpdate]),
+  OrderController.addUsageLogToOrderService
+);
+router.get('/orders/exportPdf', OrderController.exportPdf);
 export { router as orderRouter };

@@ -21,6 +21,7 @@ interface ServiceInPackage {
   serviceId: string;
   name: string;
   imageUrl: string;
+  date: Date | null;
   // salePrice: number;
   status: boolean;
 }
@@ -31,6 +32,7 @@ export interface PackagePopulate {
   salePrice: number;
   services: ServiceInPackage[];
   quantity: number;
+
   totalPrice?: number;
 }
 export class OrderPackageService {
@@ -121,6 +123,7 @@ export class OrderPackageService {
           name: srv.service.name,
           imageUrl: srv.service.imageUrl,
           // salePrice: srv.service,
+          date: srv.date ? srv.date : null,
           status: srv.status,
         });
       });

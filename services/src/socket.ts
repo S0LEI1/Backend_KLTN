@@ -1,31 +1,21 @@
-import { Server } from 'socket.io';
-import http from 'http';
-const WEBSOCKET_CORS = {
-  origin: '*',
-  methods: ['GET', 'POST'],
+import { Server as HttpServer } from 'http';
+import { Server as SocketIOServer } from 'socket.io';
+
+let io: SocketIOServer | undefined;
+
+export const init = (httpServer: HttpServer): SocketIOServer => {
+  io = new SocketIOServer(httpServer, {
+    cors: {
+      origin: 'kimbeautyspa.com:3000',
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    },
+  });
+  return io;
 };
 
-class Websocket extends Server {
-  private static io: Server;
-
-  constructor(httpServer: http.Server) {
-    super(httpServer, {
-      cors: {
-        origin: 'https://kimbeautyspa/client',
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-      },
-    });
+export const getIO = (): SocketIOServer => {
+  if (!io) {
+    throw new Error('Socket.io not initialized!');
   }
-  static init = (httpServer: http.Server) => {
-    Websocket.io = require('socket.io')(httpServer);
-    return Websocket.io;
-  };
-  static getIO = () => {
-    if (!Websocket.io) {
-      throw new Error('Socket.io not initialized!');
-    }
-    return Websocket.io;
-  };
-}
-
-export default Websocket;
+  return io;
+};

@@ -6,11 +6,13 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 interface PackageServiceAttrs {
   service: ServiceDoc;
   package: PackageDoc;
+  // quantity: number
 }
 
 export interface PackageServiceDoc extends mongoose.Document {
   service: ServiceDoc;
   package: PackageDoc;
+  // quantity: number;
   isDeleted: boolean;
   version: number;
 }
@@ -35,6 +37,9 @@ const packageServiceSchema = new mongoose.Schema(
       required: true,
       ref: 'Package',
     },
+    // quantity:{
+    //   type: Number,
+    // },
     isDeleted: {
       type: Boolean,
       default: false,
