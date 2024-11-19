@@ -67,6 +67,8 @@ router.post(
           permissions: permissions,
           fullName: existUser.fullName,
           avatar: existUser.avatar,
+          phoneNumer: existUser.phoneNumber,
+          address: existUser.address,
         },
         process.env.JWT_KEY!,
         { expiresIn: '3h' }
