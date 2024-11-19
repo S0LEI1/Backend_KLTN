@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 import { Order, OrderDoc } from '../models/order';
 import {
   OrderPackage,
@@ -11,9 +11,10 @@ import { ServiceService } from './service.service';
 import { Package, PackageDoc } from '../models/package';
 import { BadRequestError, NotFoundError } from '@share-package/common';
 import { Service, ServiceDoc } from '../models/service';
+import { UsageLog } from '../models/order-service';
 export interface PackageInOrder {
   packageInfor: PackageDoc;
-  services: ServiceDoc[];
+  services: { service: ServiceDoc; quantity: number }[];
   quantity: number;
   totalPrice?: number;
 }
@@ -21,7 +22,8 @@ interface ServiceInPackage {
   serviceId: string;
   name: string;
   imageUrl: string;
-  date: Date | null;
+  usageLogs: UsageLog[] | null;
+  quantity: number;
   // salePrice: number;
   status: boolean;
 }
@@ -42,20 +44,27 @@ export class OrderPackageService {
       package: attr.id,
       isDeleted: false,
     }).populate('package');
+    // get package and price
     const { existPackage, price } = await PackageService.getPackage(attr);
-    const services = await ServiceService.getServiceInPackage(existPackage.id);
-    console.log(services);
+    //  get services and quantity in package
+    const servicesInPackage = await ServiceService.getServiceInPackage(
+      existPackage.id
+    );
 
     const serviceEmbedded: ServiceEmbedded[] = [];
-    services.map((srv) => {
-      serviceEmbedded.push({ service: srv, status: false });
+    servicesInPackage.map((serviceInPackage) => {
+      serviceEmbedded.push({
+        service: serviceInPackage.service,
+        status: false,
+        quantity: serviceInPackage.quantity,
+      });
     });
     // const services = await Service.find({ _id: { $in: serviceIds } });
     if (orderPackageExist) {
       if (attr.quantity === 0) orderPackageExist.set({ isDeleted: true });
       orderPackageExist.set({ quantity: attr.quantity });
       await orderPackageExist.save();
-      return { orderPackage: orderPackageExist, services };
+      return { orderPackage: orderPackageExist, servicesInPackage };
     }
     if (attr.quantity <= 0)
       throw new BadRequestError(
@@ -69,14 +78,14 @@ export class OrderPackageService {
       totalPrice: price,
     });
     await orderPackage.save();
-    return { orderPackage, services };
+    return { orderPackage, servicesInPackage };
   }
   static async newOrderPacakages(order: OrderDoc, packageAttrs: Attrs[]) {
     const orderPackages: OrderPackageDoc[] = [];
     const packagesInOrder: PackageInOrder[] = [];
     let packageTotalPrice: number = 0;
     for (const attr of packageAttrs) {
-      const { orderPackage, services } = await this.newOrderPacakage(
+      const { orderPackage, servicesInPackage } = await this.newOrderPacakage(
         order,
         attr
       );
@@ -84,7 +93,7 @@ export class OrderPackageService {
       packageTotalPrice += orderPackage.totalPrice;
       packagesInOrder.push({
         packageInfor: orderPackage.package,
-        services: services,
+        services: servicesInPackage,
         quantity: orderPackage.quantity,
       });
     }
@@ -123,8 +132,9 @@ export class OrderPackageService {
           name: srv.service.name,
           imageUrl: srv.service.imageUrl,
           // salePrice: srv.service,
-          date: srv.date ? srv.date : null,
           status: srv.status,
+          quantity: srv.quantity,
+          usageLogs: srv.usageLogs ?? null,
         });
       });
       totalPrice += op.package.salePrice * op.quantity;
@@ -140,12 +150,54 @@ export class OrderPackageService {
     }
     return packages;
   }
-  // static async findByOrderId(orderId: string){
-  //   // const order =await Order.findOne({_id: orderId, isDeleted: false});
-  //   const orderPackages = await OrderPackage.find({order: orderId, isDeleted: false}).populate('package');
-  //   const packages: PackageDoc[] = [];
-  //   for (const orderPkg of orderPackages) {
-  //     packages.push
-  //   }
-  // }
+  static async addUsageLog(
+    orderId: string,
+    packageId: string,
+    serviceId: string
+  ) {
+    const orderPackage = await OrderPackage.findOne({
+      order: orderId,
+      package: packageId,
+    });
+    if (!orderPackage) throw new NotFoundError('Order-Package not found');
+    const { serviceEmbedded } = orderPackage;
+    console.log(serviceEmbedded);
+
+    let count = 0;
+    let usageLogs: UsageLog[] = [];
+    const date = new Date();
+    const newLog: UsageLog = {
+      date: date,
+      status: true,
+    };
+    const serviceEmbeddeds: ServiceEmbedded[] = [];
+    for (const serviceEbd of serviceEmbedded) {
+      const service = await Service.findOne({
+        _id: serviceId,
+        isDeleted: false,
+      });
+      if (!service) throw new NotFoundError('Service');
+      if (serviceEbd.service.id.toString('hex') !== service.id) {
+        serviceEmbeddeds.push(serviceEbd);
+        continue;
+      }
+      if (serviceEbd.usageLogs) {
+        usageLogs = serviceEbd.usageLogs;
+        count = serviceEbd.usageLogs.filter(
+          (item) => item.status === true
+        ).length;
+        console.log('Count', count);
+        if (count >= serviceEbd.quantity)
+          throw new BadRequestError('Number of Uses Exhausted.');
+      }
+      usageLogs.push(newLog);
+      serviceEbd.usageLogs = usageLogs;
+      console.log(serviceEbd);
+
+      serviceEmbeddeds.push(serviceEbd);
+      orderPackage.set({ serviceEmbedded: serviceEmbeddeds });
+      await orderPackage.save();
+    }
+    return orderPackage;
+  }
 }

@@ -91,8 +91,8 @@ export class OrderServiceService {
       order: orderId,
       service: serviceId,
     });
-    let count = 0;
     if (!orderService) throw new NotFoundError('Order-Service');
+    let count = 0;
     let usageLogs: UsageLog[] = [];
     if (orderService.usageLogs) {
       usageLogs = orderService.usageLogs;

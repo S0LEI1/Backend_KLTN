@@ -3,6 +3,7 @@ import { OrderService } from '../services/order.service';
 import { PDFDocument } from 'pdf-lib';
 import fs from 'fs';
 import { OrderServiceService } from '../services/order-service.service';
+import { OrderPackageService } from '../services/order-package.service';
 
 export class OrderController {
   static async newOrder(req: Request, res: Response) {
@@ -128,10 +129,16 @@ export class OrderController {
     const order = await OrderService.deleteOrder(orderId);
     res.status(200).send({ message: 'PATCH:Delete order successfully' });
   }
-  static async updateServiceInOrderPackage(req: Request, res: Response) {
-    const { orderId, serviceId } = req.body;
-    await OrderService.updateServiceInOrderPackage(orderId, serviceId);
-    res.status(200).send({ message: 'PATCH: Update successfully' });
+  static async addUsageLogToOrderPackage(req: Request, res: Response) {
+    const { orderId, packageId, serviceId } = req.body;
+    const orderPackage = await OrderPackageService.addUsageLog(
+      orderId,
+      packageId,
+      serviceId
+    );
+    res
+      .status(200)
+      .send({ message: 'PATCH: Update successfully', orderPackage });
   }
   static async addUsageLogToOrderService(req: Request, res: Response) {
     const { orderId, serviceId } = req.body;

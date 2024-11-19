@@ -4,6 +4,10 @@ import { Attrs } from './order.service';
 import { PackageService } from '../models/package-service';
 import mongoose, { ObjectId } from 'mongoose';
 import { ServiceEmbedded } from '../models/order-package';
+interface ServiceInPackage {
+  service: ServiceDoc;
+  quantity: number;
+}
 export class ServiceService {
   static async getService(attr: Attrs) {
     const service = await Service.findService(attr.id);
@@ -22,22 +26,22 @@ export class ServiceService {
     return { services, totalPrice };
   }
   static async getServiceInPackage(packageId: string) {
-    console.log('packageId', packageId);
-
     const packageSrvs = await PackageService.find({
       package: packageId,
       isDeleted: false,
     }).populate('service');
 
-    const services: ServiceDoc[] = [];
+    const servicesInPackage: ServiceInPackage[] = [];
     // packageSrvs.map((pSrv) => {
     //   services.push(pSrv.service);
     // });
     for (const ps of packageSrvs) {
-      services.push(ps.service);
+      servicesInPackage.push({
+        service: ps.service,
+        quantity: ps.quantity,
+      });
     }
-    console.log(services);
 
-    return services;
+    return servicesInPackage;
   }
 }

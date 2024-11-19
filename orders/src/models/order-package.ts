@@ -3,10 +3,12 @@ import { OrderDoc } from './order';
 import { PackageDoc } from './package';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { ServiceDoc } from './service';
+import { UsageLog } from './order-service';
 export interface ServiceEmbedded {
   service: ServiceDoc;
   status: boolean;
-  date?: Date;
+  quantity: number;
+  usageLogs?: UsageLog[];
 }
 interface OrderPackageAttrs {
   order: OrderDoc;
@@ -48,12 +50,19 @@ const orderPackageSchema = new mongoose.Schema(
           type: mongoose.Types.ObjectId,
           ref: 'Service',
         },
-        status: {
-          type: Boolean,
+        quantity: {
+          type: Number,
         },
-        date: {
-          type: Date,
-        },
+        usageLogs: [
+          {
+            date: {
+              type: Date,
+            },
+            status: {
+              type: Boolean,
+            },
+          },
+        ],
       },
     ],
     quantity: {

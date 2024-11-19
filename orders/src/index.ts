@@ -21,6 +21,7 @@ import { PackageDeletedListener } from './events/listeners/packages/package-dele
 import { PackageServiceCreatedListener } from './events/listeners/package-services/package-service-created-listener';
 import { PacakgeServiceDeletedListener } from './events/listeners/package-services/package-service-deleted-listener';
 import { PackageUpdatedListener } from './events/listeners/packages/package-updated-listener';
+import { PackageServiceUpdatedListener } from './events/listeners/package-services/package-service-updated-listener';
 
 const start = async () => {
   if (!process.env.JWT_KEY) {
@@ -77,6 +78,7 @@ const start = async () => {
     // ------------------package service --------------------------
     new PackageServiceCreatedListener(natsWrapper.client).listen();
     new PacakgeServiceDeletedListener(natsWrapper.client).listen();
+    new PackageServiceUpdatedListener(natsWrapper.client).listen();
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connecting mongo!!');
   } catch (error) {

@@ -62,6 +62,9 @@ router.patch(
   '/orders/order-package',
   [
     body('orderId').isMongoId().withMessage('Order Id must be type ObjectId'),
+    body('packageId')
+      .isMongoId()
+      .withMessage('Service Id must be type ObjectId'),
     body('serviceId')
       .isMongoId()
       .withMessage('Service Id must be type ObjectId'),
@@ -70,7 +73,7 @@ router.patch(
   requireAuth,
   requireType([UserType.Employee, UserType.Manager]),
   requirePermission([ListPermission.OrderUpdate]),
-  OrderController.updateServiceInOrderPackage
+  OrderController.addUsageLogToOrderPackage
 );
 router.patch(
   '/orders/order-service/add',

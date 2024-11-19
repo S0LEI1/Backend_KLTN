@@ -12,8 +12,13 @@ import { Service, ServiceDoc } from '../models/service';
 import { select } from '../utils/convert';
 import mongoose, { ObjectId } from 'mongoose';
 import exceljs from 'exceljs';
-import { PackageServiceServices } from './package-serivce.service';
+import {
+  PackageServiceServices,
+  ServiceAttrs,
+  ServiceInPackage,
+} from './package-serivce.service';
 import _ from 'lodash';
+import { PackageServicePublisher } from './package-service.publisher.service';
 const PER_PAGE = process.env.PER_PAGE!;
 interface ServiceInterface {
   code: string;
@@ -28,10 +33,8 @@ export class PackageServices {
     count: number,
     expire: number,
     code: string,
-    serviceIds: string[]
+    services: [{ id: string; quantity: number }]
   ) {
-    console.log(serviceIds);
-
     // check package exitst
     const existPackage = await Package.findOne({
       $or: [{ name: name }, { code: code }],
@@ -56,14 +59,14 @@ export class PackageServices {
       expire: expire,
       code: code,
     });
-    // save package on database
     await newPackage.save();
-    const { packageServices, services } =
-      await PackageServiceServices.newPackageService(serviceIds, newPackage.id);
-    // publish created event
     PackagePublisher.newPackage(newPackage);
+    // save package on database
+    const { packageExist, servicesInPackage } =
+      await PackageServiceServices.newPackageServices(services, newPackage.id);
+    // publish created event
     // return package for controller
-    return { newPackage, services };
+    return { newPackage, servicesInPackage };
   }
   static async readAll(
     pages: string,
@@ -150,25 +153,30 @@ export class PackageServices {
     const packageServices = await PackageService.find(
       { package: existPackage.id },
       isManager ? null : select
-    );
+    ).populate('service');
     // if packageService lenght => no service attach package => return package
     if (packageServices.length === 0) return { existPackage };
     // define service id array
     const serviceIds: mongoose.Types.ObjectId[] = [];
+    const serviceInPackage: ServiceInPackage[] = [];
     packageServices.forEach((ps) =>
       // push service id
-      serviceIds.push(new mongoose.Types.ObjectId(ps.service.id))
+      {
+        serviceIds.push(new mongoose.Types.ObjectId(ps.service.id)),
+          serviceInPackage.push({
+            service: ps.service,
+            quantity: ps.quantity,
+          });
+      }
     );
     // find services attach with package
-    const services = await Service.find({ _id: { $in: serviceIds } }).sort({
-      name: 1,
-    });
+
     // if user = manager => return services not attach with package
     const notInSerivce = await Service.find(
       { _id: { $nin: serviceIds }, isDeleted: false },
       isManager ? null : select
     ).sort({ name: 1 });
-    return { existPackage, notInSerivce, services };
+    return { existPackage, notInSerivce, services: serviceInPackage };
   }
   static async deletedPackage(id: string) {
     // check exist package and isDeleted = false
@@ -177,6 +185,10 @@ export class PackageServices {
     if (!existPackage) throw new NotFoundError('Package');
     // update isDeleted = true
     existPackage.set({ isDeleted: true });
+    await PackageService.updateMany(
+      { package: existPackage.id },
+      { isDeleted: true }
+    );
     // save database
     await existPackage.save();
     // publisher deleted event
@@ -196,7 +208,7 @@ export class PackageServices {
     featured: boolean;
     description: string;
     code: string;
-    serviceIds: string[];
+    services: [{ id: string; quantity: number }];
   }) {
     const existPackage = await Package.findOne({
       _id: packageAttrs.id,
@@ -214,10 +226,10 @@ export class PackageServices {
       costPrice: packageAttrs.costPrice,
       // salePrice: packageAttrs.salePrice,
       imageUrl: imageUrl,
-      discount: packageAttrs.discount,
+      discount: packageAttrs.discount ?? existPackage.discount,
       expire: packageAttrs.expire,
       count: packageAttrs.count,
-      featured: packageAttrs.featured,
+      featured: packageAttrs.featured ?? existPackage.featured,
       description: packageAttrs.description,
       code: packageAttrs.code,
     });
@@ -225,42 +237,51 @@ export class PackageServices {
       await PackageServiceServices.findServiceInPackageId(existPackage.id);
     console.log(servicesInPackage);
 
-    const servicesInPackageIds = servicesInPackage.map((srv) => srv.id);
-    // const setExistSrvIds = new Set(existSrvIds);
-    // const setSrvIds = new Set(packageAttrs.serviceIds);
-    const { serviceIds } = packageAttrs;
-    // const addIds = serviceIds.filter(
-    //   (element) => !servicesInPackageIds.includes(element)
-    // );
-    const addIds = _.difference(serviceIds, servicesInPackageIds);
-    let services: ServiceDoc[] = [];
-    if (addIds.length > 0) {
-      const response = await PackageServiceServices.newPackageService(
-        addIds,
-        existPackage.id
-      );
-      services = response.services;
-    }
-    const deleteIds = _.difference(servicesInPackageIds, serviceIds);
-    if (deleteIds.length > 0) {
-      await PackageServiceServices.deletePackageSevice({
-        serviceIds: deleteIds,
-        packageId: existPackage.id,
+    const serviceInPackage: ServiceInPackage[] = [];
+
+    for (const serviceAttr of packageAttrs.services) {
+      console.log(serviceAttr);
+
+      const serviceExist = await Service.findService(serviceAttr.id);
+      if (!serviceExist) throw new NotFoundError('Service');
+      const packageServiceExist =
+        await PackageServiceServices.findPackageService(
+          serviceExist.id,
+          existPackage.id
+        );
+      if (packageServiceExist) {
+        if ((serviceAttr.quantity as number) === 0) {
+          packageServiceExist.set({
+            quantity: serviceAttr.quantity,
+            isDeleted: true,
+          });
+          await packageServiceExist.save();
+          PackageServicePublisher.deletePackageService(packageServiceExist);
+          continue;
+        }
+        packageServiceExist.set({ quantity: serviceAttr.quantity });
+        await packageServiceExist.save();
+        serviceInPackage.push({
+          service: serviceExist,
+          quantity: serviceAttr.quantity as number,
+        });
+        PackageServicePublisher.updatePackageService(packageServiceExist);
+        continue;
+      }
+      const { packageService, service, quantity } =
+        await PackageServiceServices.newPackageService(
+          { service: serviceExist, quantity: serviceAttr.quantity },
+          existPackage
+        );
+      serviceInPackage.push({
+        service: service,
+        quantity: quantity as number,
       });
     }
-    console.log('servicesInPackageIds', servicesInPackageIds);
-    console.log('serviceIds', serviceIds);
-
-    console.log('addIds', addIds);
-    console.log('deleteIds', deleteIds);
-
-    const midSrvs = servicesInPackage.filter((srv) =>
-      serviceIds.includes(srv.id)
-    );
     await existPackage.save();
     return {
       existPackage,
-      services: [...midSrvs, ...services],
+      serviceInPackage,
     };
   }
   static async exportPackage() {

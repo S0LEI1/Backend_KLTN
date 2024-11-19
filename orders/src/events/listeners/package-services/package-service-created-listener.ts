@@ -15,6 +15,8 @@ export class PackageServiceCreatedListener extends Listener<PackageServiceCreate
   subject: Subjects.PackageServiceCreated = Subjects.PackageServiceCreated;
   queueGroupName: string = queueGroupName;
   async onMessage(data: PackageServiceCreatedEvent['data'], msg: Message) {
+    console.log(data);
+
     const service = await Service.findService(data.serviceId);
     if (!service) throw new NotFoundError('Service');
     const existPackage = await Package.findPackage(data.packageId);
@@ -29,8 +31,11 @@ export class PackageServiceCreatedListener extends Listener<PackageServiceCreate
       id: data.id,
       service: service,
       package: existPackage,
+      quantity: data.quantity,
     });
     await packageService.save();
+    console.log('packageService', packageService);
+
     msg.ack();
   }
 }

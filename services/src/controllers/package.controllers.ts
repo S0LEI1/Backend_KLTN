@@ -4,27 +4,33 @@ import { PackageServices } from '../services/packages.service';
 import { Check } from '../utils/check-type';
 import { Package } from '../models/package';
 import { PackagePublisher } from '../services/package.publisher.service';
+import { ServiceAttrs } from '../services/package-serivce.service';
 
 export class PackageControllers {
   static async newPackage(req: Request, res: Response) {
     const { file } = req;
-    const { name, costPrice, description, count, expire, code, serviceIds } =
+    const { name, costPrice, description, count, expire, code, services } =
       req.body;
-    const { newPackage, services } = await PackageServices.newPackage(
-      name,
-      costPrice,
-      file as Express.Multer.File,
-      description,
-      count,
-      expire,
-      code,
-      serviceIds as string[]
-    );
-    res.status(201).send({
-      message: 'POST: new package successfully',
-      pakage: newPackage,
-      services: services,
-    });
+    try {
+      const { newPackage, servicesInPackage } =
+        await PackageServices.newPackage(
+          name,
+          costPrice,
+          file as Express.Multer.File,
+          description,
+          count,
+          expire,
+          code,
+          services
+        );
+      res.status(201).send({
+        message: 'POST: new package successfully',
+        pakage: newPackage,
+        services: servicesInPackage,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
   static async readAll(req: Request, res: Response) {
     const {
@@ -83,8 +89,8 @@ export class PackageControllers {
     res.status(200).send({
       message: 'GET: Package successfully',
       package: existPackage,
-      notInSerivce,
       services,
+      notInSerivce,
     });
   }
   static async deletePackage(req: Request, res: Response) {
@@ -111,28 +117,29 @@ export class PackageControllers {
       featured,
       description,
       code,
-      serviceIds,
+      services,
     } = req.body;
     const file = req.file;
     try {
-      const { existPackage, services } = await PackageServices.updatePackage({
-        id: id,
-        name: name,
-        costPrice: parseInt(costPrice as string),
-        // salePrice: parseInt(salePrice as string),
-        discount: parseInt(discount as string),
-        count: parseInt(count as string),
-        expire: parseInt(expire as string),
-        file: file!,
-        featured: featured === 'true' ? true : false,
-        description: description,
-        code: code,
-        serviceIds: serviceIds as string[],
-      });
+      const { existPackage, serviceInPackage } =
+        await PackageServices.updatePackage({
+          id: id,
+          name: name,
+          costPrice: costPrice,
+          // salePrice: salePrice,
+          discount: discount,
+          count: count,
+          expire: expire,
+          file: file!,
+          featured: featured === 'true' ? true : false,
+          description: description,
+          code: code,
+          services: services,
+        });
       res.status(200).send({
         message: 'Update package successfully',
         package: existPackage,
-        services: services,
+        services: serviceInPackage,
       });
     } catch (error) {
       console.log(error);

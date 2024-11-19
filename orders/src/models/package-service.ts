@@ -7,11 +7,13 @@ interface PackageServiceAttrs {
   id: string;
   service: ServiceDoc;
   package: PackageDoc;
+  quantity: number;
 }
 
 export interface PackageServiceDoc extends mongoose.Document {
   service: ServiceDoc;
   package: PackageDoc;
+  quantity: number;
   isDeleted: boolean;
   version: number;
 }
@@ -40,6 +42,9 @@ const packageServiceSchema = new mongoose.Schema(
       required: true,
       ref: 'Package',
     },
+    quantity: {
+      type: Number,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -64,6 +69,7 @@ packageServiceSchema.statics.build = (attrs: PackageServiceAttrs) => {
     _id: attrs.id,
     service: attrs.service,
     package: attrs.package,
+    quantity: attrs.quantity,
   });
 };
 packageServiceSchema.statics.findPackageService = async (id: string) => {

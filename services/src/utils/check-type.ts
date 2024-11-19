@@ -24,6 +24,7 @@ export class Check {
     return false;
   }
   static checkImage = (file: Express.Multer.File) => {
+    if (!file) throw new BadRequestError('File must be provided');
     const { mimetype } = file;
     if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
       throw new BadRequestError('Image invalid');
