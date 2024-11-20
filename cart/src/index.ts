@@ -13,6 +13,12 @@ import { SuplierDeletedListener } from './events/listeners/supliers/suplier-dele
 import { ProductCreatedListener } from './events/listeners/products/product-created-listener';
 import { ProductUpdatedListener } from './events/listeners/products/product-updated-listener';
 import { ProductDeletedListener } from './events/listeners/products/product-deleted-listener';
+import { ServiceCreatedListener } from './events/listeners/services/service-created-listener';
+import { ServiceUpdatedListener } from './events/listeners/services/service-updated-listener';
+import { ServiceDeletedListener } from './events/listeners/services/service-deleted-listener';
+import { PackageCreatedListener } from './events/listeners/packages/package-created-listener';
+import { PackageUpdatedListener } from './events/listeners/packages/package-updated-listener';
+import { PackageDeletedListener } from './events/listeners/packages/package-deleted-listener';
 const start = async () => {
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
@@ -57,6 +63,14 @@ const start = async () => {
     new ProductCreatedListener(natsWrapper.client).listen();
     new ProductUpdatedListener(natsWrapper.client).listen();
     new ProductDeletedListener(natsWrapper.client).listen();
+    // ------------------services --------------------------
+    new ServiceCreatedListener(natsWrapper.client).listen();
+    new ServiceUpdatedListener(natsWrapper.client).listen();
+    new ServiceDeletedListener(natsWrapper.client).listen();
+    // ------------------package --------------------------
+    new PackageCreatedListener(natsWrapper.client).listen();
+    new PackageUpdatedListener(natsWrapper.client).listen();
+    new PackageDeletedListener(natsWrapper.client).listen();
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connecting mongo!!');
   } catch (error) {

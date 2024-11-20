@@ -3,14 +3,18 @@ import express, { Request, Response } from 'express';
 import { CartController } from '../controllers/cart.controller';
 import { body } from 'express-validator';
 import mongoose from 'mongoose';
+import { AddType } from '../services/cart.service';
 const router = express.Router();
 router.post(
   '/cart/add',
   [
-    body('quantity')
+    body('item.quantity')
       .isInt({ min: 1 })
       .withMessage('Quantity must be type Integer and greater than or equal 1'),
-    body('productId').isMongoId().withMessage('Product Id must be ObjectId'),
+    body('item.id').isMongoId().withMessage('Item Id must be ObjectId'),
+    body('type')
+      .isIn(Object.values(AddType))
+      .withMessage('Type must be: product, service, package'),
   ],
   validationRequest,
   requireAuth,
@@ -24,9 +28,7 @@ router.patch(
     body('cartAttr.*.quantity')
       .isInt()
       .withMessage('Quantity must be type Integer and greater than or equal 1'),
-    body('cartAttr.*.productId')
-      .isMongoId()
-      .withMessage('ProductId must be ObjectId'),
+    body('cartAttr.*.id').isMongoId().withMessage('ItemId must be ObjectId'),
   ],
   validationRequest,
   requireAuth,
@@ -35,8 +37,8 @@ router.patch(
 router.patch(
   '/cart/delete',
   [
-    body('productIds').isArray().withMessage('ProductIds must be an array'),
-    body('productIds.*').custom((value) => {
+    body('ids').isArray().withMessage('ProductIds must be an array'),
+    body('ids.*').custom((value) => {
       if (!mongoose.Types.ObjectId.isValid(value)) {
         throw new Error('Invalid ObjectID');
       }
@@ -44,6 +46,6 @@ router.patch(
     }),
   ],
   requireAuth,
-  CartController.deleteProducts
+  CartController.deleteItems
 );
 export { router as cartRouter };

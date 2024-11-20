@@ -15,6 +15,7 @@ interface CartProductDoc extends mongoose.Document {
   quantity: number;
   totalPrice: number;
   isDeleted: boolean;
+  createdAt: Date;
   version: number;
 }
 interface CartProductModel extends mongoose.Model<CartProductDoc> {
