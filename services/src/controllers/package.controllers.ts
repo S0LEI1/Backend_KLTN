@@ -84,13 +84,14 @@ export class PackageControllers {
         ListPermission.PackageRead,
       ]);
     }
-    const { existPackage, notInSerivce, services } =
-      await PackageServices.readOne(id, isManager);
+    const { existPackage, services } = await PackageServices.readOne(
+      id,
+      isManager
+    );
     res.status(200).send({
       message: 'GET: Package successfully',
       package: existPackage,
       services,
-      notInSerivce,
     });
   }
   static async deletePackage(req: Request, res: Response) {

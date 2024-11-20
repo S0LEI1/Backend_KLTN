@@ -20,9 +20,11 @@ import {
 import _ from 'lodash';
 import { PackageServicePublisher } from './package-service.publisher.service';
 const PER_PAGE = process.env.PER_PAGE!;
-interface ServiceInterface {
-  code: string;
+interface ServiceInPacakge {
+  serviceId: string;
   name: string;
+  imageUrl: string;
+  quantity: number;
 }
 export class PackageServices {
   static async newPackage(
@@ -157,26 +159,27 @@ export class PackageServices {
     // if packageService lenght => no service attach package => return package
     if (packageServices.length === 0) return { existPackage };
     // define service id array
-    const serviceIds: mongoose.Types.ObjectId[] = [];
-    const serviceInPackage: ServiceInPackage[] = [];
+    // const serviceIds: mongoose.Types.ObjectId[] = [];
+    const serviceInPackage: ServiceInPacakge[] = [];
     packageServices.forEach((ps) =>
       // push service id
       {
-        serviceIds.push(new mongoose.Types.ObjectId(ps.service.id)),
-          serviceInPackage.push({
-            service: ps.service,
-            quantity: ps.quantity,
-          });
+        serviceInPackage.push({
+          serviceId: ps.service.id,
+          name: ps.service.name,
+          imageUrl: ps.service.imageUrl,
+          quantity: ps.quantity,
+        });
       }
     );
     // find services attach with package
 
     // if user = manager => return services not attach with package
-    const notInSerivce = await Service.find(
-      { _id: { $nin: serviceIds }, isDeleted: false },
-      isManager ? null : select
-    ).sort({ name: 1 });
-    return { existPackage, notInSerivce, services: serviceInPackage };
+    // const notInSerivce = await Service.find(
+    //   { _id: { $nin: serviceIds }, isDeleted: false },
+    //   isManager ? null : select
+    // ).sort({ name: 1 });
+    return { existPackage, services: serviceInPackage };
   }
   static async deletedPackage(id: string) {
     // check exist package and isDeleted = false
