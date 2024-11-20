@@ -99,7 +99,9 @@ export class PackageServiceServices {
     const packageSrvs = await PackageService.find({
       package: id,
       isDeleted: false,
-    }).populate('service');
+    })
+      .populate('service')
+      .populate('package');
     const services: ServiceDoc[] = packageSrvs.map((ps) => ps.service);
     return services;
   }
@@ -108,7 +110,9 @@ export class PackageServiceServices {
       package: packageId,
       service: serviceId,
       isDeleted: false,
-    }).populate('service');
+    })
+      .populate('service')
+      .populate('package');
     return packageSrvExist;
   }
 }

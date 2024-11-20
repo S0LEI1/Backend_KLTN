@@ -92,7 +92,7 @@ packageServiceSchema.statics.findByEvent = async (event: {
 }): Promise<PackageServiceDoc | null> => {
   const packageService = await PackageService.findOne({
     _id: event.id,
-    version: event.version,
+    version: event.version - 1,
   });
   return packageService;
 };

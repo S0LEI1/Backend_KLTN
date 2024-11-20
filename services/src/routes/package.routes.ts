@@ -33,6 +33,15 @@ router.post(
       .isFloat({ min: 5 })
       .withMessage('Expire must be greater than equal 1 day'),
     body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
+    body('services').isArray().withMessage('Service must me array'),
+    body('services.*.id')
+      .isMongoId()
+      .withMessage('Service Id in services must be ObjectId'),
+    body('services.*.quantity')
+      .isInt({ min: 1 })
+      .withMessage(
+        'Quantity in services must be type Integer and greater than or equal 1'
+      ),
   ],
   validationRequest,
   requireAuth,
@@ -71,9 +80,9 @@ router.patch(
       .isMongoId()
       .withMessage('Service Id in services must be ObjectId'),
     body('services.*.quantity')
-      .isInt({ min: 1 })
+      .isInt({ min: 0 })
       .withMessage(
-        'Quantity in services must be type Integer and greater than or equal 1'
+        'Quantity in services must be type Integer and greater than or equal 0'
       ),
   ],
   validationRequest,

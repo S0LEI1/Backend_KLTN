@@ -268,6 +268,7 @@ export class PackageServices {
         });
         continue;
       }
+      if (packageServiceExist.isDeleted === true) continue;
       packageServiceExist.set({ quantity: serviceAttr.quantity });
       await packageServiceExist.save();
       if (packageServiceExist.quantity === 0) {

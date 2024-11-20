@@ -12,13 +12,11 @@ export class PacakgeServiceDeletedListener extends Listener<PackageServiceDelete
   subject: Subjects.PackageServiceDeleted = Subjects.PackageServiceDeleted;
   queueGroupName: string = queueGroupName;
   async onMessage(data: PackageServiceDeletedEvent['data'], msg: Message) {
-    console.log(data);
-
     const packageService = await PackageService.findByEvent({
       id: data.id,
       version: data.version,
     });
-    if (!packageService) throw new NotFoundError('Package-Service');
+    if (!packageService) throw new NotFoundError('Package-Service not found');
     packageService.set({ isDeleted: data.isDeleted });
     msg.ack();
   }

@@ -19,13 +19,13 @@ router.post(
   requirePermission([ListPermission.PackageCreate]),
   PackageServiceControllers.newPackageService
 );
-router.post(
-  '/services/package-service/delete',
-  [body('packageId').isMongoId().withMessage('Package Id must be mongoId')],
-  validationRequest,
-  requireAuth,
-  requireType([UserType.Manager]),
-  requirePermission([ListPermission.PackageDelete]),
-  PackageServiceControllers.deletePackageService
-);
+// router.post(
+//   '/services/package-service/delete',
+//   [body('packageId').isMongoId().withMessage('Package Id must be mongoId')],
+//   validationRequest,
+//   requireAuth,
+//   requireType([UserType.Manager]),
+//   requirePermission([ListPermission.PackageDelete]),
+//   PackageServiceControllers.deletePackageService
+// );
 export { router as packageServiceRouter };

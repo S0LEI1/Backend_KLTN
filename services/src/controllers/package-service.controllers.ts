@@ -15,12 +15,12 @@ export class PackageServiceControllers {
       packageServices,
     });
   }
-  static async deletePackageService(req: Request, res: Response) {
-    const { serviceIds, packageId } = req.body;
-    await PackageServiceServices.deletePackageSevice({
-      serviceIds: serviceIds as string[],
-      packageId: packageId,
-    });
-    res.status(200).send({ message: 'DELETE: Package service successfully' });
-  }
+  // static async deletePackageService(req: Request, res: Response) {
+  //   const { serviceIds, packageId } = req.body;
+  //   await PackageServiceServices.deletePackageSevice({
+  //     serviceIds: serviceIds as string[],
+  //     packageId: packageId,
+  //   });
+  //   res.status(200).send({ message: 'DELETE: Package service successfully' });
+  // }
 }
