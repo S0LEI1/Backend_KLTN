@@ -65,28 +65,35 @@ export class PackageServiceServices {
     // publish create event
     return { packageExist, servicesInPackage };
   }
-  static async deletePackageSevice(attrs: {
-    serviceIds: string[];
-    packageId: string;
-  }) {
-    try {
-      const existPSs = await PackageService.find({
-        package: attrs.packageId,
-        service: { $in: attrs.serviceIds },
-        isDeleted: false,
-      });
-      if (existPSs.length <= 0)
-        throw new BadRequestError('Package Service do not exist');
-      // publish deleted event
-      for (const ps of existPSs) {
-        PackageServicePublisher.deletePackageService(ps);
-        ps.set({ isDeleted: true });
-        await ps.save();
-        console.log('delete service successfully');
-      }
-    } catch (error) {
-      console.log(error);
-    }
+  static async deletePackageSevice(
+    serviceInPackage: ServiceInPackage,
+    packageDoc: PackageDoc
+  ) {
+    const existPS = await PackageService.findOne({
+      package: packageDoc.id,
+      service: serviceInPackage.service.id,
+      isDeleted: false,
+    });
+    if (!existPS) throw new BadRequestError('Package Service do not exist');
+    // publish deleted event
+    existPS.set({ isDeleted: false, quantity: 0 });
+    await existPS.save();
+    return existPS;
+  }
+  static async updatePackageSevice(
+    serviceInPackage: ServiceInPackage,
+    packageDoc: PackageDoc
+  ) {
+    const existPS = await PackageService.findOne({
+      package: packageDoc.id,
+      service: serviceInPackage.service.id,
+      isDeleted: false,
+    });
+    if (!existPS) throw new BadRequestError('Package Service do not exist');
+    // publish deleted event
+    existPS.set({ quantity: serviceInPackage.quantity });
+    await existPS.save();
+    return existPS;
   }
   static async findServiceInPackageId(id: string) {
     const packageSrvs = await PackageService.find({
@@ -101,7 +108,7 @@ export class PackageServiceServices {
       package: packageId,
       service: serviceId,
       isDeleted: false,
-    });
+    }).populate('service');
     return packageSrvExist;
   }
 }

@@ -26,6 +26,10 @@ interface ServiceInPacakge {
   imageUrl: string;
   quantity: number;
 }
+export interface ServiceAttr {
+  id: string;
+  quantity: number;
+}
 export class PackageServices {
   static async newPackage(
     name: string,
@@ -35,7 +39,7 @@ export class PackageServices {
     count: number,
     expire: number,
     code: string,
-    services: [{ id: string; quantity: number }]
+    services: ServiceAttr[]
   ) {
     // check package exitst
     const existPackage = await Package.findOne({
@@ -211,13 +215,13 @@ export class PackageServices {
     featured: boolean;
     description: string;
     code: string;
-    services: [{ id: string; quantity: number }];
+    services: ServiceAttr[];
   }) {
     const existPackage = await Package.findOne({
       _id: packageAttrs.id,
       isDeleted: false,
     });
-    if (!existPackage) throw new NotFoundError('Package services');
+    if (!existPackage) throw new NotFoundError('Package-Services');
     let imageUrl = existPackage.imageUrl;
     if (packageAttrs.file) {
       await AwsServices.deleteFile(imageUrl);
@@ -240,11 +244,9 @@ export class PackageServices {
       await PackageServiceServices.findServiceInPackageId(existPackage.id);
     console.log(servicesInPackage);
 
-    const serviceInPackage: ServiceInPackage[] = [];
+    const serviceInPackage: ServiceInPacakge[] = [];
 
     for (const serviceAttr of packageAttrs.services) {
-      console.log(serviceAttr);
-
       const serviceExist = await Service.findService(serviceAttr.id);
       if (!serviceExist) throw new NotFoundError('Service');
       const packageServiceExist =
@@ -252,34 +254,33 @@ export class PackageServices {
           serviceExist.id,
           existPackage.id
         );
-      if (packageServiceExist) {
-        if ((serviceAttr.quantity as number) === 0) {
-          packageServiceExist.set({
-            quantity: serviceAttr.quantity,
-            isDeleted: true,
-          });
-          await packageServiceExist.save();
-          PackageServicePublisher.deletePackageService(packageServiceExist);
-          continue;
-        }
-        packageServiceExist.set({ quantity: serviceAttr.quantity });
-        await packageServiceExist.save();
+      if (!packageServiceExist) {
+        const { packageService, service, quantity } =
+          await PackageServiceServices.newPackageService(
+            { service: serviceExist, quantity: serviceAttr.quantity },
+            existPackage
+          );
         serviceInPackage.push({
-          service: serviceExist,
-          quantity: serviceAttr.quantity as number,
+          serviceId: service.id,
+          name: service.name,
+          imageUrl: service.imageUrl,
+          quantity: packageService.quantity,
         });
-        PackageServicePublisher.updatePackageService(packageServiceExist);
         continue;
       }
-      const { packageService, service, quantity } =
-        await PackageServiceServices.newPackageService(
-          { service: serviceExist, quantity: serviceAttr.quantity },
-          existPackage
-        );
+      packageServiceExist.set({ quantity: serviceAttr.quantity });
+      await packageServiceExist.save();
+      if (packageServiceExist.quantity === 0) {
+        PackageServicePublisher.deletePackageService(packageServiceExist);
+        continue;
+      }
       serviceInPackage.push({
-        service: service,
-        quantity: quantity as number,
+        serviceId: packageServiceExist.service.id,
+        name: packageServiceExist.service.name,
+        imageUrl: packageServiceExist.service.imageUrl,
+        quantity: packageServiceExist.quantity,
       });
+      PackageServicePublisher.updatePackageService(packageServiceExist);
     }
     await existPackage.save();
     return {

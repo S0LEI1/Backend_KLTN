@@ -1,6 +1,7 @@
 import express from 'express';
 import 'express-async-errors';
 import { json } from 'body-parser';
+import bodyParser from 'body-parser';
 import cookieSession from 'cookie-session';
 import cors from 'cors';
 import { Server } from 'socket.io';
@@ -17,6 +18,7 @@ import { packageServiceRouter } from './routes/package-service.routes';
 const app = express();
 const httpServer = createServer(app);
 app.use(json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.set('trust proxy', true);
 // config cookie session
 app.use(

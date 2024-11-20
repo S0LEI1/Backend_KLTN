@@ -111,7 +111,6 @@ export class PackageControllers {
     const {
       name,
       costPrice,
-      salePrice,
       discount,
       count,
       expire,
