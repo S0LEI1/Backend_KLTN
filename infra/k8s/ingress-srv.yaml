@@ -17,52 +17,59 @@ spec:
                 name: auth-srv
                 port:
                   number: 3000
-          - path: /products/?(.*)
+          # - path: /products/?(.*)
+          #   pathType: ImplementationSpecific
+          #   backend:
+          #     service:
+          #       name: products-srv
+          #       port:
+          #         number: 3000
+          - path: /branchs/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
-                name: products-srv
+                name: branchs-srv
                 port:
                   number: 3000
-          - path: /shifts/?(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: shifts-srv
-                port:
-                  number: 3000
-          - path: /services/?(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: services-srv
-                port:
-                  number: 3000
-          - path: /orders/?(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: orders-srv
-                port:
-                  number: 3000
-          - path: /payments/?(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: payments-srv
-                port:
-                  number: 3000
-          - path: /cart/?(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: cart-srv
-                port:
-                  number: 3000
-          - path: /?(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: client-srv
-                port:
-                  number: 3000
+          # - path: /shifts/?(.*)
+          #   pathType: ImplementationSpecific
+          #   backend:
+          #     service:
+          #       name: shifts-srv
+          #       port:
+          #         number: 3000
+          # - path: /services/?(.*)
+          #   pathType: ImplementationSpecific
+          #   backend:
+          #     service:
+          #       name: services-srv
+          #       port:
+          #         number: 3000
+          # - path: /orders/?(.*)
+          #   pathType: ImplementationSpecific
+          #   backend:
+          #     service:
+          #       name: orders-srv
+          #       port:
+          #         number: 3000
+          # - path: /payments/?(.*)
+          #   pathType: ImplementationSpecific
+          #   backend:
+          #     service:
+          #       name: payments-srv
+          #       port:
+          #         number: 3000
+          # - path: /cart/?(.*)
+          #   pathType: ImplementationSpecific
+          #   backend:
+          #     service:
+          #       name: cart-srv
+          #       port:
+          #         number: 3000
+          # - path: /?(.*)
+          #   pathType: ImplementationSpecific
+          #   backend:
+          #     service:
+          #       name: client-srv
+          #       port:
+          #         number: 3000

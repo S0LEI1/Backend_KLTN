@@ -37,7 +37,7 @@
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5"
   },
-  "name": "payments",
+  "name": "cart",
   "version": "1.0.0",
   "main": "index.js",
   "keywords": [],

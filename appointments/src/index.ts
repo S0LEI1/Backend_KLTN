@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import { app } from './app';
 import { natsWrapper } from './nats-wrapper';
+import { BranchCreatedListener } from './events/listeners/branchs/branch-created-listener';
+import { BranchUpdatedListener } from './events/listeners/branchs/branch-updated-listener';
+import { BranchDeletedListener } from './events/listeners/branchs/branch-delete-listener';
 const start = async () => {
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
@@ -29,6 +32,11 @@ const start = async () => {
     });
     process.on('SIGINT', () => natsWrapper.client!.close());
     process.on('SIGTERM', () => natsWrapper.client!.close());
+
+    new BranchCreatedListener(natsWrapper.client).listen();
+    new BranchUpdatedListener(natsWrapper.client).listen();
+    new BranchDeletedListener(natsWrapper.client).listen();
+
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connecting mongo!!');
   } catch (error) {
