@@ -4,4 +4,9 @@
 ./employees/node_modules
 ./products/node_modules
 ./accounts/node_modules
+./branchs/node_modules
+./payments/node_modules
+./cart/node_modules
+./services/node_modules
+./appointments/node_modules
 ./client

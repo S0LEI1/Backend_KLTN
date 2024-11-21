@@ -68,7 +68,7 @@ branchSchema.statics.build = (attrs: BranchAttrs) => {
   return new Branch({
     _id: attrs.id,
     name: attrs.name,
-    phoneNumer: attrs.phoneNumber,
+    phoneNumber: attrs.phoneNumber,
     email: attrs.email,
     address: attrs.address,
   });

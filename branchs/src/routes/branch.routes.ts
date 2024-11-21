@@ -30,4 +30,42 @@ router.post(
   requirePermission([ListPermission.BranchCreate]),
   BranchControllers.newBranch
 );
+router.get(
+  '/branchs/',
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.BranchRead]),
+  BranchControllers.getBranchs
+);
+router.get(
+  '/branchs/:id',
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.BranchRead]),
+  BranchControllers.getBranch
+);
+router.patch(
+  '/branchs/update/:id',
+  [
+    body('name')
+      .notEmpty()
+      .isString()
+      .withMessage('Branch name must be provided'),
+    body('phoneNumber').isMobilePhone('vi-VN').withMessage(PHONE_MESSAGE),
+    body('address').not().isEmpty().withMessage(ADDRESS_MESSAGE),
+    body('email').isEmail().withMessage(EMAIL_MESSAGE),
+  ],
+  validationRequest,
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.BranchRead]),
+  BranchControllers.updateBranch
+);
+router.patch(
+  '/branchs/delete/:id',
+  requireAuth,
+  requireType([UserType.Manager]),
+  requirePermission([ListPermission.BranchRead]),
+  BranchControllers.deleteBranch
+);
 export { router as branchRouter };
