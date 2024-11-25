@@ -8,6 +8,7 @@ import {
 import { ServiceDoc } from '../models/service';
 import { Attrs } from './order.service';
 import { ServiceService } from './service.service';
+import { OrderServicePublisher } from './order-service-publisher.service';
 export interface ServiceInOrder {
   serviceId: string;
   name: string;
@@ -19,15 +20,24 @@ export interface ServiceInOrder {
 }
 export class OrderServiceService {
   static async newOrderService(order: OrderDoc, attr: Attrs) {
+    // find order service
     const orderServiceExist = await OrderServiceM.findOne({
       order: order.id,
       service: attr.id,
       isDeleted: false,
     }).populate('service');
+    //  check if exist
     if (orderServiceExist) {
-      if (attr.quantity === 0) orderServiceExist.set({ isDeleted: true });
+      // if quantity =0 => delete order service
+      if (attr.quantity === 0) {
+        orderServiceExist.set({ isDeleted: true });
+        OrderServicePublisher.deleteOrderService(orderServiceExist);
+        await orderServiceExist.save();
+        return orderServiceExist;
+      }
       orderServiceExist.set({ quantity: attr.quantity });
       await orderServiceExist.save();
+      OrderServicePublisher.updateOrderService(orderServiceExist);
       return orderServiceExist;
     }
     if (attr.quantity <= 0)
@@ -42,6 +52,7 @@ export class OrderServiceService {
       totalPrice: price,
     });
     await orderService.save();
+    OrderServicePublisher.newOrderService(orderService);
     return orderService;
   }
   static async newOrderServices(order: OrderDoc, servicesAttr: Attrs[]) {

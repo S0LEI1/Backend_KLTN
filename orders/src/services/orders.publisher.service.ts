@@ -9,7 +9,7 @@ export class OrderPublisher {
     new OrderCreatedPublisher(natsWrapper.client).publish({
       id: orderDoc.id,
       customer: orderDoc.customer.id,
-      creEmp: orderDoc.creEmp.id,
+      creator: orderDoc.creator.id,
       postTaxTotal: orderDoc.postTaxTotal,
       status: orderDoc.status,
       createdAt: orderDoc.createdAt,
@@ -19,7 +19,7 @@ export class OrderPublisher {
     new OrderUpdatedPublisher(natsWrapper.client).publish({
       id: orderDoc.id,
       customer: orderDoc.customer.id.toString(),
-      creEmp: orderDoc.creEmp.id.toString(),
+      creator: orderDoc.creator.id.toString(),
       postTaxTotal: orderDoc.postTaxTotal,
       status: orderDoc.status,
       createdAt: orderDoc.createdAt,

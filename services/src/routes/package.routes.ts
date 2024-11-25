@@ -80,9 +80,9 @@ router.patch(
       .isMongoId()
       .withMessage('Service Id in services must be ObjectId'),
     body('services.*.quantity')
-      .isInt({ min: 0 })
+      .isInt({ min: 1 })
       .withMessage(
-        'Quantity in services must be type Integer and greater than or equal 0'
+        'Quantity in services must be type Integer and greater than or equal 1'
       ),
   ],
   validationRequest,

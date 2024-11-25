@@ -23,14 +23,14 @@ export interface Attrs {
 }
 export class OrderService {
   static async newOrder(order: {
-    creEmpId: string;
+    creatorId: string;
     execEmpId: string;
     customerId: string;
     type: string;
   }) {
-    const createEmp = await User.findUser(order.creEmpId);
-    if (!createEmp) throw new NotFoundError('Create Employee');
-    if (order.type === UserType.Customer) order.customerId = order.creEmpId;
+    const creator = await User.findUser(order.creatorId);
+    if (!creator) throw new NotFoundError('Create Employee');
+    if (order.type === UserType.Customer) order.customerId = order.creatorId;
     // check execute employy
     // check customer
     const customer = await User.findUser(order.customerId);
@@ -39,17 +39,10 @@ export class OrderService {
     // define previous tax price
     let orderDoc: OrderDoc;
     orderDoc = Order.build({
+      creator: creator,
       customer: customer,
-      creEmp: createEmp,
       status: OrderStatus.Created,
     });
-    if (order.execEmpId) {
-      const execEmp = await User.findUser(order.execEmpId);
-      if (!execEmp) throw new NotFoundError('Execute Employee');
-      orderDoc.set({
-        execEmp: execEmp,
-      });
-    }
     await orderDoc.save();
     OrderPublisher.newOrder(orderDoc);
     return orderDoc;
@@ -65,7 +58,7 @@ export class OrderService {
       isDeleted: false,
     })
       .populate('customer')
-      .populate('creEmp');
+      .populate('creator');
     console.log(orderDoc);
 
     if (!orderDoc) throw new NotFoundError('Order');
@@ -117,7 +110,7 @@ export class OrderService {
     let sort: FilterQuery<OrderDoc> = {};
     if (type === 'customer' && cusId)
       filter.customer = new mongoose.Types.ObjectId(cusId);
-    if (creId) filter.creEmp = new mongoose.Types.ObjectId(creId);
+    if (creId) filter.creator = new mongoose.Types.ObjectId(creId);
     if (execId) filter.execEmp = execId;
     if (status) filter.status = status;
     if (createdAt) {
@@ -158,19 +151,19 @@ export class OrderService {
       {
         $lookup: {
           from: 'users',
-          localField: 'creEmp',
+          localField: 'creator',
           foreignField: '_id',
-          as: 'creEmp',
+          as: 'creator',
         },
       },
       {
         $addFields: {
-          creEmpId: { $arrayElemAt: ['$creEmp._id', 0] },
-          creEmpName: { $arrayElemAt: ['$creEmp.fullName', 0] },
+          creatorId: { $arrayElemAt: ['$creator._id', 0] },
+          creatorName: { $arrayElemAt: ['$creator.fullName', 0] },
         },
       },
       {
-        $project: { customer: 0, creEmp: 0 },
+        $project: { customer: 0, creator: 0 },
       },
       { $skip: pages - 1 },
       { $limit: parseInt(PER_PAGE as string, 25) },
@@ -184,14 +177,14 @@ export class OrderService {
     filter.isDeleted = false;
     const order = await Order.findOne({ _id: id, isDeleted: false });
     if (!order) throw new NotFoundError('Order');
-    const createEmp = await User.findOne(
+    const creator = await User.findOne(
       {
-        _id: order.creEmp,
+        _id: order.creator,
         isDeleted: false,
       },
       { id: 1, fullName: 1, imageUrl: 1, phoneNumber: 1, type: 1 }
     );
-    if (!createEmp) throw new NotFoundError('Create Employee');
+    if (!creator) throw new NotFoundError('Create Employee');
     const customer = await User.findOne(
       {
         _id: order.customer,
@@ -200,19 +193,10 @@ export class OrderService {
       { id: 1, fullName: 1, imageUrl: 1, phoneNumber: 1, type: 1 }
     );
     if (!customer) throw new NotFoundError('Customer');
-    let execEmp: UserDoc | null;
-    if (order.execEmp) {
-      execEmp = await User.findOne(
-        { _id: order.execEmp, isDeleted: false },
-        { id: 1, fullName: 1, imageUrl: 1, phoneNumber: 1, type: 1 }
-      );
-      if (execEmp === null) throw new NotFoundError('Execute Employee');
-    }
-
     const packages = await OrderPackageService.findByOrder(order);
     const products = await OrderProductService.findByOrder(order);
     const services = await OrderServiceService.findByOrder(order);
-    return { order, createEmp, customer, packages, services, products };
+    return { order, creator, customer, packages, services, products };
   }
 
   static async cancelOrder(orderId: string, userId: string, type: string) {
@@ -248,7 +232,7 @@ export class OrderService {
         select: '_id fullName imageUrl phoneNumber',
       })
       .populate({
-        path: 'creEmp',
+        path: 'creator',
         select: '_id fullName imageUrl phoneNumber',
       })
       .populate({

@@ -12,7 +12,7 @@ export class OrderController {
     const { execEmpId, customerId } = req.body;
     try {
       const order = await OrderService.newOrder({
-        creEmpId: creEmpId,
+        creatorId: creEmpId,
         execEmpId: execEmpId,
         customerId: customerId,
         type,
@@ -25,19 +25,23 @@ export class OrderController {
   static async addAndDelete(req: Request, res: Response) {
     const { services, packages, products } = req.body;
     const { orderId } = req.params;
-    const order = await OrderService.addAndRemove(
-      orderId,
-      services,
-      packages,
-      products
-    );
-    res.status(201).send({
-      message: 'POST:Add successfullt',
-      order: order.orderDoc,
-      products: order.products,
-      services: order.services,
-      package: order.packages,
-    });
+    try {
+      const order = await OrderService.addAndRemove(
+        orderId,
+        services,
+        packages,
+        products
+      );
+      res.status(201).send({
+        message: 'POST:Add successfullt',
+        order: order.orderDoc,
+        products: order.products,
+        services: order.services,
+        package: order.packages,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
   static async readOrders(req: Request, res: Response) {
     const {
@@ -77,7 +81,7 @@ export class OrderController {
   static async getOrder(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { order, packages, services, products, createEmp, customer } =
+      const { order, packages, services, products, creator, customer } =
         await OrderService.getOne(id);
       res.status(200).send({
         message: 'GET: Order successfully',
@@ -87,9 +91,9 @@ export class OrderController {
           customerId: customer.id,
           customerName: customer.fullName,
           customerPhone: customer.phoneNumber,
-          creatorId: createEmp.id,
-          creatorName: createEmp.fullName,
-          creatorPhone: createEmp.phoneNumber,
+          creatorId: creator.id,
+          creatorName: creator.fullName,
+          creatorPhone: creator.phoneNumber,
           preTaxTotal: order.preTaxTotal,
           tax: order.tax,
           status: order.status,

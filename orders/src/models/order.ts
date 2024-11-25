@@ -5,8 +5,7 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 interface OrderAttrs {
   customer: UserDoc;
-  creEmp: UserDoc;
-  execEmp?: UserDoc;
+  creator: UserDoc;
   preTaxTotal?: number;
   // postTaxTotal: number;
   status: OrderStatus;
@@ -14,7 +13,7 @@ interface OrderAttrs {
 
 export interface OrderDoc extends mongoose.Document {
   customer: UserDoc;
-  creEmp: UserDoc;
+  creator: UserDoc;
   execEmp?: UserDoc;
   preTaxTotal: number;
   tax: number;
@@ -37,13 +36,9 @@ const orderSchema = new mongoose.Schema(
       required: true,
       ref: 'User',
     },
-    creEmp: {
+    creator: {
       type: mongoose.Types.ObjectId,
       required: true,
-      ref: 'User',
-    },
-    execEmp: {
-      type: mongoose.Types.ObjectId,
       ref: 'User',
     },
     preTaxTotal: {

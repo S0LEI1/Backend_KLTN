@@ -12,6 +12,7 @@ import { Package, PackageDoc } from '../models/package';
 import { BadRequestError, NotFoundError } from '@share-package/common';
 import { Service, ServiceDoc } from '../models/service';
 import { UsageLog } from '../models/order-service';
+import { OrderPackagePublisher } from './order-package-publisher.service';
 export interface PackageInOrder {
   packageInfor: PackageDoc;
   services: { service: ServiceDoc; quantity: number }[];
@@ -34,7 +35,6 @@ export interface PackagePopulate {
   salePrice: number;
   services: ServiceInPackage[];
   quantity: number;
-
   totalPrice?: number;
 }
 export class OrderPackageService {
@@ -61,9 +61,15 @@ export class OrderPackageService {
     });
     // const services = await Service.find({ _id: { $in: serviceIds } });
     if (orderPackageExist) {
-      if (attr.quantity === 0) orderPackageExist.set({ isDeleted: true });
+      if (attr.quantity === 0) {
+        orderPackageExist.set({ isDeleted: true });
+        await orderPackageExist.save();
+        OrderPackagePublisher.deletedOrderPackage(orderPackageExist);
+        return { orderPackage: orderPackageExist, servicesInPackage };
+      }
       orderPackageExist.set({ quantity: attr.quantity });
       await orderPackageExist.save();
+      OrderPackagePublisher.updateOrderPackage(orderPackageExist);
       return { orderPackage: orderPackageExist, servicesInPackage };
     }
     if (attr.quantity <= 0)
@@ -78,6 +84,7 @@ export class OrderPackageService {
       totalPrice: price,
     });
     await orderPackage.save();
+    OrderPackagePublisher.newOrderPackage(orderPackage);
     return { orderPackage, servicesInPackage };
   }
   static async newOrderPacakages(order: OrderDoc, packageAttrs: Attrs[]) {

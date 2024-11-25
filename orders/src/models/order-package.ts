@@ -4,6 +4,7 @@ import { PackageDoc } from './package';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { ServiceDoc } from './service';
 import { UsageLog } from './order-service';
+import { UserDoc } from './user';
 export interface ServiceEmbedded {
   service: ServiceDoc;
   status: boolean;
@@ -16,6 +17,7 @@ interface OrderPackageAttrs {
   serviceEmbedded: ServiceEmbedded[];
   quantity: number;
   totalPrice: number;
+  execEmployee?: UserDoc;
 }
 
 export interface OrderPackageDoc extends mongoose.Document {
@@ -24,6 +26,7 @@ export interface OrderPackageDoc extends mongoose.Document {
   serviceEmbedded: ServiceEmbedded[];
   quantity: number;
   totalPrice: number;
+  execEmployee?: UserDoc;
   isDeleted: boolean;
   version: number;
 }
@@ -72,6 +75,10 @@ const orderPackageSchema = new mongoose.Schema(
     totalPrice: {
       type: Number,
       required: true,
+    },
+    execEmployee: {
+      type: mongoose.Types.ObjectId,
+      ref: 'User',
     },
     isDeleted: {
       type: Boolean,

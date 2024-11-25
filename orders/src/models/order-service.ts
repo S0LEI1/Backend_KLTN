@@ -2,6 +2,7 @@ import mongoose, { mongo } from 'mongoose';
 import { OrderDoc } from './order';
 import { ServiceDoc } from './service';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+import { UserDoc } from './user';
 export interface UsageLog {
   date: Date;
   status: boolean;
@@ -12,6 +13,7 @@ interface OrderServiceAttrs {
   quantity: number;
   totalPrice: number;
   usageLogs?: UsageLog[];
+  execEmployee?: UserDoc;
 }
 export interface OrderServiceDoc extends mongoose.Document {
   order: OrderDoc;
@@ -19,6 +21,7 @@ export interface OrderServiceDoc extends mongoose.Document {
   quantity: number;
   totalPrice: number;
   usageLogs?: UsageLog[];
+  execEmployee?: UserDoc;
   isDeleted: boolean;
   version: number;
 }
@@ -57,6 +60,10 @@ const orderServiceSchema = new mongoose.Schema(
         },
       },
     ],
+    execEmployee: {
+      type: mongoose.Types.ObjectId,
+      ref: 'User',
+    },
     isDeleted: {
       type: Boolean,
       default: false,
