@@ -22,7 +22,7 @@ export class OrderUpdatedListener extends Listener<OrderUpdatedEvent> {
     if (!existOrder) throw new NotFoundError('Order not found');
     existOrder.set({
       customer: data.customer,
-      creEmp: data.creEmp,
+      creator: data.creator,
       status: data.status,
       createdAt: data.createdAt,
       postTaxTotal: data.postTaxTotal,

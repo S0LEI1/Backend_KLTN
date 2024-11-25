@@ -25,7 +25,9 @@ export class OrderServiceService {
       order: order.id,
       service: attr.id,
       isDeleted: false,
-    }).populate('service');
+    })
+      .populate('service')
+      .populate('order');
     //  check if exist
     if (orderServiceExist) {
       // if quantity =0 => delete order service

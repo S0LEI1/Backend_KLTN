@@ -59,7 +59,6 @@ export class OrderService {
     })
       .populate('customer')
       .populate('creator');
-    console.log(orderDoc);
 
     if (!orderDoc) throw new NotFoundError('Order');
     let preTaxTotal = orderDoc.preTaxTotal | 0;
@@ -264,13 +263,10 @@ export class OrderService {
     );
     if (!service) throw new BadRequestError('Service not exist in package');
     const date = new Date();
-    console.log(date);
     const orderPackage = await OrderPackage.findOne({
       order: orderId,
       'serviceEmbedded.service': serviceId,
     });
-    console.log(orderPackage);
-
     await OrderPackage.updateOne(
       { order: orderId, 'serviceEmbedded.service': serviceId },
       {

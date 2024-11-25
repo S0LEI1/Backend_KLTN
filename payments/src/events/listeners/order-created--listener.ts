@@ -24,7 +24,7 @@ export class OrderCreatedListener extends Listener<OrderCreatedEvent> {
     const order = Order.build({
       id: data.id,
       customer: data.customer,
-      creEmp: data.creEmp,
+      creator: data.creator,
       status: data.status,
       createdAt: data.createdAt,
       postTaxTotal: data.postTaxTotal,

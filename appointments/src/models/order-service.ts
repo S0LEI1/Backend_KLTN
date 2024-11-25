@@ -84,7 +84,7 @@ orderServiceSchema.statics.build = (
   attrs: OrderServiceAttrs
 ): OrderServiceDoc => {
   return new OrderServiceM({
-    id: attrs.id,
+    _id: attrs.id,
     order: attrs.order,
     service: attrs.service,
     quantity: attrs.quantity,

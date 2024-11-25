@@ -14,6 +14,8 @@ export class OrderServiceUpdatedListener extends Listener<OrderServiceUpdatedEve
   subject: Subjects.OrderServiceUpdated = Subjects.OrderServiceUpdated;
   queueGroupName: string = queueGroupName;
   async onMessage(data: OrderServiceUpdatedEvent['data'], msg: Message) {
+    console.log('order-service-update', data);
+
     const orderService = await OrderServiceM.findByEvent({
       id: data.id,
       version: data.version,

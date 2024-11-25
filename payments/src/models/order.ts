@@ -6,8 +6,7 @@ import { UserDoc } from './user';
 interface OrderAttrs {
   id: string;
   customer: string;
-  creEmp: string;
-  execEmp?: string;
+  creator: string;
   postTaxTotal: number;
   // postTaxTotal: number;
   status: OrderStatus;
@@ -16,7 +15,7 @@ interface OrderAttrs {
 
 export interface OrderDoc extends mongoose.Document {
   customer: string;
-  creEmp: string;
+  creator: string;
   execEmp?: string;
   tax: number;
   postTaxTotal: number;
@@ -39,7 +38,7 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    creEmp: {
+    creator: {
       type: String,
       required: true,
     },
@@ -77,10 +76,8 @@ orderSchema.statics.build = (attrs: OrderAttrs) => {
   return new Order({
     _id: attrs.id,
     customer: attrs.customer,
-    creEmp: attrs.creEmp,
-    execEmp: attrs.execEmp,
+    creator: attrs.creator,
     postTaxTotal: attrs.postTaxTotal,
-    // postTaxTotal: number,
     status: attrs.status,
     createdAt: attrs.createdAt,
   });

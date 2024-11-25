@@ -43,7 +43,10 @@ export class OrderPackageService {
       order: order.id,
       package: attr.id,
       isDeleted: false,
-    }).populate('package');
+    })
+      .populate('package')
+      .populate('order')
+      .populate({ path: 'serviceEmbedded.service' });
     // get package and price
     const { existPackage, price } = await PackageService.getPackage(attr);
     //  get services and quantity in package
