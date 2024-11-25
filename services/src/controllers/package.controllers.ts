@@ -121,7 +121,7 @@ export class PackageControllers {
     } = req.body;
     const file = req.file;
     try {
-      const { existPackage, serviceInPackage } =
+      const { existPackage, servicesInPackage } =
         await PackageServices.updatePackage({
           id: id,
           name: name,
@@ -139,7 +139,7 @@ export class PackageControllers {
       res.status(200).send({
         message: 'Update package successfully',
         package: existPackage,
-        services: serviceInPackage,
+        services: servicesInPackage,
       });
     } catch (error) {
       console.log(error);

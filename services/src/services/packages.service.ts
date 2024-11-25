@@ -15,12 +15,11 @@ import exceljs from 'exceljs';
 import {
   PackageServiceServices,
   ServiceAttrs,
-  ServiceInPackage,
 } from './package-serivce.service';
-import _ from 'lodash';
+import _, { update } from 'lodash';
 import { PackageServicePublisher } from './package-service.publisher.service';
 const PER_PAGE = process.env.PER_PAGE!;
-interface ServiceInPacakge {
+export interface ServiceInPacakge {
   serviceId: string;
   name: string;
   imageUrl: string;
@@ -240,53 +239,58 @@ export class PackageServices {
       description: packageAttrs.description,
       code: packageAttrs.code,
     });
-    const servicesInPackage =
+    const { serviceAttr, services } =
       await PackageServiceServices.findServiceInPackageId(existPackage.id);
-    console.log(servicesInPackage);
 
-    const serviceInPackage: ServiceInPacakge[] = [];
+    const servicesInPackage: ServiceInPacakge[] = [];
 
-    for (const serviceAttr of packageAttrs.services) {
-      const serviceExist = await Service.findService(serviceAttr.id);
-      if (!serviceExist) throw new NotFoundError('Service');
-      const packageServiceExist =
-        await PackageServiceServices.findPackageService(
-          serviceExist.id,
-          existPackage.id
-        );
-      if (!packageServiceExist) {
-        const { packageService, service, quantity } =
-          await PackageServiceServices.newPackageService(
-            { service: serviceExist, quantity: serviceAttr.quantity },
-            existPackage
-          );
-        serviceInPackage.push({
-          serviceId: service.id,
-          name: service.name,
-          imageUrl: service.imageUrl,
-          quantity: packageService.quantity,
-        });
-        continue;
-      }
-      if (packageServiceExist.isDeleted === true) continue;
-      packageServiceExist.set({ quantity: serviceAttr.quantity });
-      await packageServiceExist.save();
-      if (packageServiceExist.quantity === 0) {
-        PackageServicePublisher.deletePackageService(packageServiceExist);
-        continue;
-      }
-      serviceInPackage.push({
-        serviceId: packageServiceExist.service.id,
-        name: packageServiceExist.service.name,
-        imageUrl: packageServiceExist.service.imageUrl,
-        quantity: packageServiceExist.quantity,
-      });
-      PackageServicePublisher.updatePackageService(packageServiceExist);
-    }
-    await existPackage.save();
+    // const existIds = serviceInPackage.map((srv) => srv.serviceId);
+    const updateServiceAttr: ServiceAttr[] = [];
+    packageAttrs.services.map((srv) =>
+      updateServiceAttr.push({
+        id: srv.id,
+        quantity: srv.quantity,
+      })
+    );
+    const addValue = _.differenceBy(updateServiceAttr, serviceAttr, 'id');
+    const updateValue = _.intersectionBy(updateServiceAttr, serviceAttr, 'id');
+    const deleteValue = _.differenceBy(serviceAttr, updateServiceAttr, 'id');
+    console.log('addIds', addValue);
+    console.log('deleteValue', deleteValue);
+    console.log('updateValue', updateValue);
+
+    const updateServices = await PackageServiceServices.updatePackageSevices(
+      updateValue,
+      existPackage
+    );
+    updateServices.map((update) =>
+      servicesInPackage.push({
+        serviceId: update.service.id,
+        name: update.service.name,
+        imageUrl: update.service.name,
+        quantity: update.quantity,
+      })
+    );
+    const addServices = await PackageServiceServices.newPackageServices(
+      addValue,
+      existPackage.id
+    );
+    addServices.servicesInPackage.map((add) =>
+      servicesInPackage.push({
+        serviceId: add.service.id,
+        name: add.service.name,
+        imageUrl: add.service.name,
+        quantity: add.quantity,
+      })
+    );
+    const deleteServices = await PackageServiceServices.deletePackageServices(
+      deleteValue,
+      existPackage
+    );
+
     return {
       existPackage,
-      serviceInPackage,
+      servicesInPackage,
     };
   }
   static async exportPackage() {

@@ -4,6 +4,7 @@ import { Package, PackageDoc } from '../models/package';
 import { PackageService, PackageServiceDoc } from '../models/package-service';
 import { PackageServicePublisher } from './package-service.publisher.service';
 import exceljs from 'exceljs';
+// import { ServiceAttr } from './packages.service';
 export interface ServiceInPackage {
   service: ServiceDoc;
   quantity: number;
@@ -38,8 +39,6 @@ export class PackageServiceServices {
     if (!packageExist) throw new NotFoundError('Package');
     const servicesInPackage: ServiceInPackage[] = [];
     for (const serviceAttr of serviceAttrs) {
-      console.log(serviceAttr);
-
       const serviceExist = await Service.findOne({
         _id: serviceAttr.id,
         isDeleted: false,
@@ -66,34 +65,65 @@ export class PackageServiceServices {
     return { packageExist, servicesInPackage };
   }
   static async deletePackageSevice(
-    serviceInPackage: ServiceInPackage,
+    serviceAttr: ServiceAttrs,
     packageDoc: PackageDoc
   ) {
     const existPS = await PackageService.findOne({
       package: packageDoc.id,
-      service: serviceInPackage.service.id,
+      service: serviceAttr.id,
       isDeleted: false,
     });
     if (!existPS) throw new BadRequestError('Package Service do not exist');
     // publish deleted event
-    existPS.set({ isDeleted: false, quantity: 0 });
+    existPS.set({ isDeleted: true, quantity: 0 });
     await existPS.save();
     return existPS;
   }
-  static async updatePackageSevice(
-    serviceInPackage: ServiceInPackage,
+  static async deletePackageServices(
+    serviceAttrs: ServiceAttrs[],
     packageDoc: PackageDoc
   ) {
+    for (const serviceAttr of serviceAttrs) {
+      await this.deletePackageSevice(serviceAttr, packageDoc);
+    }
+  }
+  static async updatePackageSevice(
+    serviceAttr: ServiceAttrs,
+    packageDoc: PackageDoc
+  ) {
+    const existService = await Service.findOne({
+      _id: serviceAttr.id,
+      isDeleted: false,
+    });
+    if (!existService) throw new NotFoundError('Service not found');
     const existPS = await PackageService.findOne({
       package: packageDoc.id,
-      service: serviceInPackage.service.id,
+      service: existService.id,
       isDeleted: false,
     });
     if (!existPS) throw new BadRequestError('Package Service do not exist');
     // publish deleted event
-    existPS.set({ quantity: serviceInPackage.quantity });
+    existPS.set({ quantity: serviceAttr.quantity });
     await existPS.save();
-    return existPS;
+    PackageServicePublisher.updatePackageService(existPS);
+    return { service: existService, quantity: existPS.quantity };
+  }
+  static async updatePackageSevices(
+    servicesInPackage: ServiceAttrs[],
+    packageDoc: PackageDoc
+  ) {
+    const services: ServiceInPackage[] = [];
+    for (const serviceInPackage of servicesInPackage) {
+      const { service, quantity } = await this.updatePackageSevice(
+        serviceInPackage,
+        packageDoc
+      );
+      services.push({
+        service: service,
+        quantity: quantity,
+      });
+    }
+    return services;
   }
   static async findServiceInPackageId(id: string) {
     const packageSrvs = await PackageService.find({
@@ -103,8 +133,16 @@ export class PackageServiceServices {
       .populate('service')
       .populate('package');
     const services: ServiceDoc[] = packageSrvs.map((ps) => ps.service);
-    return services;
+    const serviceAttr: ServiceAttrs[] = [];
+    packageSrvs.map((ps) => {
+      serviceAttr.push({
+        id: ps.service.id,
+        quantity: ps.quantity,
+      });
+    });
+    return { services, serviceAttr };
   }
+
   static async findPackageService(serviceId: string, packageId: string) {
     const packageSrvExist = await PackageService.findOne({
       package: packageId,
