@@ -133,28 +133,16 @@ export class OrderController {
     const order = await OrderService.deleteOrder(orderId);
     res.status(200).send({ message: 'PATCH:Delete order successfully' });
   }
-  static async addUsageLogToOrderPackage(req: Request, res: Response) {
+  static async addUsageLog(req: Request, res: Response) {
     const { orderId, packageId, serviceId } = req.body;
-    const orderPackage = await OrderPackageService.addUsageLog(
+    const { serviceEmebedded, count } = await OrderService.addUsageLog(
       orderId,
       packageId,
       serviceId
     );
     res
       .status(200)
-      .send({ message: 'PATCH: Update successfully', orderPackage });
-  }
-  static async addUsageLogToOrderService(req: Request, res: Response) {
-    const { orderId, serviceId } = req.body;
-    const { orderService, count } = await OrderServiceService.addUsageLog(
-      orderId,
-      serviceId
-    );
-    res.status(200).send({
-      message: 'PATCH: Add usage log successfully',
-      orderService,
-      count,
-    });
+      .send({ message: 'PATCH: Update successfully', serviceEmebedded, count });
   }
   static async exportPdf(req: Request, res: Response) {
     const pdfDoc = await PDFDocument.create();

@@ -12,6 +12,8 @@ export class OrderServiceDeletedListener extends Listener<OrderServiceDeletedEve
   subject: Subjects.OrderServiceDeleted = Subjects.OrderServiceDeleted;
   queueGroupName: string = queueGroupName;
   async onMessage(data: OrderServiceDeletedEvent['data'], msg: Message) {
+    console.log('data-order-serivce-delête', data);
+
     const orderService = await OrderServiceM.findByEvent({
       id: data.id,
       version: data.version,

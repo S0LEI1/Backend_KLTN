@@ -15,11 +15,19 @@ import { format } from 'date-fns';
 import { OrderPublisher } from './orders.publisher.service';
 import { OrderPackage } from '../models/order-package';
 import { PDFDocument } from 'pdf-lib';
+import { OrderServiceM, UsageLog } from '../models/order-service';
 
 const PER_PAGE = process.env.PER_PAGE;
 export interface Attrs {
   id: string;
   quantity: number;
+}
+interface ServiceEmebeddedLog {
+  serviceId: string;
+  name: string;
+  imageUrl: string;
+  quantity: number;
+  usageLogs: UsageLog[];
 }
 export class OrderService {
   static async newOrder(order: {
@@ -368,5 +376,39 @@ export class OrderService {
     // Serialize the PDFDocument to bytes (a Uint8Array)
     const pdfBytes = await pdfDoc.save();
     return pdfBytes;
+  }
+  static async addUsageLog(
+    orderId: string,
+    packageId: string,
+    serviceId: string
+  ) {
+    console.log(packageId);
+    console.log(serviceId);
+
+    if (packageId) {
+      const { serviceEmbeddedUpdate, count } =
+        await OrderPackageService.addUsageLog(orderId, packageId, serviceId);
+      const serviceEmebedded: ServiceEmebeddedLog = {
+        serviceId: serviceEmbeddedUpdate.service.id,
+        name: serviceEmbeddedUpdate.service.name,
+        imageUrl: serviceEmbeddedUpdate.service.imageUrl,
+        quantity: serviceEmbeddedUpdate.quantity,
+        usageLogs: serviceEmbeddedUpdate.usageLogs!,
+      };
+      return { serviceEmebedded, count };
+    }
+    const { orderService, count } = await OrderServiceService.addUsageLog(
+      orderId,
+      serviceId
+    );
+    const serviceEmebedded: ServiceEmebeddedLog = {
+      serviceId: orderService.service.id,
+      name: orderService.service.name,
+      imageUrl: orderService.service.imageUrl,
+      quantity: orderService.quantity,
+      usageLogs: orderService.usageLogs!,
+    };
+    return { serviceEmebedded, count };
+    // return {"Not found", 0};
   }
 }

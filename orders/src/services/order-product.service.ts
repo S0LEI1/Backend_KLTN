@@ -30,7 +30,13 @@ export class OrderProductService {
       );
 
     if (orderProductExist) {
-      if (attr.quantity === 0) orderProductExist.set({ isDeleted: true });
+      if (attr.quantity === 0) {
+        orderProductExist.set({ isDeleted: true });
+        return orderProductExist;
+      }
+      if (attr.quantity === orderProductExist.quantity) {
+        return orderProductExist;
+      }
       orderProductExist.set({ quantity: attr.quantity });
       await orderProductExist.save();
       return orderProductExist;

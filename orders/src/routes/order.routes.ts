@@ -59,12 +59,12 @@ router.patch(
   OrderController.deleteOrder
 );
 router.patch(
-  '/orders/order-package',
+  '/orders/add/usagelog',
   [
     body('orderId').isMongoId().withMessage('Order Id must be type ObjectId'),
-    body('packageId')
-      .isMongoId()
-      .withMessage('Service Id must be type ObjectId'),
+    // body('packageId')
+    //   .isMongoId()
+    //   .withMessage('Package Id must be type ObjectId'),
     body('serviceId')
       .isMongoId()
       .withMessage('Service Id must be type ObjectId'),
@@ -73,21 +73,7 @@ router.patch(
   requireAuth,
   requireType([UserType.Employee, UserType.Manager]),
   requirePermission([ListPermission.OrderUpdate]),
-  OrderController.addUsageLogToOrderPackage
-);
-router.patch(
-  '/orders/order-service/add',
-  [
-    body('orderId').isMongoId().withMessage('Order Id must be type ObjectId'),
-    body('serviceId')
-      .isMongoId()
-      .withMessage('Service Id must be type ObjectId'),
-  ],
-  validationRequest,
-  requireAuth,
-  requireType([UserType.Employee, UserType.Manager]),
-  requirePermission([ListPermission.OrderUpdate]),
-  OrderController.addUsageLogToOrderService
+  OrderController.addUsageLog
 );
 router.get('/orders/exportPdf', OrderController.exportPdf);
 export { router as orderRouter };

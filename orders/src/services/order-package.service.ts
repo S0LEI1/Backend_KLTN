@@ -70,6 +70,9 @@ export class OrderPackageService {
         OrderPackagePublisher.deletedOrderPackage(orderPackageExist);
         return { orderPackage: orderPackageExist, servicesInPackage };
       }
+      if (attr.quantity === orderPackageExist.quantity) {
+        return { orderPackage: orderPackageExist, servicesInPackage };
+      }
       orderPackageExist.set({ quantity: attr.quantity });
       await orderPackageExist.save();
       OrderPackagePublisher.updateOrderPackage(orderPackageExist);
@@ -168,11 +171,12 @@ export class OrderPackageService {
     const orderPackage = await OrderPackage.findOne({
       order: orderId,
       package: packageId,
+    }).populate({
+      path: 'serviceEmbedded.service',
+      select: 'id name imageUrl',
     });
     if (!orderPackage) throw new NotFoundError('Order-Package not found');
     const { serviceEmbedded } = orderPackage;
-    console.log(serviceEmbedded);
-
     let count = 0;
     let usageLogs: UsageLog[] = [];
     const date = new Date();
@@ -181,33 +185,37 @@ export class OrderPackageService {
       status: true,
     };
     const serviceEmbeddeds: ServiceEmbedded[] = [];
+    const service = await Service.findOne({
+      _id: serviceId,
+      isDeleted: false,
+    });
+    if (!service) throw new NotFoundError('Service');
+    let serviceEmbeddedUpdate: ServiceEmbedded = {
+      service: service,
+      status: false,
+      quantity: 0,
+    };
     for (const serviceEbd of serviceEmbedded) {
-      const service = await Service.findOne({
-        _id: serviceId,
-        isDeleted: false,
-      });
-      if (!service) throw new NotFoundError('Service');
-      if (serviceEbd.service.id.toString('hex') !== service.id) {
+      if (serviceEbd.service.id !== service.id) {
         serviceEmbeddeds.push(serviceEbd);
         continue;
       }
       if (serviceEbd.usageLogs) {
-        usageLogs = serviceEbd.usageLogs;
+        // count status === true
         count = serviceEbd.usageLogs.filter(
           (item) => item.status === true
         ).length;
-        console.log('Count', count);
         if (count >= serviceEbd.quantity)
           throw new BadRequestError('Number of Uses Exhausted.');
+        usageLogs = serviceEbd.usageLogs;
       }
       usageLogs.push(newLog);
       serviceEbd.usageLogs = usageLogs;
-      console.log(serviceEbd);
-
+      serviceEmbeddedUpdate = serviceEbd;
       serviceEmbeddeds.push(serviceEbd);
-      orderPackage.set({ serviceEmbedded: serviceEmbeddeds });
-      await orderPackage.save();
     }
-    return orderPackage;
+    orderPackage.set({ serviceEmbedded: serviceEmbeddeds });
+    await orderPackage.save();
+    return { serviceEmbeddedUpdate, count };
   }
 }

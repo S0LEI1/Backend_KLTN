@@ -33,8 +33,11 @@ export class OrderServiceService {
       // if quantity =0 => delete order service
       if (attr.quantity === 0) {
         orderServiceExist.set({ isDeleted: true });
-        OrderServicePublisher.deleteOrderService(orderServiceExist);
         await orderServiceExist.save();
+        OrderServicePublisher.deleteOrderService(orderServiceExist);
+        return orderServiceExist;
+      }
+      if (attr.quantity === orderServiceExist.quantity) {
         return orderServiceExist;
       }
       orderServiceExist.set({ quantity: attr.quantity });
@@ -103,7 +106,7 @@ export class OrderServiceService {
     const orderService = await OrderServiceM.findOne({
       order: orderId,
       service: serviceId,
-    });
+    }).populate('service');
     if (!orderService) throw new NotFoundError('Order-Service');
     let count = 0;
     let usageLogs: UsageLog[] = [];
