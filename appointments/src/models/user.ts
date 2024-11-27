@@ -21,6 +21,9 @@ interface UserModel extends mongoose.Model<UserDoc> {
     version: number;
   }): Promise<UserDoc | null>;
   findUserByAccountId(id: string): Promise<UserDoc | null>;
+  findEmployee(id: string): Promise<UserDoc | null>;
+  findEmployees(ids: string[]): Promise<UserDoc[] | null>;
+  findCustomer(id: string): Promise<UserDoc | null>;
 }
 // property user doc has
 export interface UserDoc extends mongoose.Document {
@@ -103,6 +106,16 @@ userSchema.statics.findUser = async (id: string) => {
   const user = await User.findOne({ _id: id, isDeleted: false });
   return user;
 };
+userSchema.statics.findEmployee = async (
+  id: string
+): Promise<UserDoc | null> => {
+  const user = await User.findOne({
+    _id: id,
+    type: UserType.Employee,
+    isDeleted: false,
+  });
+  return user;
+};
 userSchema.statics.findUserByEvent = async (event: {
   id: string;
   version: number;
@@ -120,6 +133,28 @@ userSchema.statics.findUserByAccountId = async (id: string) => {
   return user;
 };
 
+userSchema.statics.findEmployees = async (
+  ids: string[]
+): Promise<UserDoc[] | null> => {
+  const user = await User.find(
+    {
+      _id: { $in: ids },
+      type: UserType.Employee,
+      isDeleted: false,
+    },
+    { id: 1, fullName: 1, gender: 1, avatar: 1 }
+  );
+  return user;
+};
+userSchema.statics.findCustomer = async (
+  id: string
+): Promise<UserDoc | null> => {
+  const user = await User.findOne({
+    _id: id,
+    type: UserType.Customer,
+    isDeleted: false,
+  });
+  return user;
+};
 const User = mongoose.model<UserDoc, UserModel>('User', userSchema);
-
 export { User };

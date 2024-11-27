@@ -66,6 +66,13 @@ spec:
                 name: cart-srv
                 port:
                   number: 3000
+          - path: /appointments/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: appointments-srv
+                port:
+                  number: 3000
           - path: /?(.*)
             pathType: ImplementationSpecific
             backend:

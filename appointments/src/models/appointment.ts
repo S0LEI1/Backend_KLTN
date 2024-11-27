@@ -32,14 +32,17 @@ const appointmentSchema = new mongoose.Schema(
     creator: {
       type: mongoose.Types.ObjectId,
       required: true,
+      ref: 'User',
     },
     customer: {
       type: mongoose.Types.ObjectId,
       required: true,
+      ref: 'User',
     },
     branch: {
       type: mongoose.Types.ObjectId,
       required: true,
+      ref: 'Branch',
     },
     dateTime: {
       type: Date,
@@ -52,6 +55,10 @@ const appointmentSchema = new mongoose.Schema(
     },
     description: {
       type: String,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -67,11 +74,19 @@ const appointmentSchema = new mongoose.Schema(
 
 appointmentSchema.set('versionKey', 'version');
 appointmentSchema.plugin(updateIfCurrentPlugin);
-
+appointmentSchema.index({ customer: 1, dateTime: 1 });
 appointmentSchema.statics.build = (attrs: AppointmentAttrs) => {
   return new Appointment(attrs);
 };
-
+appointmentSchema.statics.findAppointment = async (
+  id: string
+): Promise<AppointmentDoc | null> => {
+  const apm = await Appointment.findOne({ _id: id, isDeleted: false })
+    .populate('customer')
+    .populate('creator')
+    .populate('branch');
+  return apm;
+};
 const Appointment = mongoose.model<AppointmentDoc, AppointmentModel>(
   'appointment',
   appointmentSchema

@@ -10,3 +10,4 @@
 ./services/node_modules
 ./appointments/node_modules
 ./client
+node_modules

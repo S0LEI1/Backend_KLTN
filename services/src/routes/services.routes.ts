@@ -12,7 +12,7 @@ import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { ServiceControllers } from '../controllers/service.controllers';
 const CODE_MESSAGE =
-  'Password must contain digit from 1 to 9, uppercase letter, no space, and it must be 3-7 characters long.';
+  'Code must contain digit from 1 to 9, uppercase letter, no space, and it must be 3-7 characters long.';
 
 const router = express.Router();
 router.post(

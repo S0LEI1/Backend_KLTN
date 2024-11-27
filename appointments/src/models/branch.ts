@@ -91,5 +91,5 @@ branchSchema.statics.findByEvent = async (event: {
   });
   return branch;
 };
-const Branch = mongoose.model<BranchDoc, BranchModel>('branch', branchSchema);
+const Branch = mongoose.model<BranchDoc, BranchModel>('Branch', branchSchema);
 export { Branch };
