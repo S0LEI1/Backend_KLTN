@@ -129,12 +129,10 @@ export class AppointmentController {
     try {
       const appointments =
         await AppointmentServices.findAppointmentByNameOrPhone(key as string);
-      res
-        .status(200)
-        .send({
-          message: 'GET: Appointment by name or phone number successfully',
-          appointments,
-        });
+      res.status(200).send({
+        message: 'GET: Appointment by name or phone number successfully',
+        appointments,
+      });
     } catch (error) {
       console.log(error);
       throw error;

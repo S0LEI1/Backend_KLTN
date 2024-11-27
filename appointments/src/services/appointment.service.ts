@@ -316,7 +316,12 @@ export class AppointmentServices {
       $or: [{ fullName: new RegExp(key, 'i') }, { phoneNumber: key }],
     });
     if (!customer) throw new NotFoundError('Customer not found');
-    const appointments = await Appointment.find({ customer: customer.id })
+    console.log(customer.id);
+
+    const appointments = await Appointment.find({
+      customer: customer.id,
+      isDeleted: false,
+    })
       .populate('customer')
       .populate('creator')
       .populate('branch');

@@ -38,7 +38,7 @@ router.patch(
   AppointmentController.deleteAppointment
 );
 router.get(
-  '/appointments/find',
+  '/appointments/find/by',
   requireAuth,
   requireType([UserType.Employee, UserType.Manager]),
   AppointmentController.findAppointmentByNameOrPhone
