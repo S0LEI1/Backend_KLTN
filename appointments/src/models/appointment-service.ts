@@ -21,9 +21,12 @@ interface AppointmentServiceDoc extends mongoose.Document {
 }
 interface AppointServiceModel extends mongoose.Model<AppointmentServiceDoc> {
   build(attrs: AppointmentServiceAttrs): AppointmentServiceDoc;
-  finByAppointment(
+  findByAppointment(
     appointmentDoc: AppointmentDoc
-  ): Promise<AppointServiceModel | null>;
+  ): Promise<AppointmentServiceDoc | null>;
+  findByAppointments(
+    appointmentDoc: AppointmentDoc
+  ): Promise<AppointmentServiceDoc[] | null>;
 }
 
 const appointmentServiceSchema = new mongoose.Schema(
@@ -71,7 +74,7 @@ appointmentServiceSchema.statics.build = (attrs: AppointmentServiceAttrs) => {
   return new AppointmentService(attrs);
 };
 
-appointmentServiceSchema.statics.finByAppointment = async (
+appointmentServiceSchema.statics.findByAppointment = async (
   appointmentDoc: AppointmentDoc
 ): Promise<AppointmentServiceDoc | null> => {
   const apm = await AppointmentService.findOne({
@@ -79,6 +82,17 @@ appointmentServiceSchema.statics.finByAppointment = async (
     isDeleted: false,
   });
   return apm;
+};
+appointmentServiceSchema.statics.findByAppointments = async (
+  appointmentDoc: AppointmentDoc
+): Promise<AppointmentServiceDoc[] | null> => {
+  const apms = await AppointmentService.find({
+    appointment: appointmentDoc.id,
+    isDeleted: false,
+  })
+    .populate('service')
+    .populate('appointment');
+  return apms;
 };
 const AppointmentService = mongoose.model<
   AppointmentServiceDoc,

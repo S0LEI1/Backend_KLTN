@@ -19,7 +19,7 @@ export interface AppointmentDoc extends mongoose.Document {
   dateTime: Date;
   status: AppointmentStatus;
   description: string;
-  isDeleted: false;
+  isDeleted: boolean;
   version: number;
 }
 interface AppointmentModel extends mongoose.Model<AppointmentDoc> {

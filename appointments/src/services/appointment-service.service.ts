@@ -4,6 +4,7 @@ import { User, UserDoc } from '../models/user';
 import { Branch } from '../models/branch';
 import { Service } from '../models/service';
 import { AppointmentService } from '../models/appointment-service';
+import _ from 'lodash';
 interface ServiceAttr {
   id: string;
   execEmp?: string[];
@@ -49,8 +50,6 @@ export class AppointmentServiceServices {
     appointmentId: string,
     serviceAttrs: ServiceAttr[]
   ) {
-    console.log(appointmentId);
-
     const appointmentDoc = await Appointment.findAppointment(appointmentId);
     if (!appointmentDoc) throw new NotFoundError('Appointment');
     const services: ServiceInAppointment[] = [];
@@ -69,7 +68,10 @@ export class AppointmentServiceServices {
     return services;
   }
   static async getAppointmentServices(appointmentId: string) {
-    const appointment = await Appointment.findAppointment(appointmentId);
+    const appointment = await Appointment.findOne({
+      _id: appointmentId,
+      isDeleted: false,
+    });
     if (!appointment) throw new NotFoundError('Appointment');
     const aServices = await AppointmentService.find({
       appointment: appointment.id,
@@ -90,5 +92,26 @@ export class AppointmentServiceServices {
     });
 
     return services;
+  }
+  static async updateAppointmentServices(
+    appointmentId: string,
+    serviceAttrs: ServiceAttr[]
+  ) {
+    const appointmentDoc = await Appointment.findAppointment(appointmentId);
+    if (!appointmentDoc) throw new NotFoundError('Appointment');
+    const services = await this.getAppointmentServices(appointmentDoc.id);
+    const existServiceAttrs: ServiceAttr[] = [];
+    for (const srv of services) {
+      const execEmpId: string[] = srv.execEmp.map((exec) => exec.id);
+      const serviceAttr: ServiceAttr = {
+        id: srv.serviceId,
+        quantity: srv.quantity,
+        execEmp: execEmpId,
+      };
+      existServiceAttrs.push(serviceAttr);
+    }
+    const addValue = _.differenceBy(existServiceAttrs, serviceAttrs, 'id');
+    const updateValue = _.intersectionBy(existServiceAttrs, serviceAttrs, 'id');
+    const deleteValue = _.differenceBy(serviceAttrs, existServiceAttrs, 'id');
   }
 }

@@ -117,6 +117,7 @@ export class AppointmentServices {
     status: string
   ) {
     const filter = Pagination.query();
+    filter.isDeleted = false;
     if (type === UserType.Customer) filter.customer = userId;
     if (dateTime) {
       const dateFormat = format(dateTime, 'yyyy-MM-dd');
@@ -145,7 +146,7 @@ export class AppointmentServices {
     let services: ServiceInAppointment[] = [];
     let packages: PackageInAppointment[] = [];
     for (const apm of appointments) {
-      const aService = await AppointmentService.finByAppointment(apm);
+      const aService = await AppointmentService.findByAppointment(apm);
       if (aService) {
         services = await AppointmentServiceServices.getAppointmentServices(
           apm.id
@@ -264,5 +265,88 @@ export class AppointmentServices {
     appointment.set({ isDeleted: true });
     await appointment.save();
     return appointment;
+  }
+  static async updateAppointment(
+    appointmentId: string,
+    branchId: string,
+    dateTime: Date,
+    description: string
+  ) {
+    const appointment = await Appointment.findAppointment(appointmentId);
+    if (!appointment) throw new NotFoundError('Appointment');
+    const branch = await Branch.findBranch(branchId);
+    if (!branch) throw new NotFoundError('Branch');
+    const nowDateTime = new Date();
+    const inputDate = new Date(dateTime);
+    // inputDate.setHours(20, 0, 0);
+    console.log('inputDate', inputDate);
+    console.log('nowDateTime', nowDateTime);
+
+    if (inputDate < nowDateTime)
+      throw new BadRequestError(
+        'Appointment date must be greater than or equal now date'
+      );
+    var startHappyHourD = new Date(dateTime);
+    startHappyHourD.setHours(8, 30, 0); // 5.30 pm
+    var endHappyHourD = new Date(dateTime);
+    endHappyHourD.setHours(19, 30, 0);
+    console.log(inputDate.getTime());
+    console.log(startHappyHourD.getTime());
+    console.log(endHappyHourD.getTime());
+
+    if (
+      inputDate.getTime() < startHappyHourD.getTime() ||
+      inputDate.getTime() > endHappyHourD.getTime()
+    )
+      throw new BadRequestError('Appointment time between 8.30am and 19.30pm');
+    if (inputDate.getTime() <= nowDateTime.getTime() + 1 * 60 * 60 * 1000)
+      throw new BadRequestError(
+        'Appointment time must be greater than now time least 1hour'
+      );
+    appointment.set({
+      branch: branch,
+      dateTime: inputDate,
+      description: description,
+    });
+    await appointment.save();
+    return appointment;
+  }
+  static async findAppointmentByNameOrPhone(key: string) {
+    const customer = await User.findOne({
+      $or: [{ fullName: new RegExp(key, 'i') }, { phoneNumber: key }],
+    });
+    if (!customer) throw new NotFoundError('Customer not found');
+    const appointments = await Appointment.find({ customer: customer.id })
+      .populate('customer')
+      .populate('creator')
+      .populate('branch');
+    const apmConverts: AppointmentConvert[] = [];
+    for (const appointment of appointments) {
+      const services = await AppointmentServiceServices.getAppointmentServices(
+        appointment.id
+      );
+      const packages = await AppointmentPackageService.getAppointmentPackage(
+        appointment.id
+      );
+      await appointment.save();
+      const apmConvert: AppointmentConvert = {
+        id: appointment.id,
+        customerId: appointment.customer.id,
+        customerName: appointment.customer.fullName,
+        customerImageUrl: appointment.customer.avatar!,
+        creatorId: appointment.creator.id,
+        creatorName: appointment.creator.fullName,
+        creatorImageUrl: appointment.creator.avatar!,
+        branchId: appointment.branch.id,
+        branchName: appointment.branch.name,
+        dateTime: appointment.dateTime,
+        status: appointment.status,
+        description: appointment.description,
+        services: services,
+        packages: packages,
+      };
+      apmConverts.push(apmConvert);
+    }
+    return apmConverts;
   }
 }

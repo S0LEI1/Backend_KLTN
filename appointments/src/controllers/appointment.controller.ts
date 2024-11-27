@@ -124,4 +124,20 @@ export class AppointmentController {
       throw error;
     }
   }
+  static async findAppointmentByNameOrPhone(req: Request, res: Response) {
+    const { key } = req.query;
+    try {
+      const appointments =
+        await AppointmentServices.findAppointmentByNameOrPhone(key as string);
+      res
+        .status(200)
+        .send({
+          message: 'GET: Appointment by name or phone number successfully',
+          appointments,
+        });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 }

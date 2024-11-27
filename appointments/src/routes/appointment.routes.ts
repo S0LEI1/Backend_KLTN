@@ -1,4 +1,11 @@
-import { requireAuth, validationRequest } from '@share-package/common';
+import {
+  ListPermission,
+  UserType,
+  requireAuth,
+  requirePermission,
+  requireType,
+  validationRequest,
+} from '@share-package/common';
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import { AppointmentController } from '../controllers/appointment.controller';
@@ -29,5 +36,11 @@ router.patch(
   '/appointments/delete/:appointmentId',
   requireAuth,
   AppointmentController.deleteAppointment
+);
+router.get(
+  '/appointments/find',
+  requireAuth,
+  requireType([UserType.Employee, UserType.Manager]),
+  AppointmentController.findAppointmentByNameOrPhone
 );
 export { router as AppointmentRouter };
