@@ -26,6 +26,7 @@ interface AppointmentConvert {
   customerId: string;
   customerName: string;
   customerImageUrl: string;
+  customerPhoneNumber: string;
   creatorId: string;
   creatorName: string;
   creatorImageUrl: string;
@@ -97,6 +98,7 @@ export class AppointmentServices {
       customerId: customer.id,
       customerName: customer.fullName,
       customerImageUrl: customer.avatar!,
+      customerPhoneNumber: customer.phoneNumber,
       creatorId: creator.id,
       creatorName: creator.fullName,
       creatorImageUrl: creator.avatar!,
@@ -165,6 +167,7 @@ export class AppointmentServices {
         customerId: apm.customer.id,
         customerName: apm.customer.fullName,
         customerImageUrl: apm.customer.avatar!,
+        customerPhoneNumber: apm.customer.phoneNumber,
         creatorId: apm.creator.id,
         creatorName: apm.creator.fullName,
         creatorImageUrl: apm.creator.avatar!,
@@ -195,6 +198,7 @@ export class AppointmentServices {
       customerId: appointment.customer.id,
       customerName: appointment.customer.fullName,
       customerImageUrl: appointment.customer.avatar!,
+      customerPhoneNumber: appointment.customer.phoneNumber,
       creatorId: appointment.creator.id,
       creatorName: appointment.creator.fullName,
       creatorImageUrl: appointment.creator.avatar!,
@@ -235,6 +239,7 @@ export class AppointmentServices {
       customerId: appointment.customer.id,
       customerName: appointment.customer.fullName,
       customerImageUrl: appointment.customer.avatar!,
+      customerPhoneNumber: appointment.customer.phoneNumber,
       creatorId: appointment.creator.id,
       creatorName: appointment.creator.fullName,
       creatorImageUrl: appointment.creator.avatar!,
@@ -339,6 +344,7 @@ export class AppointmentServices {
         customerId: appointment.customer.id,
         customerName: appointment.customer.fullName,
         customerImageUrl: appointment.customer.avatar!,
+        customerPhoneNumber: appointment.customer.phoneNumber,
         creatorId: appointment.creator.id,
         creatorName: appointment.creator.fullName,
         creatorImageUrl: appointment.creator.avatar!,
