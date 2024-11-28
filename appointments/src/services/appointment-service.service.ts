@@ -5,7 +5,7 @@ import { Branch } from '../models/branch';
 import { Service } from '../models/service';
 import { AppointmentService } from '../models/appointment-service';
 import _ from 'lodash';
-interface ServiceAttr {
+export interface ServiceAttr {
   id: string;
   quantity: number;
 }
@@ -26,6 +26,7 @@ export class AppointmentServiceServices {
     const existAService = await AppointmentService.findOne({
       appointment: appointmentDoc.id,
       service: service.id,
+      isDeleted: false,
     });
     if (existAService)
       throw new BadRequestError('Service existing in appointment');
@@ -96,9 +97,10 @@ export class AppointmentServiceServices {
     const aService = await AppointmentService.findOne({
       appointment: appointmentDoc.id,
       service: serviceAttr.id,
+      isDeleted: false,
     });
     if (!aService) throw new NotFoundError('Appointment-Service');
-    aService.set({ isDeleted: false });
+    aService.set({ isDeleted: true });
     await aService.save();
   }
   static async deleteAppointmentServices(
@@ -116,8 +118,15 @@ export class AppointmentServiceServices {
     const aService = await AppointmentService.findOne({
       appointment: appointmentDoc.id,
       service: serviceAttr.id,
-    });
+      isDeleted: false,
+    })
+      .populate('service')
+      .populate('appointment');
     if (!aService) throw new NotFoundError('Appointment-Service');
+    if (aService.quantity === serviceAttr.quantity) return aService;
+    aService.set({ quantity: serviceAttr.quantity });
+    await aService.save();
+    return aService;
   }
   static async updateAppointmentServices(
     appointmentId: string,
@@ -136,13 +145,35 @@ export class AppointmentServiceServices {
       };
       existServiceAttrs.push(serviceAttr);
     }
-    const addValue = _.differenceBy(existServiceAttrs, serviceAttrs, 'id');
-    const updateValue = _.intersectionBy(existServiceAttrs, serviceAttrs, 'id');
-    const deleteValue = _.differenceBy(serviceAttrs, existServiceAttrs, 'id');
+    const deleteValue = _.differenceBy(existServiceAttrs, serviceAttrs, 'id');
+    const updateValue = _.intersectionBy(serviceAttrs, existServiceAttrs, 'id');
+    const addValue = _.differenceBy(serviceAttrs, existServiceAttrs, 'id');
+    console.log('addService', addValue);
+    console.log('updateService', updateValue);
+    console.log('deleteService', deleteValue);
+
     const addServices = await this.newAppointmentServices(
       appointmentId,
       addValue
     );
+    const updateServices: ServiceInAppointment[] = [];
+    for (const value of updateValue) {
+      const aService = await this.updateAppointmentService(
+        appointmentDoc,
+        value
+      );
+      updateServices.push({
+        serviceId: aService.service.id,
+        name: aService.service.name,
+        salePrice: aService.service.salePrice,
+        imageUrl: aService.service.imageUrl,
+        quantity: aService.quantity,
+      });
+    }
     await this.deleteAppointmentServices(appointmentDoc, deleteValue);
+    const serviceInAppointment: ServiceInAppointment[] = [];
+    serviceInAppointment.push(...addServices);
+    serviceInAppointment.push(...updateServices);
+    return serviceInAppointment;
   }
 }

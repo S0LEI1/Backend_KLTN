@@ -95,7 +95,7 @@ appointmentSchema.statics.findAppointment = async (
   return apm;
 };
 const Appointment = mongoose.model<AppointmentDoc, AppointmentModel>(
-  'appointment',
+  'Appointment',
   appointmentSchema
 );
 export { Appointment };

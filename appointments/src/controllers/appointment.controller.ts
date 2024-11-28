@@ -22,6 +22,8 @@ export class AppointmentController {
         packageAttrs,
         consultantId,
       } = req.body;
+      console.log('serviceAttrs', serviceAttrs);
+
       const appointment = await AppointmentServices.newAppointment(
         creatorId,
         customerId,
@@ -71,13 +73,11 @@ export class AppointmentController {
           date as string,
           status as string
         );
-      res
-        .status(200)
-        .send({
-          message: 'GET: appointments successfully',
-          totalDocuments,
-          appointments: apmConverts,
-        });
+      res.status(200).send({
+        message: 'GET: appointments successfully',
+        totalDocuments,
+        appointments: apmConverts,
+      });
     } catch (error) {
       console.log(error);
       throw error;
@@ -140,6 +140,38 @@ export class AppointmentController {
         message: 'GET: Appointment by name or phone number successfully',
         appointments,
       });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+  static async updateAppointment(req: Request, res: Response) {
+    try {
+      const {
+        branchId,
+        dateTime,
+        description,
+        serviceAttrs,
+        packageAttrs,
+        consultantId,
+      } = req.body;
+      const { appointmentId } = req.params;
+      const { id, type } = req.currentUser!;
+      const appointment = await AppointmentServices.updateAppointment(
+        id,
+        type,
+        appointmentId,
+        branchId,
+        consultantId,
+        dateTime,
+        description,
+        serviceAttrs,
+        packageAttrs
+      );
+
+      res
+        .status(200)
+        .send({ message: 'PATCH: update appoint successfully', appointment });
     } catch (error) {
       console.log(error);
       throw error;

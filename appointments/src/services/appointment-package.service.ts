@@ -8,7 +8,8 @@ import { Package } from '../models/package';
 import { AppointmentPackage } from '../models/appointment-package';
 import { User, UserDoc } from '../models/user';
 import { forEachChild } from 'typescript';
-interface PackageAttr {
+import _ from 'lodash';
+export interface PackageAttr {
   id: string;
   // execEmp?: string[];
   quantity: number;
@@ -33,6 +34,7 @@ export class AppointmentPackageService {
     const existAPackage = await AppointmentPackage.findOne({
       appointment: appointmentDoc.id,
       package: existPackage.id,
+      isDeleted: false,
     });
     if (existAPackage)
       throw new BadRequestError('Package existing in appointment');
@@ -83,6 +85,7 @@ export class AppointmentPackageService {
     if (!appointment) throw new NotFoundError('Appointment');
     const aPackages = await AppointmentPackage.find({
       appointment: appointment.id,
+      isDeleted: false,
     }).populate('package');
     // .populate({ path: 'execEmp', select: 'id fullName avatar gender' });
     const packages: PackageInAppointment[] = [];
@@ -96,5 +99,91 @@ export class AppointmentPackageService {
       });
     }
     return packages;
+  }
+  static async deleteAppointmentPackage(
+    appointmentDoc: AppointmentDoc,
+    packageAttr: PackageAttr
+  ) {
+    const aPackage = await AppointmentPackage.findOne({
+      appointment: appointmentDoc.id,
+      package: packageAttr.id,
+      isDeleted: false,
+    });
+    if (!aPackage) throw new NotFoundError('Appointment-Service');
+    aPackage.set({ isDeleted: true });
+    await aPackage.save();
+  }
+  static async deleteAppointmentServices(
+    appointmentDoc: AppointmentDoc,
+    packageAttrs: PackageAttr[]
+  ) {
+    for (const packageAttr of packageAttrs) {
+      await this.deleteAppointmentPackage(appointmentDoc, packageAttr);
+    }
+  }
+  static async updateAppointmentPackage(
+    appointmentDoc: AppointmentDoc,
+    packageAttr: PackageAttr
+  ) {
+    const aPackage = await AppointmentPackage.findOne({
+      appointment: appointmentDoc.id,
+      package: packageAttr.id,
+      isDeleted: false,
+    })
+      .populate('package')
+      .populate('appointment');
+    if (!aPackage) throw new NotFoundError('Appointment-Package');
+    if (aPackage.quantity === packageAttr.quantity) return aPackage;
+    aPackage.set({ quantity: packageAttr.quantity });
+    await aPackage.save();
+    return aPackage;
+  }
+  static async updateAppointmentServices(
+    appointmentId: string,
+    packageAttrs: PackageAttr[]
+  ) {
+    const appointmentDoc = await Appointment.findAppointment(appointmentId);
+    if (!appointmentDoc) throw new NotFoundError('Appointment');
+    const packages = await this.getAppointmentPackage(appointmentDoc.id);
+    const existPackageAttrs: PackageAttr[] = [];
+    for (const pkg of packages) {
+      // const execEmpId: string[] = srv.execEmp.map((exec) => exec.id);
+      const packageAttr: PackageAttr = {
+        id: pkg.packageId,
+        quantity: pkg.quantity,
+        // execEmp: execEmpId,
+      };
+      existPackageAttrs.push(packageAttr);
+    }
+    const deleteValue = _.differenceBy(existPackageAttrs, packageAttrs, 'id');
+    const updateValue = _.intersectionBy(packageAttrs, existPackageAttrs, 'id');
+    const addValue = _.differenceBy(packageAttrs, existPackageAttrs, 'id');
+    const addPackages = await this.newAppointmentPackages(
+      appointmentId,
+      addValue
+    );
+    console.log('addPackage', addValue);
+    console.log('updatePackage', updateValue);
+    console.log('deletePackage', deleteValue);
+
+    const updatePackage: PackageInAppointment[] = [];
+    for (const value of updateValue) {
+      const aPackage = await this.updateAppointmentPackage(
+        appointmentDoc,
+        value
+      );
+      updatePackage.push({
+        packageId: aPackage.package.id,
+        name: aPackage.package.name,
+        salePrice: aPackage.package.salePrice,
+        imageUrl: aPackage.package.imageUrl,
+        quantity: aPackage.quantity,
+      });
+    }
+    await this.deleteAppointmentServices(appointmentDoc, deleteValue);
+    const packageInAppointment: PackageInAppointment[] = [];
+    packageInAppointment.push(...addPackages);
+    packageInAppointment.push(...updatePackage);
+    return packageInAppointment;
   }
 }
