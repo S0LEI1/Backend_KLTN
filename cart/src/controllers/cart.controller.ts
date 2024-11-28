@@ -12,10 +12,10 @@ export class CartController {
   }
   static async getProductInCart(req: Request, res: Response) {
     const { id } = req.currentUser!;
-    const { date } = req.query;
+    const { date, type } = req.query;
     try {
       const { itemsInCart, totalPrice, totalQuantity } =
-        await CartServices.getItemsInCart(id, date as string);
+        await CartServices.getItemsInCart(id, date as string, type as string);
       res.status(200).send({
         message: 'GET: Products in cart successfully',
         itemsInCart,

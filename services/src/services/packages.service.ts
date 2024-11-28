@@ -58,7 +58,7 @@ export class PackageServices {
     const newPackage = Package.build({
       name: name,
       description: description,
-      costPrice: costPrice,
+      costPrice: _.round(costPrice),
       imageUrl: imageUrl,
       count: count,
       expire: expire,

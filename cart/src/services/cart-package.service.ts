@@ -69,7 +69,7 @@ export class CartPackageServices {
         cartPacakge.quantity,
         cartPacakge.package.discount!
       );
-      totalPackagePrice += totalPackagePrice;
+      totalPackagePrice += totalPrice;
       totalPackageQuantity += cartPacakge.quantity;
       packagesInCart.push({
         itemId: cartPacakge.package.id,

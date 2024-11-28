@@ -12,6 +12,7 @@ import { calcSalePrice } from '../utils/calcSalePrice';
 import { ServicePublishers } from './services.publisher.service';
 import exceljs from 'exceljs';
 import { getIO } from '../socket';
+import _ from 'lodash';
 const PER_PAGE = process.env.PER_PAGE;
 export class ServiceServices {
   static async new(
@@ -34,7 +35,7 @@ export class ServiceServices {
       name: name,
       imageUrl: imageUrl,
       description: description,
-      costPrice: costPrice,
+      costPrice: _.round(costPrice),
       time: time,
       expire: expire,
       code: code,

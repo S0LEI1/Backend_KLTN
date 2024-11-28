@@ -15,6 +15,11 @@ import { CartServiceServices } from './cart-service.service';
 import { CartPackageServices } from './cart-package.service';
 import { CartService } from '../models/cart-service';
 import { CartPackage } from '../models/cart-package';
+enum Type {
+  Product = 'product',
+  Service = 'service',
+  Package = 'package',
+}
 export interface ItemInCart {
   itemId: string;
   name: string;
@@ -97,7 +102,7 @@ export class CartServices {
       return itemInCart;
     }
   }
-  static async getItemsInCart(userId: string, date: string) {
+  static async getItemsInCart(userId: string, date: string, type: string) {
     const cart = await this.getCartByUserId(userId);
     const query = Pagination.query();
     const sort = Pagination.query();
@@ -111,16 +116,37 @@ export class CartServices {
     let totalQuantity = 0;
     const { productsInCart, totalProductPrice, totalProductQuantity } =
       await CartProductService.getProductInCart(query, sort);
+    if (type === Type.Product) {
+      return {
+        itemsInCart: productsInCart,
+        totalPrice: totalProductPrice,
+        totalQuantity: totalProductQuantity,
+      };
+    }
     itemsInCart.push(...productsInCart);
     totalPrice += totalProductPrice;
     totalQuantity += totalProductQuantity;
     const { servicesInCart, totalServicesPrice, totalServicesQuantity } =
       await CartServiceServices.getServiceInCart(query, sort);
+    if (type === Type.Service) {
+      return {
+        itemsInCart: servicesInCart,
+        totalPrice: totalServicesPrice,
+        totalQuantity: totalServicesQuantity,
+      };
+    }
     itemsInCart.push(...servicesInCart);
     totalPrice += totalServicesPrice;
     totalQuantity += totalServicesQuantity;
     const { packagesInCart, totalPackagePrice, totalPackageQuantity } =
       await CartPackageServices.getPackageInCart(query, sort);
+    if (type === Type.Package) {
+      return {
+        itemsInCart: packagesInCart,
+        totalPrice: totalPackagePrice,
+        totalQuantity: totalPackageQuantity,
+      };
+    }
     itemsInCart.push(...packagesInCart);
     totalPrice += totalPackagePrice;
     totalQuantity += totalPackageQuantity;
