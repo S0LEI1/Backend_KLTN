@@ -10,7 +10,7 @@ import { User, UserDoc } from '../models/user';
 import { forEachChild } from 'typescript';
 interface PackageAttr {
   id: string;
-  execEmp?: string[];
+  // execEmp?: string[];
   quantity: number;
 }
 
@@ -20,7 +20,7 @@ export interface PackageInAppointment {
   salePrice: number;
   imageUrl: string;
   quantity: number;
-  execEmp: UserDoc[];
+  // execEmp: UserDoc[];
 }
 
 export class AppointmentPackageService {
@@ -42,18 +42,18 @@ export class AppointmentPackageService {
       quantity: packageAttr.quantity,
     });
     let employeesInAppointment: UserDoc[] = [];
-    if (packageAttr.execEmp) {
-      employeesInAppointment = await User.find(
-        {
-          _id: { $in: packageAttr.execEmp },
-          type: UserType.Employee,
-          isDeleted: false,
-        },
-        { id: 1, fullName: 1, gender: 1, avatar: 1 }
-      );
+    // if (packageAttr.execEmp) {
+    //   employeesInAppointment = await User.find(
+    //     {
+    //       _id: { $in: packageAttr.execEmp },
+    //       type: UserType.Employee,
+    //       isDeleted: false,
+    //     },
+    //     { id: 1, fullName: 1, gender: 1, avatar: 1 }
+    //   );
 
-      aPackage.set({ execEmp: employeesInAppointment });
-    }
+    //   aPackage.set({ execEmp: employeesInAppointment });
+    // }
     await aPackage.save();
     return { aPackage, existPackage, employeesInAppointment };
   }
@@ -73,7 +73,7 @@ export class AppointmentPackageService {
         salePrice: existPackage.salePrice,
         imageUrl: existPackage.imageUrl,
         quantity: aPackage.quantity,
-        execEmp: employeesInAppointment,
+        // execEmp: employeesInAppointment,
       });
     }
     return packages;
@@ -83,9 +83,8 @@ export class AppointmentPackageService {
     if (!appointment) throw new NotFoundError('Appointment');
     const aPackages = await AppointmentPackage.find({
       appointment: appointment.id,
-    })
-      .populate('package')
-      .populate({ path: 'execEmp', select: 'id fullName avatar gender' });
+    }).populate('package');
+    // .populate({ path: 'execEmp', select: 'id fullName avatar gender' });
     const packages: PackageInAppointment[] = [];
     for (const as of aPackages) {
       packages.push({
@@ -94,7 +93,6 @@ export class AppointmentPackageService {
         salePrice: as.package.salePrice,
         imageUrl: as.package.imageUrl,
         quantity: as.quantity,
-        execEmp: as.execEmp,
       });
     }
     return packages;

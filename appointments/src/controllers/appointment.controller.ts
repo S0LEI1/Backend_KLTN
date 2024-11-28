@@ -20,10 +20,12 @@ export class AppointmentController {
         description,
         serviceAttrs,
         packageAttrs,
+        consultantId,
       } = req.body;
       const appointment = await AppointmentServices.newAppointment(
         creatorId,
         customerId,
+        consultantId,
         branchId,
         dateTime,
         description
@@ -60,17 +62,22 @@ export class AppointmentController {
     const { id, type } = req.currentUser!;
     const { dateTime, date, pages, status } = req.query;
     try {
-      const appointments = await AppointmentServices.getAppointments(
-        id,
-        type,
-        pages as string,
-        dateTime as string,
-        date as string,
-        status as string
-      );
+      const { apmConverts, totalDocuments } =
+        await AppointmentServices.getAppointments(
+          id,
+          type,
+          pages as string,
+          dateTime as string,
+          date as string,
+          status as string
+        );
       res
         .status(200)
-        .send({ message: 'GET: appointments successfully', appointments });
+        .send({
+          message: 'GET: appointments successfully',
+          totalDocuments,
+          appointments: apmConverts,
+        });
     } catch (error) {
       console.log(error);
       throw error;

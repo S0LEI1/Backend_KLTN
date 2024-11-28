@@ -8,14 +8,12 @@ interface AppointmentPackageAttrs {
   appointment: AppointmentDoc;
   package: PackageDoc;
   quantity: number;
-  execEmp?: UserDoc[];
 }
 
 export interface AppointmentPackageDoc extends mongoose.Document {
   appointment: AppointmentDoc;
   package: PackageDoc;
   quantity: number;
-  execEmp: UserDoc[];
   isDeleted: boolean;
   version: number;
 }
@@ -44,12 +42,6 @@ const appointmentPackageSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    execEmp: [
-      {
-        type: mongoose.Types.ObjectId,
-        ref: 'User',
-      },
-    ],
     isDeleted: {
       type: Boolean,
       default: false,

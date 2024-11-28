@@ -7,7 +7,6 @@ import { AppointmentService } from '../models/appointment-service';
 import _ from 'lodash';
 interface ServiceAttr {
   id: string;
-  execEmp?: string[];
   quantity: number;
 }
 export interface ServiceInAppointment {
@@ -16,7 +15,6 @@ export interface ServiceInAppointment {
   salePrice: number;
   imageUrl: string;
   quantity: number;
-  execEmp: UserDoc[];
 }
 export class AppointmentServiceServices {
   static async newAppointmentService(
@@ -37,12 +35,12 @@ export class AppointmentServiceServices {
       quantity: serviceAttr.quantity,
     });
     let employeesInAppointment: UserDoc[] = [];
-    if (serviceAttr.execEmp) {
-      const execEmp = await User.findEmployees(serviceAttr.execEmp);
-      if (!execEmp) throw new NotFoundError('Execute employee not found');
-      employeesInAppointment = execEmp;
-      aService.set({ execEmp: execEmp });
-    }
+    // if (serviceAttr.execEmp) {
+    //   const execEmp = await User.findEmployees(serviceAttr.execEmp);
+    //   if (!execEmp) throw new NotFoundError('Execute employee not found');
+    //   employeesInAppointment = execEmp;
+    //   aService.set({ execEmp: execEmp });
+    // }
     await aService.save();
     return { aService, service, employeesInAppointment };
   }
@@ -62,7 +60,7 @@ export class AppointmentServiceServices {
         salePrice: service.salePrice,
         imageUrl: service.imageUrl,
         quantity: aService.quantity,
-        execEmp: employeesInAppointment,
+        // execEmp: employeesInAppointment,
       });
     }
     return services;
@@ -76,9 +74,8 @@ export class AppointmentServiceServices {
     const aServices = await AppointmentService.find({
       appointment: appointment.id,
       isDeleted: false,
-    })
-      .populate('service')
-      .populate({ path: 'execEmp', select: 'id fullName avatar gender' });
+    }).populate('service');
+    // .populate({ path: 'execEmp', select: 'id fullName avatar gender' });
     const services: ServiceInAppointment[] = [];
     aServices.map((as) => {
       services.push({
@@ -87,11 +84,40 @@ export class AppointmentServiceServices {
         salePrice: as.service.salePrice,
         imageUrl: as.service.imageUrl,
         quantity: as.quantity,
-        execEmp: as.execEmp!,
       });
     });
 
     return services;
+  }
+  static async deleteAppointmentService(
+    appointmentDoc: AppointmentDoc,
+    serviceAttr: ServiceAttr
+  ) {
+    const aService = await AppointmentService.findOne({
+      appointment: appointmentDoc.id,
+      service: serviceAttr.id,
+    });
+    if (!aService) throw new NotFoundError('Appointment-Service');
+    aService.set({ isDeleted: false });
+    await aService.save();
+  }
+  static async deleteAppointmentServices(
+    appointmentDoc: AppointmentDoc,
+    serviceAttrs: ServiceAttr[]
+  ) {
+    for (const serviceAttr of serviceAttrs) {
+      await this.deleteAppointmentService(appointmentDoc, serviceAttr);
+    }
+  }
+  static async updateAppointmentService(
+    appointmentDoc: AppointmentDoc,
+    serviceAttr: ServiceAttr
+  ) {
+    const aService = await AppointmentService.findOne({
+      appointment: appointmentDoc.id,
+      service: serviceAttr.id,
+    });
+    if (!aService) throw new NotFoundError('Appointment-Service');
   }
   static async updateAppointmentServices(
     appointmentId: string,
@@ -102,16 +128,21 @@ export class AppointmentServiceServices {
     const services = await this.getAppointmentServices(appointmentDoc.id);
     const existServiceAttrs: ServiceAttr[] = [];
     for (const srv of services) {
-      const execEmpId: string[] = srv.execEmp.map((exec) => exec.id);
+      // const execEmpId: string[] = srv.execEmp.map((exec) => exec.id);
       const serviceAttr: ServiceAttr = {
         id: srv.serviceId,
         quantity: srv.quantity,
-        execEmp: execEmpId,
+        // execEmp: execEmpId,
       };
       existServiceAttrs.push(serviceAttr);
     }
     const addValue = _.differenceBy(existServiceAttrs, serviceAttrs, 'id');
     const updateValue = _.intersectionBy(existServiceAttrs, serviceAttrs, 'id');
     const deleteValue = _.differenceBy(serviceAttrs, existServiceAttrs, 'id');
+    const addServices = await this.newAppointmentServices(
+      appointmentId,
+      addValue
+    );
+    await this.deleteAppointmentServices(appointmentDoc, deleteValue);
   }
 }

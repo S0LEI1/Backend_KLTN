@@ -7,7 +7,7 @@ import {
 } from '@share-package/common';
 import { Appointment, AppointmentDoc } from '../models/appointment';
 
-import { User } from '../models/user';
+import { User, UserDoc } from '../models/user';
 import { Branch } from '../models/branch';
 import {
   AppointmentServiceServices,
@@ -30,6 +30,9 @@ interface AppointmentConvert {
   creatorId: string;
   creatorName: string;
   creatorImageUrl: string;
+  consultantId?: string;
+  consultantName?: string;
+  consultantImageUrl?: string;
   branchId: string;
   branchName: string;
   dateTime: Date;
@@ -42,6 +45,7 @@ export class AppointmentServices {
   static async newAppointment(
     creatorId: string,
     customerId: string,
+    consultantId: string,
     branchId: string,
     dateTime: Date,
     description: string
@@ -92,6 +96,15 @@ export class AppointmentServices {
       status: AppointmentStatus.Created,
       description: description,
     });
+    // find consultant
+    let consultant: UserDoc | null = null;
+    if (consultantId) {
+      consultant = await User.findEmployee(consultantId);
+      if (!consultant) throw new NotFoundError('Employee not found');
+      apm.set({ consultant: consultant });
+      await apm.save();
+      console.log(apm);
+    }
     await apm.save();
     const apmConvert: AppointmentConvert = {
       id: apm.id,
@@ -102,6 +115,9 @@ export class AppointmentServices {
       creatorId: creator.id,
       creatorName: creator.fullName,
       creatorImageUrl: creator.avatar!,
+      consultantId: apm.consultant?.id,
+      consultantName: apm.consultant?.fullName,
+      consultantImageUrl: apm.consultant?.avatar!,
       branchId: branch.id,
       branchName: branch.name,
       dateTime: apm.dateTime,
@@ -143,7 +159,13 @@ export class AppointmentServices {
     const appointments = await Appointment.find(filter, {}, options)
       .populate('customer')
       .populate('creator')
-      .populate('branch');
+      .populate('branch')
+      .populate('consultant');
+    const totalDocuments = await Appointment.find(
+      filter,
+      {},
+      options
+    ).countDocuments();
     const apmConverts: AppointmentConvert[] = [];
     let services: ServiceInAppointment[] = [];
     let packages: PackageInAppointment[] = [];
@@ -171,6 +193,9 @@ export class AppointmentServices {
         creatorId: apm.creator.id,
         creatorName: apm.creator.fullName,
         creatorImageUrl: apm.creator.avatar!,
+        consultantId: apm.consultant?.id,
+        consultantName: apm.consultant?.fullName,
+        consultantImageUrl: apm.consultant?.avatar!,
         branchId: apm.branch.id,
         branchName: apm.branch.name,
         dateTime: apm.dateTime,
@@ -180,7 +205,7 @@ export class AppointmentServices {
         packages: packages,
       });
     }
-    return apmConverts;
+    return { apmConverts, totalDocuments };
   }
   static async getAppointment(id: string) {
     const appointment = await Appointment.findAppointment(id);
@@ -202,6 +227,9 @@ export class AppointmentServices {
       creatorId: appointment.creator.id,
       creatorName: appointment.creator.fullName,
       creatorImageUrl: appointment.creator.avatar!,
+      consultantId: appointment.consultant?.id,
+      consultantName: appointment.consultant?.fullName,
+      consultantImageUrl: appointment.consultant?.avatar!,
       branchId: appointment.branch.id,
       branchName: appointment.branch.name,
       dateTime: appointment.dateTime,
@@ -243,6 +271,9 @@ export class AppointmentServices {
       creatorId: appointment.creator.id,
       creatorName: appointment.creator.fullName,
       creatorImageUrl: appointment.creator.avatar!,
+      consultantId: appointment.consultant?.id,
+      consultantName: appointment.consultant?.fullName,
+      consultantImageUrl: appointment.consultant?.avatar!,
       branchId: appointment.branch.id,
       branchName: appointment.branch.name,
       dateTime: appointment.dateTime,
@@ -348,6 +379,9 @@ export class AppointmentServices {
         creatorId: appointment.creator.id,
         creatorName: appointment.creator.fullName,
         creatorImageUrl: appointment.creator.avatar!,
+        consultantId: appointment.consultant?.id,
+        consultantName: appointment.consultant?.fullName,
+        consultantImageUrl: appointment.consultant?.avatar!,
         branchId: appointment.branch.id,
         branchName: appointment.branch.name,
         dateTime: appointment.dateTime,

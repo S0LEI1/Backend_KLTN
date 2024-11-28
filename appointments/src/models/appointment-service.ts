@@ -9,13 +9,11 @@ interface AppointmentServiceAttrs {
   appointment: AppointmentDoc;
   service: ServiceDoc;
   quantity: number;
-  execEmp?: UserDoc[];
 }
 interface AppointmentServiceDoc extends mongoose.Document {
   appointment: AppointmentDoc;
   service: ServiceDoc;
   quantity: number;
-  execEmp?: UserDoc[];
   isDeleted: boolean;
   version: number;
 }
@@ -45,12 +43,6 @@ const appointmentServiceSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    execEmp: [
-      {
-        type: mongoose.Types.ObjectId,
-        ref: 'User',
-      },
-    ],
     isDeleted: {
       type: Boolean,
       default: false,

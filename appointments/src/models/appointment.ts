@@ -11,6 +11,7 @@ interface AppointmentAttrs {
   dateTime: Date;
   status: AppointmentStatus;
   description: string;
+  consultant?: UserDoc;
 }
 export interface AppointmentDoc extends mongoose.Document {
   creator: UserDoc;
@@ -19,6 +20,7 @@ export interface AppointmentDoc extends mongoose.Document {
   dateTime: Date;
   status: AppointmentStatus;
   description: string;
+  consultant: UserDoc;
   isDeleted: boolean;
   version: number;
 }
@@ -60,6 +62,10 @@ const appointmentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    consultant: {
+      type: mongoose.Types.ObjectId,
+      ref: 'User',
+    },
   },
   {
     toJSON: {
@@ -84,6 +90,7 @@ appointmentSchema.statics.findAppointment = async (
   const apm = await Appointment.findOne({ _id: id, isDeleted: false })
     .populate('customer')
     .populate('creator')
+    .populate('consultant')
     .populate('branch');
   return apm;
 };
