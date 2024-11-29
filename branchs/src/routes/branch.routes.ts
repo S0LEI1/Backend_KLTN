@@ -30,20 +30,8 @@ router.post(
   requirePermission([ListPermission.BranchCreate]),
   BranchControllers.newBranch
 );
-router.get(
-  '/branchs/',
-  requireAuth,
-  requireType([UserType.Manager]),
-  requirePermission([ListPermission.BranchRead]),
-  BranchControllers.getBranchs
-);
-router.get(
-  '/branchs/:id',
-  requireAuth,
-  requireType([UserType.Manager]),
-  requirePermission([ListPermission.BranchRead]),
-  BranchControllers.getBranch
-);
+router.get('/branchs/', BranchControllers.getBranchs);
+router.get('/branchs/:id', BranchControllers.getBranch);
 router.patch(
   '/branchs/update/:id',
   [

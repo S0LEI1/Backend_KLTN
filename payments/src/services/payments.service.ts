@@ -6,7 +6,7 @@ import {
 import { Order } from '../models/order';
 import { Request, Response } from 'express';
 import axios from 'axios';
-
+const callback = process.env.NGROK_LINK!;
 export class PaymentServices {
   static async payment(cusId: string, orderId: string) {
     const order = await Order.findOne({ _id: orderId, isDeleted: false });
@@ -16,16 +16,14 @@ export class PaymentServices {
     if (order.status === OrderStatus.Complete)
       throw new BadRequestError('Order complete, not payment');
     if (cusId != order.customer)
-      throw new BadRequestError('You not own this order, not payment');
+      throw new BadRequestError('You not own this order,can not payment');
 
     var accessKey = 'F8BBA842ECF85';
     var secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
     var orderInfo = 'Pay with MoMo';
     var partnerCode = 'MOMO';
-    var redirectUrl =
-      'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b';
-    var ipnUrl =
-      'https://f8c7-14-234-138-4.ngrok-free.app/payments/callback/data';
+    var redirectUrl = '';
+    var ipnUrl = `https://eeec-113-178-249-117.ngrok-free.app/payments/callback`;
     var requestType = 'payWithMethod';
     var amount = order.postTaxTotal;
     var orderId = orderId + new Date().getTime();
