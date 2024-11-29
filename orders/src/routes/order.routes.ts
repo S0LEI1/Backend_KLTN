@@ -76,4 +76,11 @@ router.patch(
   OrderController.addUsageLog
 );
 router.get('/orders/exportPdf', OrderController.exportPdf);
+router.patch(
+  '/orders/complete/:id',
+  requireAuth,
+  requireType([UserType.Employee, UserType.Manager]),
+  requirePermission([ListPermission.OrderUpdate]),
+  OrderController.completeOrder
+);
 export { router as orderRouter };

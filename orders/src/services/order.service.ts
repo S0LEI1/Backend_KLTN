@@ -411,4 +411,16 @@ export class OrderService {
     return { serviceEmebedded, count };
     // return {"Not found", 0};
   }
+  static async completeOrder(orderId: string) {
+    const order = await Order.findOrder(orderId);
+    if (!order) throw new NotFoundError('Order');
+    if (order.status === OrderStatus.Cancelled)
+      throw new BadRequestError('Cannot pay for an cancelled order');
+    if (order.status === OrderStatus.Complete)
+      throw new BadRequestError('Cannot pay for an complete order');
+    order.set({ status: OrderStatus.Complete });
+    await order.save();
+    OrderPublisher.updateOrder(order);
+    return order;
+  }
 }

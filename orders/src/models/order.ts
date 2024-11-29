@@ -80,7 +80,9 @@ orderSchema.statics.build = (attrs: OrderAttrs) => {
 orderSchema.statics.findOrder = async (
   id: string
 ): Promise<OrderDoc | null> => {
-  const order = await Order.findOne({ _id: id, isDeleted: false });
+  const order = await Order.findOne({ _id: id, isDeleted: false })
+    .populate('customer')
+    .populate('creator');
   return order;
 };
 orderSchema.statics.findOrders = async (): Promise<OrderDoc[] | null> => {

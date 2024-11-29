@@ -2,22 +2,39 @@ import {
   BadRequestError,
   NotFoundError,
   OrderStatus,
+  PaymentType,
 } from '@share-package/common';
-import { Order } from '../models/order';
+import { Order, OrderDoc } from '../models/order';
 import { Request, Response } from 'express';
 import axios from 'axios';
+import { PaymentCreatedPublisher } from '../events/publisher/payment-created-listener';
+import { natsWrapper } from '../nats-wrapper';
+import { Payment } from '../models/payment';
 const callback = process.env.NGROK_LINK!;
 export class PaymentServices {
-  static async payment(cusId: string, orderId: string) {
+  static async payment(cusId: string, orderId: string, type: string) {
     const order = await Order.findOne({ _id: orderId, isDeleted: false });
     if (!order) throw new NotFoundError('Order');
     if (order.status === OrderStatus.Cancelled)
-      throw new BadRequestError('Order cancelled, not payment');
+      throw new BadRequestError('Cannot pay for an cancelled order');
     if (order.status === OrderStatus.Complete)
-      throw new BadRequestError('Order complete, not payment');
+      throw new BadRequestError('Cannot pay for an complete order');
+    if (order.status === OrderStatus.CashPayment)
+      throw new BadRequestError('Cannot pay for an cash payment order');
     if (cusId != order.customer)
       throw new BadRequestError('You not own this order,can not payment');
-
+    if (type !== PaymentType.Cash && type !== PaymentType.Online)
+      throw new BadRequestError('Payment type not valid');
+    if (type === PaymentType.Online) {
+      const result = await this.onlinePayment(order);
+      return result;
+    }
+    if (type === PaymentType.Cash) {
+      const result = await this.cashPayment(order);
+      return result;
+    }
+  }
+  static async onlinePayment(order: OrderDoc) {
     var accessKey = 'F8BBA842ECF85';
     var secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
     var orderInfo = 'Pay with MoMo';
@@ -26,8 +43,8 @@ export class PaymentServices {
     var ipnUrl = `https://eeec-113-178-249-117.ngrok-free.app/payments/callback`;
     var requestType = 'payWithMethod';
     var amount = order.postTaxTotal;
-    var orderId = orderId + new Date().getTime();
-    var requestId = orderId;
+    var orderId = order.id + new Date().getTime();
+    var requestId = order.id;
     var extraData = '';
     var paymentCode =
       'T8Qii53fAXyUftPV3m9ysyRhEanUs9KlOPfHgpMR0ON50U10Bh+vZdpJU7VY4z+Z2y77fJHkoDc69scwwzLuW5MzeUKTwPo3ZMaB29imm6YulqnWfTkgzqRaion+EuD7FN9wZ4aXE1+mRt0gHsU193y+yxtRgpmY7SDMU9hCKoQtYyHsfFR5FUAOAKMdw2fzQqpToei3rnaYvZuYaxolprm9+/+WIETnPUDlxCYOiw7vPeaaYQQH0BF0TxyU3zu36ODx980rJvPAgtJzH1gUrlxcSS1HQeQ9ZaVM1eOK/jl8KJm6ijOwErHGbgf/hVymUQG65rHU2MWz9U8QUjvDWA==';
@@ -104,5 +121,18 @@ export class PaymentServices {
     } catch (error) {
       console.log(error);
     }
+  }
+  static async cashPayment(order: OrderDoc) {
+    const payment = Payment.build({
+      orderId: order.id,
+      type: PaymentType.Cash,
+    });
+    await payment.save();
+    new PaymentCreatedPublisher(natsWrapper.client).publish({
+      paymentId: payment.id,
+      type: payment.type,
+      orderId: order.id,
+    });
+    return order.id;
   }
 }

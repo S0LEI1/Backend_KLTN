@@ -240,4 +240,16 @@ export class OrderController {
       'Content-Disposition': `attachment; filename="order.pdf"`,
     });
   }
+  static async completeOrder(req: Request, res: Response) {
+    const { id } = req.params;
+    try {
+      const order = await OrderService.completeOrder(id);
+      res
+        .status(200)
+        .send({ message: 'PATCH: Update order complete successfully', order });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 }
