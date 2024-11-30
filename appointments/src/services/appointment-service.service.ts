@@ -145,9 +145,21 @@ export class AppointmentServiceServices {
       };
       existServiceAttrs.push(serviceAttr);
     }
-    const deleteValue = _.differenceBy(existServiceAttrs, serviceAttrs, 'id');
-    const updateValue = _.intersectionBy(serviceAttrs, existServiceAttrs, 'id');
-    const addValue = _.differenceBy(serviceAttrs, existServiceAttrs, 'id');
+    const deleteValue = _.differenceBy(
+      existServiceAttrs,
+      serviceAttrs,
+      'serviceId'
+    );
+    const updateValue = _.intersectionBy(
+      serviceAttrs,
+      existServiceAttrs,
+      'serviceId'
+    );
+    const addValue = _.differenceBy(
+      serviceAttrs,
+      existServiceAttrs,
+      'serviceId'
+    );
     console.log('addService', addValue);
     console.log('updateService', updateValue);
     console.log('deleteService', deleteValue);

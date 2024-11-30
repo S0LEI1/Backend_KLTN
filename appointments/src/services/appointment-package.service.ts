@@ -155,9 +155,21 @@ export class AppointmentPackageService {
       };
       existPackageAttrs.push(packageAttr);
     }
-    const deleteValue = _.differenceBy(existPackageAttrs, packageAttrs, 'id');
-    const updateValue = _.intersectionBy(packageAttrs, existPackageAttrs, 'id');
-    const addValue = _.differenceBy(packageAttrs, existPackageAttrs, 'id');
+    const deleteValue = _.differenceBy(
+      existPackageAttrs,
+      packageAttrs,
+      'packageId'
+    );
+    const updateValue = _.intersectionBy(
+      packageAttrs,
+      existPackageAttrs,
+      'packageId'
+    );
+    const addValue = _.differenceBy(
+      packageAttrs,
+      existPackageAttrs,
+      'packageId'
+    );
     const addPackages = await this.newAppointmentPackages(
       appointmentId,
       addValue
