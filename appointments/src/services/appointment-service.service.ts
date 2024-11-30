@@ -6,7 +6,7 @@ import { Service } from '../models/service';
 import { AppointmentService } from '../models/appointment-service';
 import _ from 'lodash';
 export interface ServiceAttr {
-  id: string;
+  serviceId: string;
   quantity: number;
 }
 export interface ServiceInAppointment {
@@ -21,7 +21,7 @@ export class AppointmentServiceServices {
     appointmentDoc: AppointmentDoc,
     serviceAttr: ServiceAttr
   ) {
-    const service = await Service.findService(serviceAttr.id);
+    const service = await Service.findService(serviceAttr.serviceId);
     if (!service) throw new NotFoundError('Service not found');
     const existAService = await AppointmentService.findOne({
       appointment: appointmentDoc.id,
@@ -96,7 +96,7 @@ export class AppointmentServiceServices {
   ) {
     const aService = await AppointmentService.findOne({
       appointment: appointmentDoc.id,
-      service: serviceAttr.id,
+      service: serviceAttr.serviceId,
       isDeleted: false,
     });
     if (!aService) throw new NotFoundError('Appointment-Service');
@@ -117,7 +117,7 @@ export class AppointmentServiceServices {
   ) {
     const aService = await AppointmentService.findOne({
       appointment: appointmentDoc.id,
-      service: serviceAttr.id,
+      service: serviceAttr.serviceId,
       isDeleted: false,
     })
       .populate('service')
@@ -139,7 +139,7 @@ export class AppointmentServiceServices {
     for (const srv of services) {
       // const execEmpId: string[] = srv.execEmp.map((exec) => exec.id);
       const serviceAttr: ServiceAttr = {
-        id: srv.serviceId,
+        serviceId: srv.serviceId,
         quantity: srv.quantity,
         // execEmp: execEmpId,
       };

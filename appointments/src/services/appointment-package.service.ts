@@ -10,7 +10,7 @@ import { User, UserDoc } from '../models/user';
 import { forEachChild } from 'typescript';
 import _ from 'lodash';
 export interface PackageAttr {
-  id: string;
+  packageId: string;
   // execEmp?: string[];
   quantity: number;
 }
@@ -29,7 +29,7 @@ export class AppointmentPackageService {
     appointmentDoc: AppointmentDoc,
     packageAttr: PackageAttr
   ) {
-    const existPackage = await Package.findPackage(packageAttr.id);
+    const existPackage = await Package.findPackage(packageAttr.packageId);
     if (!existPackage) throw new NotFoundError('Package not found');
     const existAPackage = await AppointmentPackage.findOne({
       appointment: appointmentDoc.id,
@@ -106,7 +106,7 @@ export class AppointmentPackageService {
   ) {
     const aPackage = await AppointmentPackage.findOne({
       appointment: appointmentDoc.id,
-      package: packageAttr.id,
+      package: packageAttr.packageId,
       isDeleted: false,
     });
     if (!aPackage) throw new NotFoundError('Appointment-Service');
@@ -127,7 +127,7 @@ export class AppointmentPackageService {
   ) {
     const aPackage = await AppointmentPackage.findOne({
       appointment: appointmentDoc.id,
-      package: packageAttr.id,
+      package: packageAttr.packageId,
       isDeleted: false,
     })
       .populate('package')
@@ -149,7 +149,7 @@ export class AppointmentPackageService {
     for (const pkg of packages) {
       // const execEmpId: string[] = srv.execEmp.map((exec) => exec.id);
       const packageAttr: PackageAttr = {
-        id: pkg.packageId,
+        packageId: pkg.packageId,
         quantity: pkg.quantity,
         // execEmp: execEmpId,
       };
