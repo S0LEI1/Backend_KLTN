@@ -8,11 +8,13 @@ import {
   AppointmentPackageService,
   PackageInAppointment,
 } from '../services/appointment-package.service';
+import { UserType } from '@share-package/common';
 
 export class AppointmentController {
   static async newAppointment(req: Request, res: Response) {
     try {
       const creatorId = req.currentUser!.id;
+      const type = req.currentUser!.type;
       const {
         customerId,
         branchId,
@@ -22,7 +24,6 @@ export class AppointmentController {
         packageAttrs,
         consultantId,
       } = req.body;
-      console.log('serviceAttrs', serviceAttrs);
 
       const appointment = await AppointmentServices.newAppointment(
         creatorId,
@@ -30,7 +31,8 @@ export class AppointmentController {
         consultantId,
         branchId,
         dateTime,
-        description
+        description,
+        type
       );
       let services: ServiceInAppointment[] = [];
       if (serviceAttrs) {

@@ -33,8 +33,10 @@ export class AppointmentServices {
     consultantId: string,
     branchId: string,
     dateTime: Date,
-    description: string
+    description: string,
+    type: string
   ) {
+    if (type === UserType.Customer) customerId = creatorId;
     const creator = await User.findUser(creatorId);
     if (!creator) throw new NotFoundError('Creator not found');
     const customer = await User.findCustomer(customerId);

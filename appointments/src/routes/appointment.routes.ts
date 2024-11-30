@@ -13,7 +13,7 @@ const router = express.Router();
 router.post(
   '/appointments/new',
   [
-    body('customerId').isMongoId().withMessage('Customer Id must be ObjectId'),
+    // body('customerId').isMongoId().withMessage('Customer Id must be ObjectId'),
     body('dateTime').isISO8601().withMessage('Date time must be type ISO8601'),
     body('branchId').isMongoId().withMessage('Branch Id must be ObjectId'),
     body('consultantId')
