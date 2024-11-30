@@ -68,13 +68,13 @@ router.patch(
       .isMongoId()
       .withMessage('Consultant Id must be ObjectId'),
     // body('serviceAttrs').isArray().withMessage('ServiceAttrs must be array'),
-    body('serviceAttrs.*.id')
+    body('serviceAttrs.*.serviceId')
       .isMongoId()
       .withMessage('Id in serviceAttrs must be ObjectId'),
     body('serviceAttrs.*.quantity')
       .isInt({ min: 1 })
       .withMessage('Quantity in serviceAttrs must be greater than or equal 1'),
-    body('packageAttrs.*.id')
+    body('packageAttrs.*.packageId')
       .isMongoId()
       .withMessage('Id in packageAttrs must be ObjectId'),
     body('packageAttrs.*.quantity')
