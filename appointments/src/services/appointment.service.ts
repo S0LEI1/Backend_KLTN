@@ -121,11 +121,15 @@ export class AppointmentServices {
     pages: string,
     dateTime: string,
     date: string,
-    status: string
+    status: string,
+    creatorId: string,
+    customerId: string
   ) {
     const filter = Pagination.query();
     filter.isDeleted = false;
     if (type === UserType.Customer) filter.customer = userId;
+    if (type !== UserType.Customer && customerId) filter.customer = customerId;
+    if (creatorId) filter.creator = creatorId;
     if (dateTime) {
       const dateFormat = format(dateTime, 'yyyy-MM-dd');
       const convertDate = new Date(dateFormat);

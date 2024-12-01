@@ -64,7 +64,7 @@ export class AppointmentController {
   }
   static async getAppointments(req: Request, res: Response) {
     const { id, type } = req.currentUser!;
-    const { dateTime, date, pages, status } = req.query;
+    const { dateTime, date, pages, status, customerId, creatorId } = req.query;
     try {
       const { apmConverts, totalDocuments } =
         await AppointmentServices.getAppointments(
@@ -73,7 +73,9 @@ export class AppointmentController {
           pages as string,
           dateTime as string,
           date as string,
-          status as string
+          status as string,
+          creatorId as string,
+          customerId as string
         );
       res.status(200).send({
         message: 'GET: appointments successfully',
