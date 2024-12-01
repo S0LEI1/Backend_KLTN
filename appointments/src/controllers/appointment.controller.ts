@@ -181,4 +181,19 @@ export class AppointmentController {
       throw error;
     }
   }
+  static async completeAppointment(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const appointment = await AppointmentServices.completeAppoinment(id);
+      res
+        .status(200)
+        .send({
+          message: 'PATCH: Complete appointment successfully',
+          appointment,
+        });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 }

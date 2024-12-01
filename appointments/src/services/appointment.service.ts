@@ -22,7 +22,7 @@ import { format } from 'date-fns';
 import { AppointmentService } from '../models/appointment-service';
 import { AppointmentPackage } from '../models/appointment-package';
 import { ServiceAttrs } from '../models/service';
-import { AppointmentConvert } from '../utils/convert';
+import { AppointmentConvert, Convert } from '../utils/convert';
 import { PackageAttr } from './appointment-package.service';
 const PER_PAGE = process.env.PER_PAGE;
 
@@ -426,5 +426,31 @@ export class AppointmentServices {
       apmConverts.push(apmConvert);
     }
     return apmConverts;
+  }
+  static async completeAppoinment(appointmentId: string) {
+    const appointment = await Appointment.findAppointment(appointmentId);
+    if (!appointment) throw new NotFoundError('Appointment');
+    if (appointment.status === AppointmentStatus.Cancelled)
+      throw new BadRequestError('Cannot complete for an cancelled appointment');
+    if (appointment.status === AppointmentStatus.Complete)
+      throw new BadRequestError('Cannot complete for an complete appointment');
+    appointment.set({ status: AppointmentStatus.Complete });
+    await appointment.save();
+    const apmConvert: AppointmentConvert = {
+      id: appointment.id,
+      customerId: appointment.customer.id,
+      customerName: appointment.customer.fullName,
+      customerImageUrl: appointment.customer.avatar!,
+      customerPhoneNumber: appointment.customer.phoneNumber,
+      creatorId: appointment.creator.id,
+      creatorName: appointment.creator.fullName,
+      creatorImageUrl: appointment.creator.avatar!,
+      branchId: appointment.branch.id,
+      branchName: appointment.branch.name,
+      dateTime: appointment.dateTime,
+      status: appointment.status,
+      description: appointment.description,
+    };
+    return apmConvert;
   }
 }

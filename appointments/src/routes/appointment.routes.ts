@@ -85,4 +85,10 @@ router.patch(
   requireAuth,
   AppointmentController.updateAppointment
 );
+router.patch(
+  '/appointments/complete/:id',
+  requireAuth,
+  requireType([UserType.Employee, UserType.Manager]),
+  AppointmentController.completeAppointment
+);
 export { router as AppointmentRouter };
