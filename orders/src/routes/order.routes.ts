@@ -75,7 +75,7 @@ router.patch(
   requirePermission([ListPermission.OrderUpdate]),
   OrderController.addUsageLog
 );
-router.get('/orders/exportPdf', OrderController.exportPdf);
+router.get('/orders/export/pdf', OrderController.exportPdf);
 router.patch(
   '/orders/complete/:id',
   requireAuth,

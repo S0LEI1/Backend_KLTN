@@ -4,6 +4,8 @@ import { Attrs } from './order.service';
 import { PackageService } from '../models/package-service';
 import mongoose, { ObjectId } from 'mongoose';
 import { ServiceEmbedded } from '../models/order-package';
+import { writeFileSync } from 'fs';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 interface ServiceInPackage {
   service: ServiceDoc;
   quantity: number;
