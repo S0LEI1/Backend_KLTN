@@ -57,6 +57,7 @@ export class OrderController {
       execId,
       date,
       priceRange,
+      phoneNumber,
     } = req.query;
     const { type, id } = req.currentUser!;
     try {
@@ -72,7 +73,8 @@ export class OrderController {
         createdAt as string,
         date as string,
         type as string,
-        priceRange as string
+        priceRange as string,
+        phoneNumber as string
       );
       res
         .status(200)
@@ -121,16 +123,15 @@ export class OrderController {
       .status(200)
       .send({ message: 'PATCH: Cancel order successfully', order });
   }
-  static async findByUserPhone(req: Request, res: Response) {
-    const { phoneNumber, name } = req.query;
-    const orders = await OrderService.findByPhoneNumer(
-      phoneNumber as string,
-      name as string
-    );
-    res
-      .status(200)
-      .send({ message: 'GET: Order by customer phone successfully', orders });
-  }
+  // static async findByUserPhone(req: Request, res: Response) {
+  //   const { key } = req.query;
+  //   const orders = await OrderService.findByPhoneNumer(
+  //     key as string
+  //   );
+  //   res
+  //     .status(200)
+  //     .send({ message: 'GET: Order by customer phone successfully', orders });
+  // }
   static async deleteOrder(req: Request, res: Response) {
     const { orderId } = req.params;
     const order = await OrderService.deleteOrder(orderId);

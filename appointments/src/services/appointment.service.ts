@@ -162,12 +162,14 @@ export class AppointmentServices {
     const apmConverts: AppointmentConvert[] = [];
     let services: ServiceInAppointment[] = [];
     let packages: PackageInAppointment[] = [];
+    let totalPrice: number = 0;
     for (const apm of appointments) {
       const aService = await AppointmentService.findByAppointment(apm);
       if (aService) {
-        services = await AppointmentServiceServices.getAppointmentServices(
-          apm.id
-        );
+        const servicesInAppointment =
+          await AppointmentServiceServices.getAppointmentServices(apm.id);
+        services = servicesInAppointment.services;
+        totalPrice += servicesInAppointment.totalServicePrice;
       }
       const aPackage = await AppointmentPackage.findByAppointment(apm);
       if (aPackage) {
@@ -203,9 +205,8 @@ export class AppointmentServices {
   static async getAppointment(id: string) {
     const appointment = await Appointment.findAppointment(id);
     if (!appointment) throw new NotFoundError('Appointment');
-    const services = await AppointmentServiceServices.getAppointmentServices(
-      appointment.id
-    );
+    const { services, totalServicePrice } =
+      await AppointmentServiceServices.getAppointmentServices(appointment.id);
     const packages = await AppointmentPackageService.getAppointmentPackage(
       appointment.id
     );
@@ -248,9 +249,8 @@ export class AppointmentServices {
     if (appointment.status === AppointmentStatus.Complete)
       throw new BadRequestError('Cannot cancell appointment completed');
     appointment.set({ status: AppointmentStatus.Cancelled });
-    const services = await AppointmentServiceServices.getAppointmentServices(
-      appointment.id
-    );
+    const { services, totalServicePrice } =
+      await AppointmentServiceServices.getAppointmentServices(appointment.id);
     const packages = await AppointmentPackageService.getAppointmentPackage(
       appointment.id
     );
@@ -396,9 +396,8 @@ export class AppointmentServices {
       .populate('branch');
     const apmConverts: AppointmentConvert[] = [];
     for (const appointment of appointments) {
-      const services = await AppointmentServiceServices.getAppointmentServices(
-        appointment.id
-      );
+      const { services, totalServicePrice } =
+        await AppointmentServiceServices.getAppointmentServices(appointment.id);
       const packages = await AppointmentPackageService.getAppointmentPackage(
         appointment.id
       );

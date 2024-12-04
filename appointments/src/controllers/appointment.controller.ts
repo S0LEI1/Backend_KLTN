@@ -35,11 +35,15 @@ export class AppointmentController {
         type
       );
       let services: ServiceInAppointment[] = [];
+      let totalPrice = 0;
       if (serviceAttrs) {
-        services = await AppointmentServiceServices.newAppointmentServices(
-          appointment.id,
-          serviceAttrs
-        );
+        const serviceInAppointment =
+          await AppointmentServiceServices.newAppointmentServices(
+            appointment.id,
+            serviceAttrs
+          );
+        services = serviceInAppointment.services;
+        totalPrice += serviceInAppointment.totalServicePrice;
       }
       let packages: PackageInAppointment[] = [];
       if (packageAttrs) {
@@ -55,6 +59,7 @@ export class AppointmentController {
         appointment,
         services,
         packages,
+        totalPrice,
       });
     } catch (error) {
       console.log(error);
@@ -185,12 +190,10 @@ export class AppointmentController {
     try {
       const { id } = req.params;
       const appointment = await AppointmentServices.completeAppoinment(id);
-      res
-        .status(200)
-        .send({
-          message: 'PATCH: Complete appointment successfully',
-          appointment,
-        });
+      res.status(200).send({
+        message: 'PATCH: Complete appointment successfully',
+        appointment,
+      });
     } catch (error) {
       console.log(error);
       throw error;

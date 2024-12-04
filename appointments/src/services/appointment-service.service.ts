@@ -15,6 +15,7 @@ export interface ServiceInAppointment {
   salePrice: number;
   imageUrl: string;
   quantity: number;
+  totalPrice: number;
 }
 export class AppointmentServiceServices {
   static async newAppointmentService(
@@ -52,6 +53,7 @@ export class AppointmentServiceServices {
     const appointmentDoc = await Appointment.findAppointment(appointmentId);
     if (!appointmentDoc) throw new NotFoundError('Appointment');
     const services: ServiceInAppointment[] = [];
+    let totalServicePrice = 0;
     for (const serviceAttr of serviceAttrs) {
       const { aService, service, employeesInAppointment } =
         await this.newAppointmentService(appointmentDoc, serviceAttr);
@@ -61,10 +63,12 @@ export class AppointmentServiceServices {
         salePrice: service.salePrice,
         imageUrl: service.imageUrl,
         quantity: aService.quantity,
+        totalPrice: service.salePrice * aService.quantity,
         // execEmp: employeesInAppointment,
       });
+      totalServicePrice += service.salePrice * aService.quantity;
     }
-    return services;
+    return { services, totalServicePrice };
   }
   static async getAppointmentServices(appointmentId: string) {
     const appointment = await Appointment.findOne({
@@ -78,6 +82,7 @@ export class AppointmentServiceServices {
     }).populate('service');
     // .populate({ path: 'execEmp', select: 'id fullName avatar gender' });
     const services: ServiceInAppointment[] = [];
+    let totalServicePrice = 0;
     aServices.map((as) => {
       services.push({
         serviceId: as.service.id,
@@ -85,10 +90,12 @@ export class AppointmentServiceServices {
         salePrice: as.service.salePrice,
         imageUrl: as.service.imageUrl,
         quantity: as.quantity,
+        totalPrice: as.service.salePrice * as.quantity,
       });
+      totalServicePrice += as.service.salePrice * as.quantity;
     });
 
-    return services;
+    return { services, totalServicePrice };
   }
   static async deleteAppointmentService(
     appointmentDoc: AppointmentDoc,
@@ -134,7 +141,9 @@ export class AppointmentServiceServices {
   ) {
     const appointmentDoc = await Appointment.findAppointment(appointmentId);
     if (!appointmentDoc) throw new NotFoundError('Appointment');
-    const services = await this.getAppointmentServices(appointmentDoc.id);
+    const { services, totalServicePrice } = await this.getAppointmentServices(
+      appointmentDoc.id
+    );
     const existServiceAttrs: ServiceAttr[] = [];
     for (const srv of services) {
       // const execEmpId: string[] = srv.execEmp.map((exec) => exec.id);
@@ -180,11 +189,12 @@ export class AppointmentServiceServices {
         salePrice: aService.service.salePrice,
         imageUrl: aService.service.imageUrl,
         quantity: aService.quantity,
+        totalPrice: aService.service.salePrice * aService.quantity,
       });
     }
     await this.deleteAppointmentServices(appointmentDoc, deleteValue);
     const serviceInAppointment: ServiceInAppointment[] = [];
-    serviceInAppointment.push(...addServices);
+    serviceInAppointment.push(...addServices.services);
     serviceInAppointment.push(...updateServices);
     return serviceInAppointment;
   }

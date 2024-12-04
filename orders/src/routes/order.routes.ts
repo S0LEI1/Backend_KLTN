@@ -38,13 +38,13 @@ router.patch(
   requirePermission([ListPermission.OrderDelete]),
   OrderController.cancelOrder
 );
-router.get(
-  '/orders/find/phone',
-  requireAuth,
-  requireType([UserType.Employee, UserType.Manager]),
-  requirePermission([ListPermission.OrdersRead]),
-  OrderController.findByUserPhone
-);
+// router.get(
+//   '/orders/find/phone',
+//   requireAuth,
+//   requireType([UserType.Employee, UserType.Manager]),
+//   requirePermission([ListPermission.OrdersRead]),
+//   OrderController.findByUserPhone
+// );
 router.post(
   '/orders/add/:orderId',
   requireAuth,

@@ -21,6 +21,7 @@ export interface PackageInAppointment {
   salePrice: number;
   imageUrl: string;
   quantity: number;
+  totalPrice: number;
   // execEmp: UserDoc[];
 }
 
@@ -75,6 +76,7 @@ export class AppointmentPackageService {
         salePrice: existPackage.salePrice,
         imageUrl: existPackage.imageUrl,
         quantity: aPackage.quantity,
+        totalPrice: existPackage.salePrice * aPackage.quantity,
         // execEmp: employeesInAppointment,
       });
     }
@@ -96,6 +98,7 @@ export class AppointmentPackageService {
         salePrice: as.package.salePrice,
         imageUrl: as.package.imageUrl,
         quantity: as.quantity,
+        totalPrice: as.package.salePrice * as.quantity,
       });
     }
     return packages;
@@ -190,6 +193,7 @@ export class AppointmentPackageService {
         salePrice: aPackage.package.salePrice,
         imageUrl: aPackage.package.imageUrl,
         quantity: aPackage.quantity,
+        totalPrice: aPackage.package.salePrice * aPackage.quantity,
       });
     }
     await this.deleteAppointmentServices(appointmentDoc, deleteValue);

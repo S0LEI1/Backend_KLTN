@@ -113,15 +113,18 @@ export class OrderService {
     createdAt: string,
     date: string,
     type: string,
-    priceRange: string
+    priceRange: string,
+    phoneNumber: string
   ) {
     let filter: FilterQuery<OrderDoc> = {};
+    let phone: FilterQuery<OrderDoc> = {};
     let sort: FilterQuery<OrderDoc> = {};
     if (type === 'customer' && cusId)
       filter.customer = new mongoose.Types.ObjectId(cusId);
     if (creId) filter.creator = new mongoose.Types.ObjectId(creId);
     if (execId) filter.execEmp = execId;
     if (status) filter.status = status;
+    // if (phoneNumber) filter.populate;
     if (createdAt) {
       const dateFormat = format(createdAt, 'yyyy-MM-dd');
       const convertDate = new Date(dateFormat);
@@ -129,6 +132,7 @@ export class OrderService {
       ltDate.setDate(ltDate.getDate() + 1);
       filter.createdAt = { $gte: convertDate, $lt: ltDate };
     }
+    // if (phone) phone.customer['phoneNumber'] = { customerPhone: phoneNumber };
     const highPrice = 3000000;
     const lowPrice = 500000;
     if (priceRange === 'highprice') filter.postTaxTotal = { $gt: highPrice };
@@ -180,6 +184,9 @@ export class OrderService {
           creatorId: { $arrayElemAt: ['$creator._id', 0] },
           creatorName: { $arrayElemAt: ['$creator.fullName', 0] },
         },
+      },
+      {
+        $match: { customerPhone: phoneNumber },
       },
       {
         $project: { customer: 0, creator: 0 },
@@ -235,34 +242,63 @@ export class OrderService {
     OrderPublisher.updateOrder(order);
     return order;
   }
-  static async findByPhoneNumer(phoneNumber: string, name: string) {
-    let filter = Pagination.query();
-    filter.isDeleted = false;
-    if (phoneNumber) filter.phoneNumber = phoneNumber;
-    if (name) filter = { ...filter, fullName: RegExp(name, 'i') };
-    const user = await User.findOne(filter);
-    if (!user) throw new NotFoundError('Customer');
-    console.log(filter);
-
-    const orders = await Order.find({
-      customer: user.id,
-      isDeleted: false,
-    })
-      .populate({
-        path: 'customer',
-        select: '_id fullName imageUrl phoneNumber',
-      })
-      .populate({
-        path: 'creator',
-        select: '_id fullName imageUrl phoneNumber',
-      })
-      .populate({
-        path: 'execEmp',
-        select: '_id fullName imageUrl phoneNumber',
-      });
-
-    return orders;
-  }
+  // static async findByPhoneNumer(key: string, pages: string) {
+  //   let filter = Pagination.query();
+  //   filter.isDeleted = false;
+  //   filter = {$or:[{phoneNumber: key},{ fullName: RegExp(key, 'i')}]}
+  //   const user = await User.findOne(filter);
+  //   if (!user) throw new NotFoundError('Customer');
+  //   const orders = await Order.aggregate<OrderDoc>([
+  //     {
+  //       $match: filter,
+  //     },
+  //     {
+  //       $lookup: {
+  //         from: 'users',
+  //         localField: 'customer',
+  //         foreignField: '_id',
+  //         as: 'customer',
+  //       },
+  //     },
+  //     {
+  //       $addFields: {
+  //         customerId: '$customer._id',
+  //         customerName: '$customer.fullName',
+  //         customerPhone: '$customer.phoneNumber',
+  //       },
+  //     },
+  //     {
+  //       $unwind: '$customerId',
+  //     },
+  //     {
+  //       $unwind: '$customerName',
+  //     },
+  //     {
+  //       $unwind: '$customerPhone',
+  //     },
+  //     {
+  //       $lookup: {
+  //         from: 'users',
+  //         localField: 'creator',
+  //         foreignField: '_id',
+  //         as: 'creator',
+  //       },
+  //     },
+  //     {
+  //       $addFields: {
+  //         creatorId: { $arrayElemAt: ['$creator._id', 0] },
+  //         creatorName: { $arrayElemAt: ['$creator.fullName', 0] },
+  //       },
+  //     },
+  //     {
+  //       $project: { customer: 0, creator: 0 },
+  //     },
+  //     { $skip: pages - 1 },
+  //     { $limit: parseInt(PER_PAGE as string, 25) },
+  //     { $sort: sort },
+  //   ]);
+  //   return orders;
+  // }
   static async deleteOrder(orderId: string) {
     const order = await Order.findOne({ _id: orderId, isDeleted: false });
     if (!order) throw new NotFoundError('Order');
