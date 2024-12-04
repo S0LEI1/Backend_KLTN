@@ -3,6 +3,7 @@ import { AppointmentDoc } from './appointment';
 import { OrderDoc } from './order';
 import { PackageDoc } from './package';
 import { ServiceDoc } from './service';
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 interface AppointmentOrderAttrs {
   appointment: AppointmentDoc;
@@ -34,6 +35,16 @@ const appointmentOrderSchema = new mongoose.Schema(
       required: true,
       ref: 'Order',
     },
+    service: {
+      type: mongoose.Types.ObjectId,
+      required: true,
+      ref: 'Service',
+    },
+    package: {
+      type: mongoose.Types.ObjectId,
+      required: true,
+      ref: 'Package',
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -49,3 +60,15 @@ const appointmentOrderSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+appointmentOrderSchema.set('versionKey', 'version');
+appointmentOrderSchema.plugin(updateIfCurrentPlugin);
+
+appointmentOrderSchema.statics.build = (attrs: AppointmentOrderAttrs) => {
+  return;
+};
+
+const AppointmentOrder = mongoose.model<
+  AppointmentOrderDoc,
+  AppointmentOrderModel
+>('AppointmentOrder', appointmentOrderSchema);
+export { AppointmentOrder };
