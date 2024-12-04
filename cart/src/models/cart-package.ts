@@ -3,6 +3,7 @@ import { CartDoc } from './cart';
 import { ProductDoc } from './product';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { PackageDoc } from './package';
+import { ItemType } from '@share-package/common';
 
 interface CartPackageAttrs {
   cart: CartDoc;
@@ -15,6 +16,7 @@ interface CartPackageDoc extends mongoose.Document {
   package: PackageDoc;
   quantity: number;
   totalPrice: number;
+  type: ItemType;
   isDeleted: boolean;
   createdAt: Date;
   version: number;
@@ -43,6 +45,11 @@ const cartPackageSchema = new mongoose.Schema(
     totalPrice: {
       type: Number,
       required: true,
+    },
+    type: {
+      type: String,
+      enum: ItemType,
+      default: ItemType.Package,
     },
     isDeleted: {
       type: Boolean,

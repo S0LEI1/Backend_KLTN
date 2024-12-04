@@ -1,9 +1,9 @@
 import {
   BadRequestError,
+  ItemType,
   NotFoundError,
   Pagination,
   calcPrice,
-  roundPrice,
 } from '@share-package/common';
 import { User } from '../models/user';
 import { Cart } from '../models/cart';
@@ -29,6 +29,7 @@ export interface ItemInCart {
   quantity: number;
   totalPrice: number;
   createdAt: Date;
+  type: ItemType;
 }
 interface CartAttr {
   id: string;
@@ -68,6 +69,7 @@ export class CartServices {
         quantity: cartProduct.quantity,
         totalPrice: cartProduct.totalPrice,
         createdAt: cartProduct.createdAt,
+        type: cartProduct.type,
       };
       return itemInCart;
     }
@@ -83,6 +85,7 @@ export class CartServices {
         quantity: cartService.quantity,
         totalPrice: cartService.totalPrice,
         createdAt: cartService.createdAt,
+        type: cartService.type,
       };
       return itemInCart;
     }
@@ -98,6 +101,7 @@ export class CartServices {
         quantity: cartPackage.quantity,
         totalPrice: cartPackage.totalPrice,
         createdAt: cartPackage.createdAt,
+        type: cartPackage.type,
       };
       return itemInCart;
     }
@@ -187,7 +191,7 @@ export class CartServices {
           cartProduct.product.discount
         );
         cartProduct.set({
-          totalPrice: roundPrice(totalPrice),
+          totalPrice: totalPrice,
           quantity: attr.quantity,
         });
         await cartProduct.save();
@@ -200,6 +204,7 @@ export class CartServices {
           quantity: cartProduct.quantity,
           totalPrice: cartProduct.totalPrice,
           createdAt: cartProduct.createdAt,
+          type: cartProduct.type,
         });
         continue;
       }
@@ -210,7 +215,7 @@ export class CartServices {
           cartService.service.discount
         );
         cartService.set({
-          totalPrice: roundPrice(totalPrice),
+          totalPrice: totalPrice,
           quantity: attr.quantity,
         });
         await cartService.save();
@@ -223,6 +228,7 @@ export class CartServices {
           quantity: cartService.quantity,
           totalPrice: cartService.totalPrice,
           createdAt: cartService.createdAt,
+          type: cartService.type,
         });
         continue;
       }
@@ -233,7 +239,7 @@ export class CartServices {
           cartPackage.package.discount!
         );
         cartPackage.set({
-          totalPrice: roundPrice(totalPrice),
+          totalPrice: totalPrice,
           quantity: attr.quantity,
         });
         await cartPackage.save();
@@ -246,6 +252,7 @@ export class CartServices {
           quantity: cartPackage.quantity,
           totalPrice: cartPackage.totalPrice,
           createdAt: cartPackage.createdAt,
+          type: cartPackage.type,
         });
         continue;
       }

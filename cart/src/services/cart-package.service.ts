@@ -80,6 +80,7 @@ export class CartPackageServices {
         quantity: cartPacakge.quantity,
         totalPrice: totalPrice,
         createdAt: cartPacakge.createdAt,
+        type: cartPacakge.type,
       });
     }
     return { packagesInCart, totalPackagePrice, totalPackageQuantity };

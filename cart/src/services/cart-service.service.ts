@@ -83,6 +83,7 @@ export class CartServiceServices {
         quantity: cartSrv.quantity,
         totalPrice: totalPrice,
         createdAt: cartSrv.createdAt,
+        type: cartSrv.type,
       });
     }
     return { servicesInCart, totalServicesPrice, totalServicesQuantity };

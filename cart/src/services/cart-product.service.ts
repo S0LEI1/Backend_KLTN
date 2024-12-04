@@ -77,6 +77,7 @@ export class CartProductService {
         quantity: cartProduct.quantity,
         totalPrice: totalPrice,
         createdAt: cartProduct.createdAt,
+        type: cartProduct.type,
       });
     }
     return { productsInCart, totalProductPrice, totalProductQuantity };
