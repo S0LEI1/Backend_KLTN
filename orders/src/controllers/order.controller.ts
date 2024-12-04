@@ -10,17 +10,27 @@ export class OrderController {
   static async newOrder(req: Request, res: Response) {
     const creEmpId = req.currentUser!.id;
     const { type } = req.currentUser!;
-    const { execEmpId, customerId } = req.body;
+    const { execEmpId, customerId, services, packages, products } = req.body;
     try {
-      const order = await OrderService.newOrder({
+      const data = await OrderService.newOrder({
         creatorId: creEmpId,
         execEmpId: execEmpId,
         customerId: customerId,
-        type,
+        type: type,
+        serviceAttrs: services,
+        packageAttrs: packages,
+        productAttrs: products,
       });
-      res.status(201).send({ message: 'POST: Order successfully', order });
+      res.status(201).send({
+        message: 'POST: Order successfully',
+        order: data.orderDoc,
+        products: data.products,
+        services: data.services,
+        packages: data.packages,
+      });
     } catch (error) {
       console.log(error);
+      throw error;
     }
   }
   static async addAndDelete(req: Request, res: Response) {

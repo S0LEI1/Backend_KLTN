@@ -16,14 +16,14 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    - image: vannggoc/branchs
-      context: branchs
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          - src: 'src/**/*.ts'
-            dest: .
+    # - image: vannggoc/branchs
+    #   context: branchs
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       - src: 'src/**/*.ts'
+    #         dest: .
     - image: vannggoc/orders
       context: orders
       docker:
@@ -72,19 +72,19 @@ build:
     #     manual:
     #       - src: 'src/**/*.tsx'
     #         dest: .
-    - image: vannggoc/cart
-      context: cart
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          - src: 'src/**/*.ts'
-            dest: .
-    - image: vannggoc/payments
-      context: payments
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          - src: 'src/**/*.ts'
-            dest: .
+    # - image: vannggoc/cart
+    #   context: cart
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       - src: 'src/**/*.ts'
+    #         dest: .
+    # - image: vannggoc/payments
+    #   context: payments
+    #   docker:
+    #     dockerfile: Dockerfile
+    #   sync:
+    #     manual:
+    #       - src: 'src/**/*.ts'
+    #         dest: .

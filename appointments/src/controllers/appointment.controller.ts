@@ -32,37 +32,17 @@ export class AppointmentController {
         branchId,
         dateTime,
         description,
-        type
+        type,
+        serviceAttrs,
+        packageAttrs
       );
-      let services: ServiceInAppointment[] = [];
-      let totalPrice = 0;
-      if (serviceAttrs) {
-        const serviceInAppointment =
-          await AppointmentServiceServices.newAppointmentServices(
-            appointment.id,
-            serviceAttrs
-          );
-        services = serviceInAppointment.services;
-        totalPrice += serviceInAppointment.totalServicePrice;
-      }
-      let packages: PackageInAppointment[] = [];
-      if (packageAttrs) {
-        const packagesInAppoitment =
-          await AppointmentPackageService.newAppointmentPackages(
-            appointment.id,
-            packageAttrs
-          );
-        packages = packagesInAppoitment.packages;
-        totalPrice += packagesInAppoitment.totalPackagePrice;
-      }
       // create appoint - order
       //
       res.status(201).send({
         message: 'POST: new appoint successfully',
         appointment,
-        services,
-        packages,
-        totalPrice,
+        services: appointment.services,
+        packages: appointment.packages,
       });
     } catch (error) {
       console.log(error);

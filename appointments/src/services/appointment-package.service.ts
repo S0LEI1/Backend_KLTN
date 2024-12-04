@@ -2,6 +2,7 @@ import {
   BadRequestError,
   NotFoundError,
   UserType,
+  calcPrice,
 } from '@share-package/common';
 import { Appointment, AppointmentDoc } from '../models/appointment';
 import { Package } from '../models/package';
@@ -39,10 +40,16 @@ export class AppointmentPackageService {
     });
     if (existAPackage)
       throw new BadRequestError('Package existing in appointment');
+    const totalPrice = calcPrice(
+      existPackage.salePrice,
+      packageAttr.quantity,
+      existPackage.discount!
+    );
     const aPackage = AppointmentPackage.build({
       appointment: appointmentDoc,
       package: existPackage,
       quantity: packageAttr.quantity,
+      totalPrice: totalPrice,
     });
     let employeesInAppointment: UserDoc[] = [];
     // if (packageAttr.execEmp) {
@@ -77,10 +84,10 @@ export class AppointmentPackageService {
         salePrice: existPackage.salePrice,
         imageUrl: existPackage.imageUrl,
         quantity: aPackage.quantity,
-        totalPrice: existPackage.salePrice * aPackage.quantity,
+        totalPrice: aPackage.totalPrice,
         // execEmp: employeesInAppointment,
       });
-      totalPackagePrice += existPackage.salePrice * aPackage.quantity;
+      totalPackagePrice += aPackage.totalPrice;
     }
     return { packages, totalPackagePrice };
   }
@@ -101,9 +108,9 @@ export class AppointmentPackageService {
         salePrice: as.package.salePrice,
         imageUrl: as.package.imageUrl,
         quantity: as.quantity,
-        totalPrice: as.package.salePrice * as.quantity,
+        totalPrice: as.totalPrice,
       });
-      totalPackagePrice += as.package.salePrice * as.quantity;
+      totalPackagePrice += as.totalPrice;
     }
 
     return { packages, totalPackagePrice };
@@ -120,14 +127,21 @@ export class AppointmentPackageService {
     if (!aPackage) throw new NotFoundError('Appointment-Service');
     aPackage.set({ isDeleted: true });
     await aPackage.save();
+    return aPackage.totalPrice;
   }
   static async deleteAppointmentServices(
     appointmentDoc: AppointmentDoc,
     packageAttrs: PackageAttr[]
   ) {
+    let deletePrice = 0;
     for (const packageAttr of packageAttrs) {
-      await this.deleteAppointmentPackage(appointmentDoc, packageAttr);
+      const price = await this.deleteAppointmentPackage(
+        appointmentDoc,
+        packageAttr
+      );
+      deletePrice += price;
     }
+    return deletePrice;
   }
   static async updateAppointmentPackage(
     appointmentDoc: AppointmentDoc,
@@ -142,7 +156,15 @@ export class AppointmentPackageService {
       .populate('appointment');
     if (!aPackage) throw new NotFoundError('Appointment-Package');
     if (aPackage.quantity === packageAttr.quantity) return aPackage;
-    aPackage.set({ quantity: packageAttr.quantity });
+    const totalPrice = calcPrice(
+      aPackage.package.salePrice,
+      packageAttr.quantity,
+      aPackage.package.discount!
+    );
+    aPackage.set({
+      quantity: packageAttr.quantity,
+      totalPrice: totalPrice,
+    });
     await aPackage.save();
     return aPackage;
   }
@@ -187,7 +209,7 @@ export class AppointmentPackageService {
     console.log('addPackage', addValue);
     console.log('updatePackage', updateValue);
     console.log('deletePackage', deleteValue);
-
+    let totalPrice = 0;
     const updatePackage: PackageInAppointment[] = [];
     for (const value of updateValue) {
       const aPackage = await this.updateAppointmentPackage(
@@ -200,13 +222,18 @@ export class AppointmentPackageService {
         salePrice: aPackage.package.salePrice,
         imageUrl: aPackage.package.imageUrl,
         quantity: aPackage.quantity,
-        totalPrice: aPackage.package.salePrice * aPackage.quantity,
+        totalPrice: aPackage.totalPrice,
       });
+      totalPrice += aPackage.totalPrice;
     }
-    await this.deleteAppointmentServices(appointmentDoc, deleteValue);
+    const deletePrice = await this.deleteAppointmentServices(
+      appointmentDoc,
+      deleteValue
+    );
     const packageInAppointment: PackageInAppointment[] = [];
     packageInAppointment.push(...addPackages.packages);
     packageInAppointment.push(...updatePackage);
-    return packageInAppointment;
+    totalPrice += addPackages.totalPackagePrice;
+    return { packageInAppointment, totalPrice };
   }
 }

@@ -1,28 +1,32 @@
 import { OrderDoc } from '../models/order';
 interface OrderAttrs {
   id: string;
-  creEmpId: string;
-  creEmpName: string;
-  execEmpId?: string;
-  execEmpName?: string;
+  creatorId: string;
+  creatorName: string;
   customerId: string;
   customerName: string;
+  customerPhone: string;
   status: string;
+  preTaxTotal: number;
+  tax: number;
   postTaxTotal: number;
-  createdAt: string;
+  createdAt: Date;
 }
 export class Convert {
-  static async order(orderDoc: OrderDoc) {
-    const dateConvert = orderDoc.createdAt.toLocaleDateString();
+  static order(orderDoc: OrderDoc) {
+    // const dateConvert = orderDoc.createdAt.toLocaleDateString();
     const convert: OrderAttrs = {
       id: orderDoc.id,
-      creEmpId: orderDoc.creEmp.id,
-      creEmpName: orderDoc.creEmp.fullName,
+      creatorId: orderDoc.creator.id,
+      creatorName: orderDoc.creator.fullName,
       customerId: orderDoc.customer.id,
       customerName: orderDoc.customer.fullName,
+      customerPhone: orderDoc.customer.phoneNumber,
       status: orderDoc.status,
+      preTaxTotal: orderDoc.preTaxTotal,
+      tax: orderDoc.tax,
       postTaxTotal: orderDoc.postTaxTotal,
-      createdAt: dateConvert,
+      createdAt: orderDoc.createdAt,
     };
     return convert;
   }

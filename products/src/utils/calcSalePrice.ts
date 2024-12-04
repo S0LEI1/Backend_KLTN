@@ -1,6 +1,6 @@
-export const calcSalePrice = (costPrice: number, discount: number) => {
+export const calcSalePrice = (costPrice: number, discount: number | 0) => {
   if (discount === 0 || discount === null || discount === undefined) {
-    return costPrice + costPrice * 0.9;
+    return costPrice * 1.2;
   }
-  return costPrice + costPrice * 0.9 - costPrice * (discount / 100);
+  return costPrice * 1.2 - costPrice * (discount / 100);
 };

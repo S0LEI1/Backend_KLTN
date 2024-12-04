@@ -8,12 +8,14 @@ interface AppointmentPackageAttrs {
   appointment: AppointmentDoc;
   package: PackageDoc;
   quantity: number;
+  totalPrice: number;
 }
 
 export interface AppointmentPackageDoc extends mongoose.Document {
   appointment: AppointmentDoc;
   package: PackageDoc;
   quantity: number;
+  totalPrice: number;
   isDeleted: boolean;
   version: number;
 }
@@ -39,6 +41,10 @@ const appointmentPackageSchema = new mongoose.Schema(
       ref: 'Package',
     },
     quantity: {
+      type: Number,
+      required: true,
+    },
+    totalPrice: {
       type: Number,
       required: true,
     },

@@ -9,11 +9,13 @@ interface AppointmentServiceAttrs {
   appointment: AppointmentDoc;
   service: ServiceDoc;
   quantity: number;
+  totalPrice: number;
 }
 interface AppointmentServiceDoc extends mongoose.Document {
   appointment: AppointmentDoc;
   service: ServiceDoc;
   quantity: number;
+  totalPrice: number;
   isDeleted: boolean;
   version: number;
 }
@@ -40,6 +42,10 @@ const appointmentServiceSchema = new mongoose.Schema(
       ref: 'Service',
     },
     quantity: {
+      type: Number,
+      required: true,
+    },
+    totalPrice: {
       type: Number,
       required: true,
     },

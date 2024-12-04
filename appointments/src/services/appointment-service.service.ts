@@ -1,4 +1,8 @@
-import { BadRequestError, NotFoundError } from '@share-package/common';
+import {
+  BadRequestError,
+  NotFoundError,
+  calcPrice,
+} from '@share-package/common';
 import { Appointment, AppointmentDoc } from '../models/appointment';
 import { User, UserDoc } from '../models/user';
 import { Branch } from '../models/branch';
@@ -31,10 +35,16 @@ export class AppointmentServiceServices {
     });
     if (existAService)
       throw new BadRequestError('Service existing in appointment');
+    const totalPrice = calcPrice(
+      service.salePrice,
+      serviceAttr.quantity,
+      service.discount
+    );
     const aService = AppointmentService.build({
       appointment: appointmentDoc,
       service: service,
       quantity: serviceAttr.quantity,
+      totalPrice: totalPrice,
     });
     let employeesInAppointment: UserDoc[] = [];
     // if (serviceAttr.execEmp) {
@@ -63,10 +73,10 @@ export class AppointmentServiceServices {
         salePrice: service.salePrice,
         imageUrl: service.imageUrl,
         quantity: aService.quantity,
-        totalPrice: service.salePrice * aService.quantity,
+        totalPrice: aService.totalPrice,
         // execEmp: employeesInAppointment,
       });
-      totalServicePrice += service.salePrice * aService.quantity;
+      totalServicePrice += aService.totalPrice;
     }
     return { services, totalServicePrice };
   }
@@ -83,18 +93,17 @@ export class AppointmentServiceServices {
     // .populate({ path: 'execEmp', select: 'id fullName avatar gender' });
     const services: ServiceInAppointment[] = [];
     let totalServicePrice = 0;
-    aServices.map((as) => {
+    for (const as of aServices) {
       services.push({
         serviceId: as.service.id,
         name: as.service.name,
         salePrice: as.service.salePrice,
         imageUrl: as.service.imageUrl,
         quantity: as.quantity,
-        totalPrice: as.service.salePrice * as.quantity,
+        totalPrice: as.totalPrice,
       });
-      totalServicePrice += as.service.salePrice * as.quantity;
-    });
-
+      totalServicePrice += as.totalPrice;
+    }
     return { services, totalServicePrice };
   }
   static async deleteAppointmentService(
@@ -131,7 +140,15 @@ export class AppointmentServiceServices {
       .populate('appointment');
     if (!aService) throw new NotFoundError('Appointment-Service');
     if (aService.quantity === serviceAttr.quantity) return aService;
-    aService.set({ quantity: serviceAttr.quantity });
+    const price = calcPrice(
+      aService.service.salePrice,
+      serviceAttr.quantity,
+      aService.service.discount!
+    );
+    aService.set({
+      quantity: serviceAttr.quantity,
+      totalPirce: price,
+    });
     await aService.save();
     return aService;
   }
@@ -190,9 +207,9 @@ export class AppointmentServiceServices {
         salePrice: aService.service.salePrice,
         imageUrl: aService.service.imageUrl,
         quantity: aService.quantity,
-        totalPrice: aService.service.salePrice * aService.quantity,
+        totalPrice: aService.totalPrice,
       });
-      updateServicePrices += aService.service.salePrice * aService.quantity;
+      updateServicePrices += aService.totalPrice;
     }
     await this.deleteAppointmentServices(appointmentDoc, deleteValue);
     const serviceInAppointment: ServiceInAppointment[] = [];

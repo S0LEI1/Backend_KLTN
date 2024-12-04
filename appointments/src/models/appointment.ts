@@ -12,6 +12,7 @@ interface AppointmentAttrs {
   status: AppointmentStatus;
   description: string;
   consultant?: UserDoc;
+  totalPrice?: number;
 }
 export interface AppointmentDoc extends mongoose.Document {
   creator: UserDoc;
@@ -21,6 +22,7 @@ export interface AppointmentDoc extends mongoose.Document {
   status: AppointmentStatus;
   description: string;
   consultant: UserDoc;
+  totalPrice?: number;
   isDeleted: boolean;
   version: number;
 }
@@ -65,6 +67,9 @@ const appointmentSchema = new mongoose.Schema(
     consultant: {
       type: mongoose.Types.ObjectId,
       ref: 'User',
+    },
+    totalPrice: {
+      type: Number,
     },
   },
   {

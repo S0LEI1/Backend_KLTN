@@ -17,6 +17,7 @@ import { OrderPackage } from '../models/order-package';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { OrderServiceM, UsageLog } from '../models/order-service';
 import { writeFileSync } from 'fs';
+import { Convert } from '../utils/convert';
 
 const PER_PAGE = process.env.PER_PAGE;
 export interface Attrs {
@@ -36,6 +37,9 @@ export class OrderService {
     execEmpId: string;
     customerId: string;
     type: string;
+    serviceAttrs: Attrs[];
+    packageAttrs: Attrs[];
+    productAttrs: Attrs[];
   }) {
     const creator = await User.findUser(order.creatorId);
     if (!creator) throw new NotFoundError('Create Employee');
@@ -46,15 +50,20 @@ export class OrderService {
     if (!customer) throw new NotFoundError('Customer');
     // check product, service, package must be define one
     // define previous tax price
-    let orderDoc: OrderDoc;
-    orderDoc = Order.build({
+    const newOrder = Order.build({
       creator: creator,
       customer: customer,
       status: OrderStatus.Created,
     });
-    await orderDoc.save();
-    OrderPublisher.newOrder(orderDoc);
-    return orderDoc;
+    await newOrder.save();
+    OrderPublisher.newOrder(newOrder);
+    const { orderDoc, products, services, packages } = await this.addAndRemove(
+      newOrder.id,
+      order.serviceAttrs,
+      order.packageAttrs,
+      order.productAttrs
+    );
+    return { orderDoc, products, services, packages };
   }
   static async addAndRemove(
     orderId: String,
@@ -99,7 +108,8 @@ export class OrderService {
     // console.log(orderDoc);
 
     OrderPublisher.updateOrder(orderDoc);
-    return { orderDoc, products, services, packages };
+    const orderConvert = Convert.order(orderDoc);
+    return { orderDoc: orderConvert, products, services, packages };
   }
   static async readOrders(
     pages: number,
