@@ -130,7 +130,7 @@ export class OrderService {
     let phone: FilterQuery<OrderDoc> = {};
     let sort: FilterQuery<OrderDoc> = {};
     if (type === 'customer' && cusId)
-      filter.customer = new mongoose.Types.ObjectId(cusId);
+      filter.customerId = new mongoose.Types.ObjectId(cusId);
     if (creId) filter.creator = new mongoose.Types.ObjectId(creId);
     if (execId) filter.execEmp = execId;
     if (status) filter.status = status;

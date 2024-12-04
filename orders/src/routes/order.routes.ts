@@ -12,7 +12,28 @@ import { body } from 'express-validator';
 const router = express.Router();
 router.post(
   '/orders/new',
-  [body('customerId').isMongoId().withMessage('Customer Id must be ObjectId')],
+  [
+    body('customerId').isMongoId().withMessage('Customer Id must be ObjectId'),
+    body('services.*.id')
+      .isMongoId()
+      .withMessage('Id in services must be ObjectId'),
+    body('services.*.quantity')
+      .isInt({ min: 1 })
+      .withMessage('Quantity in service must be greater than or equal 1'),
+    body('packages.*.id')
+      .isMongoId()
+      .withMessage('Id in packages must be ObjectId'),
+    body('packages.*.quantity')
+      .isInt({ min: 1 })
+      .withMessage('Quantity in packages must be greater than or equal 1'),
+    body('products.*.id')
+      .isMongoId()
+      .withMessage('Id in products must be ObjectId'),
+    body('products.*.quantity')
+      .isInt({ min: 1 })
+      .withMessage('Quantity in products must be greater than or equal 1'),
+  ],
+  validationRequest,
   requireAuth,
   // requireType([UserType.Employee, UserType.Manager]),
   requirePermission([ListPermission.OrderCreate]),
@@ -47,6 +68,27 @@ router.patch(
 // );
 router.post(
   '/orders/add/:orderId',
+  [
+    body('services.*.id')
+      .isMongoId()
+      .withMessage('Id in services must be ObjectId'),
+    body('services.*.quantity')
+      .isInt({ min: 1 })
+      .withMessage('Quantity in service must be greater than or equal 1'),
+    body('packages.*.id')
+      .isMongoId()
+      .withMessage('Id in packages must be ObjectId'),
+    body('packages.*.quantity')
+      .isInt({ min: 1 })
+      .withMessage('Quantity in packages must be greater than or equal 1'),
+    body('products.*.id')
+      .isMongoId()
+      .withMessage('Id in products must be ObjectId'),
+    body('products.*.quantity')
+      .isInt({ min: 1 })
+      .withMessage('Quantity in products must be greater than or equal 1'),
+  ],
+  validationRequest,
   requireAuth,
   requirePermission([ListPermission.OrderCreate]),
   OrderController.addAndDelete
