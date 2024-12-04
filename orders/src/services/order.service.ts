@@ -124,7 +124,7 @@ export class OrderService {
     if (creId) filter.creator = new mongoose.Types.ObjectId(creId);
     if (execId) filter.execEmp = execId;
     if (status) filter.status = status;
-    // if (phoneNumber) filter.populate;
+    if (phoneNumber) filter.customerPhone = phoneNumber;
     if (createdAt) {
       const dateFormat = format(createdAt, 'yyyy-MM-dd');
       const convertDate = new Date(dateFormat);
@@ -142,11 +142,38 @@ export class OrderService {
     if (date === 'asc') sort.createdAt = 1;
     if (date === 'desc') sort.createdAt = -1;
     console.log(filter);
-    const totalDocuments = await Order.find(filter).countDocuments();
+    // const totalDocuments = await Order.aggregate([
+    //   {
+    //     $lookup: {
+    //       from: 'users',
+    //       localField: 'customer',
+    //       foreignField: '_id',
+    //       as: 'customer',
+    //     },
+    //   },
+    //   {
+    //     $addFields: {
+    //       customerId: '$customer._id',
+    //       customerName: '$customer.fullName',
+    //       customerPhone: '$customer.phoneNumber',
+    //     },
+    //   },
+    //   {
+    //     $unwind: '$customerId',
+    //   },
+    //   {
+    //     $unwind: '$customerName',
+    //   },
+    //   {
+    //     $unwind: '$customerPhone',
+    //   },
+    //   {
+    //     $match: filter,
+    //   },
+    //   { $match: filter },
+    //   { $count: 'totalDocuments' },
+    // ]);
     const orders = await Order.aggregate<OrderDoc>([
-      {
-        $match: filter,
-      },
       {
         $lookup: {
           from: 'users',
@@ -172,6 +199,9 @@ export class OrderService {
         $unwind: '$customerPhone',
       },
       {
+        $match: filter,
+      },
+      {
         $lookup: {
           from: 'users',
           localField: 'creator',
@@ -186,16 +216,13 @@ export class OrderService {
         },
       },
       {
-        $match: { customerPhone: phoneNumber },
-      },
-      {
         $project: { customer: 0, creator: 0 },
       },
       { $skip: pages - 1 },
       { $limit: parseInt(PER_PAGE as string, 25) },
       { $sort: sort },
     ]);
-    return { orders, totalDocuments };
+    return { orders, totalDocuments: orders.length };
   }
   static async getOne(id: string) {
     let filter: FilterQuery<OrderDoc> = {};

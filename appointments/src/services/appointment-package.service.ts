@@ -67,6 +67,7 @@ export class AppointmentPackageService {
     const appointmentDoc = await Appointment.findAppointment(appointmentId);
     if (!appointmentDoc) throw new NotFoundError('Appointment');
     const packages: PackageInAppointment[] = [];
+    let totalPackagePrice = 0;
     for (const packageAttr of packageAttrs) {
       const { aPackage, existPackage, employeesInAppointment } =
         await this.newAppointmentPackage(appointmentDoc, packageAttr);
@@ -79,8 +80,9 @@ export class AppointmentPackageService {
         totalPrice: existPackage.salePrice * aPackage.quantity,
         // execEmp: employeesInAppointment,
       });
+      totalPackagePrice += existPackage.salePrice * aPackage.quantity;
     }
-    return packages;
+    return { packages, totalPackagePrice };
   }
   static async getAppointmentPackage(appointmentId: string) {
     const appointment = await Appointment.findAppointment(appointmentId);
@@ -91,6 +93,7 @@ export class AppointmentPackageService {
     }).populate('package');
     // .populate({ path: 'execEmp', select: 'id fullName avatar gender' });
     const packages: PackageInAppointment[] = [];
+    let totalPackagePrice = 0;
     for (const as of aPackages) {
       packages.push({
         packageId: as.package.id,
@@ -100,8 +103,10 @@ export class AppointmentPackageService {
         quantity: as.quantity,
         totalPrice: as.package.salePrice * as.quantity,
       });
+      totalPackagePrice += as.package.salePrice * as.quantity;
     }
-    return packages;
+
+    return { packages, totalPackagePrice };
   }
   static async deleteAppointmentPackage(
     appointmentDoc: AppointmentDoc,
@@ -147,7 +152,9 @@ export class AppointmentPackageService {
   ) {
     const appointmentDoc = await Appointment.findAppointment(appointmentId);
     if (!appointmentDoc) throw new NotFoundError('Appointment');
-    const packages = await this.getAppointmentPackage(appointmentDoc.id);
+    const { packages, totalPackagePrice } = await this.getAppointmentPackage(
+      appointmentDoc.id
+    );
     const existPackageAttrs: PackageAttr[] = [];
     for (const pkg of packages) {
       // const execEmpId: string[] = srv.execEmp.map((exec) => exec.id);
@@ -198,7 +205,7 @@ export class AppointmentPackageService {
     }
     await this.deleteAppointmentServices(appointmentDoc, deleteValue);
     const packageInAppointment: PackageInAppointment[] = [];
-    packageInAppointment.push(...addPackages);
+    packageInAppointment.push(...addPackages.packages);
     packageInAppointment.push(...updatePackage);
     return packageInAppointment;
   }

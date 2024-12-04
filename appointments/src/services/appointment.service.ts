@@ -4,6 +4,7 @@ import {
   NotFoundError,
   Pagination,
   UserType,
+  roundPrice,
 } from '@share-package/common';
 import { Appointment, AppointmentDoc } from '../models/appointment';
 
@@ -173,9 +174,10 @@ export class AppointmentServices {
       }
       const aPackage = await AppointmentPackage.findByAppointment(apm);
       if (aPackage) {
-        packages = await AppointmentPackageService.getAppointmentPackage(
-          apm.id
-        );
+        const packagesInAppoinment =
+          await AppointmentPackageService.getAppointmentPackage(apm.id);
+        packages = packagesInAppoinment.packages;
+        totalPrice += packagesInAppoinment.totalPackagePrice;
       }
       // order
       //
@@ -198,6 +200,7 @@ export class AppointmentServices {
         description: apm.description,
         services: services,
         packages: packages,
+        totalPrice: totalPrice,
       });
     }
     return { apmConverts, totalDocuments };
@@ -207,9 +210,8 @@ export class AppointmentServices {
     if (!appointment) throw new NotFoundError('Appointment');
     const { services, totalServicePrice } =
       await AppointmentServiceServices.getAppointmentServices(appointment.id);
-    const packages = await AppointmentPackageService.getAppointmentPackage(
-      appointment.id
-    );
+    const { packages, totalPackagePrice } =
+      await AppointmentPackageService.getAppointmentPackage(appointment.id);
     // order
     //
     const apmConvert: AppointmentConvert = {
@@ -231,6 +233,7 @@ export class AppointmentServices {
       description: appointment.description,
       services: services,
       packages: packages,
+      totalPrice: totalPackagePrice + totalServicePrice,
     };
     return apmConvert;
   }
@@ -251,9 +254,8 @@ export class AppointmentServices {
     appointment.set({ status: AppointmentStatus.Cancelled });
     const { services, totalServicePrice } =
       await AppointmentServiceServices.getAppointmentServices(appointment.id);
-    const packages = await AppointmentPackageService.getAppointmentPackage(
-      appointment.id
-    );
+    const { packages, totalPackagePrice } =
+      await AppointmentPackageService.getAppointmentPackage(appointment.id);
     await appointment.save();
     const apmConvert: AppointmentConvert = {
       id: appointment.id,
@@ -274,6 +276,7 @@ export class AppointmentServices {
       description: appointment.description,
       services: services,
       packages: packages,
+      totalPrice: totalPackagePrice + totalServicePrice,
     };
     return apmConvert;
     // return appointment;
@@ -345,11 +348,15 @@ export class AppointmentServices {
     });
     await appointment.save();
     let services: ServiceInAppointment[] = [];
+    let totalPrice = 0;
     if (serviceAttrs) {
-      services = await AppointmentServiceServices.updateAppointmentServices(
-        appointmentId,
-        serviceAttrs
-      );
+      const servicesInAppointment =
+        await AppointmentServiceServices.updateAppointmentServices(
+          appointmentId,
+          serviceAttrs
+        );
+      services = servicesInAppointment.serviceInAppointment;
+      totalPrice += servicesInAppointment.totalPrice;
     }
     let packages: PackageInAppointment[] = [];
     if (packageAttrs) {
@@ -378,7 +385,7 @@ export class AppointmentServices {
       services: services,
       packages: packages,
     };
-    return apmConvert;
+    return { apmConvert, totalPrice };
   }
   static async findAppointmentByNameOrPhone(key: string) {
     const customer = await User.findOne({
@@ -398,9 +405,8 @@ export class AppointmentServices {
     for (const appointment of appointments) {
       const { services, totalServicePrice } =
         await AppointmentServiceServices.getAppointmentServices(appointment.id);
-      const packages = await AppointmentPackageService.getAppointmentPackage(
-        appointment.id
-      );
+      const { packages, totalPackagePrice } =
+        await AppointmentPackageService.getAppointmentPackage(appointment.id);
       await appointment.save();
       const apmConvert: AppointmentConvert = {
         id: appointment.id,
@@ -421,6 +427,7 @@ export class AppointmentServices {
         description: appointment.description,
         services: services,
         packages: packages,
+        totalPrice: roundPrice(totalPackagePrice + totalServicePrice),
       };
       apmConverts.push(apmConvert);
     }

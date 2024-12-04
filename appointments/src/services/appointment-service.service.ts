@@ -178,6 +178,7 @@ export class AppointmentServiceServices {
       addValue
     );
     const updateServices: ServiceInAppointment[] = [];
+    let updateServicePrices = 0;
     for (const value of updateValue) {
       const aService = await this.updateAppointmentService(
         appointmentDoc,
@@ -191,11 +192,13 @@ export class AppointmentServiceServices {
         quantity: aService.quantity,
         totalPrice: aService.service.salePrice * aService.quantity,
       });
+      updateServicePrices += aService.service.salePrice * aService.quantity;
     }
     await this.deleteAppointmentServices(appointmentDoc, deleteValue);
     const serviceInAppointment: ServiceInAppointment[] = [];
     serviceInAppointment.push(...addServices.services);
     serviceInAppointment.push(...updateServices);
-    return serviceInAppointment;
+    const totalPrice = addServices.totalServicePrice + updateServicePrices;
+    return { serviceInAppointment, totalPrice };
   }
 }

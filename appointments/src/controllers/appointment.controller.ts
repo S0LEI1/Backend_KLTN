@@ -47,10 +47,13 @@ export class AppointmentController {
       }
       let packages: PackageInAppointment[] = [];
       if (packageAttrs) {
-        packages = await AppointmentPackageService.newAppointmentPackages(
-          appointment.id,
-          packageAttrs
-        );
+        const packagesInAppoitment =
+          await AppointmentPackageService.newAppointmentPackages(
+            appointment.id,
+            packageAttrs
+          );
+        packages = packagesInAppoitment.packages;
+        totalPrice += packagesInAppoitment.totalPackagePrice;
       }
       // create appoint - order
       //
