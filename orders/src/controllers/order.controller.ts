@@ -56,6 +56,7 @@ export class OrderController {
       creId,
       execId,
       date,
+      priceRange,
     } = req.query;
     const { type, id } = req.currentUser!;
     try {
@@ -70,7 +71,8 @@ export class OrderController {
         execName as string,
         createdAt as string,
         date as string,
-        type as string
+        type as string,
+        priceRange as string
       );
       res
         .status(200)

@@ -112,7 +112,8 @@ export class OrderService {
     execName: string,
     createdAt: string,
     date: string,
-    type: string
+    type: string,
+    priceRange: string
   ) {
     let filter: FilterQuery<OrderDoc> = {};
     let sort: FilterQuery<OrderDoc> = {};
@@ -128,10 +129,16 @@ export class OrderService {
       ltDate.setDate(ltDate.getDate() + 1);
       filter.createdAt = { $gte: convertDate, $lt: ltDate };
     }
+    const highPrice = 3000000;
+    const lowPrice = 500000;
+    if (priceRange === 'highprice') filter.postTaxTotal = { $gt: highPrice };
+    if (priceRange === 'lowprice') filter.postTaxTotal = { $lt: lowPrice };
+    if (priceRange === 'mediumprice')
+      filter.postTaxTotal = { $gte: lowPrice, $lte: highPrice };
     if (date === 'asc') sort.createdAt = 1;
     if (date === 'desc') sort.createdAt = -1;
     console.log(filter);
-    const totalDocuments = await Order.find().countDocuments();
+    const totalDocuments = await Order.find(filter).countDocuments();
     const orders = await Order.aggregate<OrderDoc>([
       {
         $match: filter,
@@ -148,6 +155,7 @@ export class OrderService {
         $addFields: {
           customerId: '$customer._id',
           customerName: '$customer.fullName',
+          customerPhone: '$customer.phoneNumber',
         },
       },
       {
@@ -155,6 +163,9 @@ export class OrderService {
       },
       {
         $unwind: '$customerName',
+      },
+      {
+        $unwind: '$customerPhone',
       },
       {
         $lookup: {

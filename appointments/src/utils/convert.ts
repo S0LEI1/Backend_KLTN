@@ -20,6 +20,7 @@ export interface AppointmentConvert {
   dateTime: Date;
   status: AppointmentStatus;
   description: string;
+  totalPrice?: number;
   services?: ServiceInAppointment[];
   packages?: PackageInAppointment[];
 }
