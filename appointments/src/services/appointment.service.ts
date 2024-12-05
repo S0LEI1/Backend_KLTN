@@ -24,6 +24,7 @@ import { AppointmentPackage } from '../models/appointment-package';
 import { ServiceAttrs } from '../models/service';
 import { AppointmentConvert, Convert } from '../utils/convert';
 import { PackageAttr } from './appointment-package.service';
+import { Order } from '../models/order';
 // import { OrderAttr } from './appointment-order.service';
 const PER_PAGE = process.env.PER_PAGE;
 
@@ -37,7 +38,8 @@ export class AppointmentServices {
     description: string,
     type: string,
     serviceAttrs: ServiceAttr[],
-    packageAttrs: PackageAttr[]
+    packageAttrs: PackageAttr[],
+    orderId: string
     // orderAttrs: OrderAttr[],
   ) {
     if (type === UserType.Customer) customerId = creatorId;
@@ -98,13 +100,22 @@ export class AppointmentServices {
       apm.set({ consultant: consultant });
       // await apm.save();
     }
+    let existOrderId = null;
+    if (orderId) {
+      const order = await Order.findOne({ _id: orderId, isDeleted: false });
+      if (!order) throw new NotFoundError('Order');
+      existOrderId = order.id;
+      apm.set({ order: order.id });
+      await apm.save();
+    }
     let services: ServiceInAppointment[] = [];
     let totalPrice = 0;
     if (serviceAttrs) {
       const serviceInAppointment =
         await AppointmentServiceServices.newAppointmentServices(
           apm.id,
-          serviceAttrs
+          serviceAttrs,
+          existOrderId
         );
       services = serviceInAppointment.services;
       totalPrice += serviceInAppointment.totalServicePrice;
@@ -138,6 +149,7 @@ export class AppointmentServices {
       dateTime: apm.dateTime,
       status: apm.status,
       description: apm.description,
+      orderId: orderId,
       services: services,
       packages: packages,
       totalPrice: totalPrice,
@@ -182,7 +194,8 @@ export class AppointmentServices {
       .populate('customer')
       .populate('creator')
       .populate('branch')
-      .populate('consultant');
+      .populate('consultant')
+      .populate('order');
     const totalDocuments = await Appointment.find(filter).countDocuments();
     const apmConverts: AppointmentConvert[] = [];
     // let services: ServiceInAppointment[] = [];
@@ -225,6 +238,7 @@ export class AppointmentServices {
         // services: services,
         // packages: packages,
         totalPrice: apm.totalPrice,
+        orderId: apm.order?.id,
       });
     }
     return { apmConverts, totalDocuments };
@@ -258,6 +272,7 @@ export class AppointmentServices {
       services: services,
       packages: packages,
       totalPrice: appointment.totalPrice,
+      orderId: appointment.order?.id,
     };
     return apmConvert;
   }
@@ -306,6 +321,7 @@ export class AppointmentServices {
       services: services,
       packages: packages,
       totalPrice: appointment.totalPrice,
+      orderId: appointment.order?.id,
     };
     return apmConvert;
     // return appointment;
@@ -336,7 +352,8 @@ export class AppointmentServices {
     dateTime: Date,
     description: string,
     serviceAttrs: ServiceAttr[],
-    packageAttrs: PackageAttr[]
+    packageAttrs: PackageAttr[],
+    orderId: string
   ) {
     const appointment = await Appointment.findAppointment(appointmentId);
     if (!appointment) throw new NotFoundError('Appointment');
@@ -376,13 +393,22 @@ export class AppointmentServices {
       description: description,
     });
     await appointment.save();
+    let existOrderId = null;
+    if (orderId) {
+      const order = await Order.findOne({ _id: orderId, isDeleted: false });
+      if (!order) throw new NotFoundError('Order');
+      existOrderId = order.id;
+      appointment.set({ order: order.id });
+      await appointment.save();
+    }
     let services: ServiceInAppointment[] = [];
     let totalPrice = 0;
     if (serviceAttrs) {
       const servicesInAppointment =
         await AppointmentServiceServices.updateAppointmentServices(
           appointmentId,
-          serviceAttrs
+          serviceAttrs,
+          existOrderId
         );
       services = servicesInAppointment.serviceInAppointment;
       totalPrice += servicesInAppointment.totalPrice;
@@ -419,6 +445,7 @@ export class AppointmentServices {
       services: services,
       packages: packages,
       totalPrice: appointment.totalPrice,
+      orderId: appointment.order?.id,
     };
     return apmConvert;
   }
@@ -435,14 +462,16 @@ export class AppointmentServices {
     })
       .populate('customer')
       .populate('creator')
-      .populate('branch');
+      .populate('consultant')
+      .populate('branch')
+      .populate('order');
     const apmConverts: AppointmentConvert[] = [];
     for (const appointment of appointments) {
-      const { services, totalServicePrice } =
-        await AppointmentServiceServices.getAppointmentServices(appointment.id);
-      const { packages, totalPackagePrice } =
-        await AppointmentPackageService.getAppointmentPackage(appointment.id);
-      await appointment.save();
+      // const { services, totalServicePrice } =
+      //   await AppointmentServiceServices.getAppointmentServices(appointment.id);
+      // const { packages, totalPackagePrice } =
+      //   await AppointmentPackageService.getAppointmentPackage(appointment.id);
+      // await appointment.save();
       const apmConvert: AppointmentConvert = {
         id: appointment.id,
         customerId: appointment.customer.id,
@@ -460,9 +489,10 @@ export class AppointmentServices {
         dateTime: appointment.dateTime,
         status: appointment.status,
         description: appointment.description,
-        services: services,
-        packages: packages,
+        // services: services,
+        // packages: packages,
         totalPrice: appointment.totalPrice,
+        orderId: appointment.order?.id,
       };
       apmConverts.push(apmConvert);
     }
@@ -492,6 +522,7 @@ export class AppointmentServices {
       status: appointment.status,
       description: appointment.description,
       totalPrice: appointment.totalPrice,
+      orderId: appointment.order?.id,
     };
     return apmConvert;
   }

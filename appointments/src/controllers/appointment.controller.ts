@@ -14,6 +14,7 @@ export class AppointmentController {
         packageAttrs,
         orderAttrs,
         consultantId,
+        orderId,
       } = req.body;
 
       const appointment = await AppointmentServices.newAppointment(
@@ -25,7 +26,8 @@ export class AppointmentController {
         description,
         type,
         serviceAttrs,
-        packageAttrs
+        packageAttrs,
+        orderId
       );
       // create appoint - order
       //
@@ -137,6 +139,7 @@ export class AppointmentController {
         serviceAttrs,
         packageAttrs,
         consultantId,
+        orderId,
       } = req.body;
       const { appointmentId } = req.params;
       const { id, type } = req.currentUser!;
@@ -149,7 +152,8 @@ export class AppointmentController {
         dateTime,
         description,
         serviceAttrs,
-        packageAttrs
+        packageAttrs,
+        orderId
       );
 
       res

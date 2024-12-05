@@ -1,8 +1,9 @@
-import { AppointmentStatus } from '@share-package/common';
+import { AppointmentStatus, NotFoundError } from '@share-package/common';
 import { BranchDoc } from './branch';
 import { UserDoc } from './user';
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+import { OrderDoc } from './order';
 
 interface AppointmentAttrs {
   creator: UserDoc;
@@ -13,6 +14,7 @@ interface AppointmentAttrs {
   description: string;
   consultant?: UserDoc;
   totalPrice?: number;
+  order?: OrderDoc;
 }
 export interface AppointmentDoc extends mongoose.Document {
   creator: UserDoc;
@@ -23,6 +25,7 @@ export interface AppointmentDoc extends mongoose.Document {
   description: string;
   consultant: UserDoc;
   totalPrice?: number;
+  order?: OrderDoc;
   isDeleted: boolean;
   version: number;
 }
@@ -47,6 +50,10 @@ const appointmentSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       required: true,
       ref: 'Branch',
+    },
+    order: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Order',
     },
     dateTime: {
       type: Date,
@@ -96,7 +103,8 @@ appointmentSchema.statics.findAppointment = async (
     .populate('customer')
     .populate('creator')
     .populate('consultant')
-    .populate('branch');
+    .populate('branch')
+    .populate('order');
   return apm;
 };
 const Appointment = mongoose.model<AppointmentDoc, AppointmentModel>(

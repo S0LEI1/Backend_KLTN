@@ -13,12 +13,10 @@ import _ from 'lodash';
 import { OrderServiceM } from '../models/order-service';
 export interface ServiceAttr {
   serviceId: string;
-  orderId?: string;
   quantity: number;
 }
 export interface ServiceInAppointment {
   serviceId: string;
-  orderId: string;
   name: string;
   salePrice: number;
   imageUrl: string;
@@ -28,7 +26,8 @@ export interface ServiceInAppointment {
 export class AppointmentServiceServices {
   static async newAppointmentService(
     appointmentDoc: AppointmentDoc,
-    serviceAttr: ServiceAttr
+    serviceAttr: ServiceAttr,
+    orderId: string | null
   ) {
     const service = await Service.findService(serviceAttr.serviceId);
     if (!service) throw new NotFoundError('Service not found');
@@ -50,9 +49,9 @@ export class AppointmentServiceServices {
       quantity: serviceAttr.quantity,
       totalPrice: totalPrice,
     });
-    if (serviceAttr.orderId) {
+    if (orderId) {
       const oService = await OrderServiceM.findOne({
-        order: serviceAttr.orderId,
+        order: orderId,
         service: service.id,
       }).populate('order');
       if (!oService) throw new NotFoundError('Order-Service');
@@ -72,7 +71,8 @@ export class AppointmentServiceServices {
   }
   static async newAppointmentServices(
     appointment: AppointmentDoc,
-    serviceAttrs: ServiceAttr[]
+    serviceAttrs: ServiceAttr[],
+    orderId: string | null
   ) {
     // const appointmentDoc = await Appointment.findAppointment(appointment.id);
     // if (!appointmentDoc) throw new NotFoundError('Appointment');
@@ -81,7 +81,8 @@ export class AppointmentServiceServices {
     for (const serviceAttr of serviceAttrs) {
       const { aService, service, order } = await this.newAppointmentService(
         appointment,
-        serviceAttr
+        serviceAttr,
+        orderId
       );
       services.push({
         serviceId: service.id,
@@ -90,8 +91,6 @@ export class AppointmentServiceServices {
         imageUrl: service.imageUrl,
         quantity: aService.quantity,
         totalPrice: aService.totalPrice,
-        orderId: order?.id,
-        // execEmp: employeesInAppointment,
       });
       totalServicePrice += aService.totalPrice;
     }
@@ -106,16 +105,13 @@ export class AppointmentServiceServices {
     const aServices = await AppointmentService.find({
       appointment: appointment.id,
       isDeleted: false,
-    })
-      .populate('service')
-      .populate('order');
+    }).populate('service');
     // .populate({ path: 'execEmp', select: 'id fullName avatar gender' });
     const services: ServiceInAppointment[] = [];
     let totalServicePrice = 0;
     for (const as of aServices) {
       services.push({
         serviceId: as.service.id,
-        orderId: as.order?.id,
         name: as.service.name,
         salePrice: as.service.salePrice,
         imageUrl: as.service.imageUrl,
@@ -134,7 +130,6 @@ export class AppointmentServiceServices {
     filter.appointment = appointmentDoc.id;
     filter.service = serviceAttr.serviceId;
     filter.isDeleted = false;
-    if (serviceAttr.orderId) filter.order = serviceAttr.orderId;
     const aService = await AppointmentService.findOne(filter);
     if (!aService) throw new NotFoundError('Appointment-Service');
     aService.set({ isDeleted: true });
@@ -150,13 +145,13 @@ export class AppointmentServiceServices {
   }
   static async updateAppointmentService(
     appointmentDoc: AppointmentDoc,
-    serviceAttr: ServiceAttr
+    serviceAttr: ServiceAttr,
+    orderId: string | null
   ) {
     const filter = Pagination.query();
     filter.appointment = appointmentDoc.id;
     filter.service = serviceAttr.serviceId;
     filter.isDeleted = false;
-    if (serviceAttr.orderId) filter.order = serviceAttr.orderId;
     const aService = await AppointmentService.findOne(filter)
       .populate('service')
       .populate('appointment')
@@ -177,7 +172,8 @@ export class AppointmentServiceServices {
   }
   static async updateAppointmentServices(
     appointmentId: string,
-    serviceAttrs: ServiceAttr[]
+    serviceAttrs: ServiceAttr[],
+    orderId: string | null
   ) {
     const appointmentDoc = await Appointment.findAppointment(appointmentId);
     if (!appointmentDoc) throw new NotFoundError('Appointment');
@@ -215,14 +211,16 @@ export class AppointmentServiceServices {
 
     const addServices = await this.newAppointmentServices(
       appointmentDoc,
-      addValue
+      addValue,
+      orderId
     );
     const updateServices: ServiceInAppointment[] = [];
     let updateServicePrices = 0;
     for (const value of updateValue) {
       const aService = await this.updateAppointmentService(
         appointmentDoc,
-        value
+        value,
+        orderId
       );
       updateServices.push({
         serviceId: aService.service.id,
@@ -231,7 +229,6 @@ export class AppointmentServiceServices {
         imageUrl: aService.service.imageUrl,
         quantity: aService.quantity,
         totalPrice: aService.totalPrice,
-        orderId: aService.order?.id,
       });
       updateServicePrices += aService.totalPrice;
     }

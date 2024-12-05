@@ -21,6 +21,7 @@ export interface AppointmentConvert {
   status: AppointmentStatus;
   description: string;
   totalPrice?: number;
+  orderId: string;
   services?: ServiceInAppointment[];
   packages?: PackageInAppointment[];
 }
@@ -48,6 +49,7 @@ export class Convert {
       dateTime: appointment.dateTime,
       status: appointment.status,
       description: appointment.description,
+      orderId: appointment.order?.id,
       services: services,
       packages: packages,
     };
