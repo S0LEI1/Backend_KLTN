@@ -3,10 +3,15 @@ import { AppointmentDoc } from './appointment';
 import { PackageDoc } from './package';
 import { UserDoc } from './user';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+interface OrderService {
+  id: string;
+  serviceIds: string[];
+}
 
 interface AppointmentPackageAttrs {
   appointment: AppointmentDoc;
   package: PackageDoc;
+  order?: OrderService;
   quantity: number;
   totalPrice: number;
 }
@@ -14,6 +19,7 @@ interface AppointmentPackageAttrs {
 export interface AppointmentPackageDoc extends mongoose.Document {
   appointment: AppointmentDoc;
   package: PackageDoc;
+  order?: OrderService;
   quantity: number;
   totalPrice: number;
   isDeleted: boolean;
@@ -39,6 +45,18 @@ const appointmentPackageSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       required: true,
       ref: 'Package',
+    },
+    order: {
+      id: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Order',
+      },
+      services: [
+        {
+          type: mongoose.Types.ObjectId,
+          ref: 'Service',
+        },
+      ],
     },
     quantity: {
       type: Number,

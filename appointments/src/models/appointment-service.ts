@@ -8,12 +8,14 @@ import { OrderDoc } from './order';
 interface AppointmentServiceAttrs {
   appointment: AppointmentDoc;
   service: ServiceDoc;
+  order?: OrderDoc;
   quantity: number;
   totalPrice: number;
 }
 interface AppointmentServiceDoc extends mongoose.Document {
   appointment: AppointmentDoc;
   service: ServiceDoc;
+  order?: OrderDoc;
   quantity: number;
   totalPrice: number;
   isDeleted: boolean;
@@ -35,6 +37,10 @@ const appointmentServiceSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       required: true,
       ref: 'Appointment',
+    },
+    order: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Order',
     },
     service: {
       type: mongoose.Types.ObjectId,

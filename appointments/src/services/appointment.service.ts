@@ -24,6 +24,7 @@ import { AppointmentPackage } from '../models/appointment-package';
 import { ServiceAttrs } from '../models/service';
 import { AppointmentConvert, Convert } from '../utils/convert';
 import { PackageAttr } from './appointment-package.service';
+// import { OrderAttr } from './appointment-order.service';
 const PER_PAGE = process.env.PER_PAGE;
 
 export class AppointmentServices {
@@ -37,6 +38,7 @@ export class AppointmentServices {
     type: string,
     serviceAttrs: ServiceAttr[],
     packageAttrs: PackageAttr[]
+    // orderAttrs: OrderAttr[],
   ) {
     if (type === UserType.Customer) customerId = creatorId;
     const creator = await User.findUser(creatorId);
@@ -94,7 +96,7 @@ export class AppointmentServices {
       consultant = await User.findEmployee(consultantId);
       if (!consultant) throw new NotFoundError('Employee not found');
       apm.set({ consultant: consultant });
-      await apm.save();
+      // await apm.save();
     }
     let services: ServiceInAppointment[] = [];
     let totalPrice = 0;

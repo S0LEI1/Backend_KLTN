@@ -1,6 +1,7 @@
 import {
   BadRequestError,
   NotFoundError,
+  Pagination,
   calcPrice,
 } from '@share-package/common';
 import { Appointment, AppointmentDoc } from '../models/appointment';
@@ -9,12 +10,15 @@ import { Branch } from '../models/branch';
 import { Service } from '../models/service';
 import { AppointmentService } from '../models/appointment-service';
 import _ from 'lodash';
+import { OrderServiceM } from '../models/order-service';
 export interface ServiceAttr {
   serviceId: string;
+  orderId?: string;
   quantity: number;
 }
 export interface ServiceInAppointment {
   serviceId: string;
+  orderId: string;
   name: string;
   salePrice: number;
   imageUrl: string;
@@ -46,6 +50,22 @@ export class AppointmentServiceServices {
       quantity: serviceAttr.quantity,
       totalPrice: totalPrice,
     });
+    if (serviceAttr.orderId) {
+      const oService = await OrderServiceM.findOne({
+        order: serviceAttr.orderId,
+        service: service.id,
+      }).populate('order');
+      if (!oService) throw new NotFoundError('Order-Service');
+      const { usageLogs, quantity } = oService;
+      if (usageLogs!.length >= quantity)
+        throw new BadRequestError('Number of Uses Exhausted.');
+      if (serviceAttr.quantity > oService.quantity)
+        throw new BadRequestError(
+          'Service quantity in appoinment cannot greater quantity in order'
+        );
+      aService.set({ order: oService.order.id });
+      await aService.save();
+    }
     let employeesInAppointment: UserDoc[] = [];
     // if (serviceAttr.execEmp) {
     //   const execEmp = await User.findEmployees(serviceAttr.execEmp);
@@ -57,16 +77,16 @@ export class AppointmentServiceServices {
     return { aService, service, employeesInAppointment };
   }
   static async newAppointmentServices(
-    appointmentId: string,
+    appointment: AppointmentDoc,
     serviceAttrs: ServiceAttr[]
   ) {
-    const appointmentDoc = await Appointment.findAppointment(appointmentId);
-    if (!appointmentDoc) throw new NotFoundError('Appointment');
+    // const appointmentDoc = await Appointment.findAppointment(appointment.id);
+    // if (!appointmentDoc) throw new NotFoundError('Appointment');
     const services: ServiceInAppointment[] = [];
     let totalServicePrice = 0;
     for (const serviceAttr of serviceAttrs) {
       const { aService, service, employeesInAppointment } =
-        await this.newAppointmentService(appointmentDoc, serviceAttr);
+        await this.newAppointmentService(appointment, serviceAttr);
       services.push({
         serviceId: service.id,
         name: service.name,
@@ -74,6 +94,7 @@ export class AppointmentServiceServices {
         imageUrl: service.imageUrl,
         quantity: aService.quantity,
         totalPrice: aService.totalPrice,
+        orderId: aService.order?.id,
         // execEmp: employeesInAppointment,
       });
       totalServicePrice += aService.totalPrice;
@@ -89,13 +110,16 @@ export class AppointmentServiceServices {
     const aServices = await AppointmentService.find({
       appointment: appointment.id,
       isDeleted: false,
-    }).populate('service');
+    })
+      .populate('service')
+      .populate('order');
     // .populate({ path: 'execEmp', select: 'id fullName avatar gender' });
     const services: ServiceInAppointment[] = [];
     let totalServicePrice = 0;
     for (const as of aServices) {
       services.push({
         serviceId: as.service.id,
+        orderId: as.order?.id,
         name: as.service.name,
         salePrice: as.service.salePrice,
         imageUrl: as.service.imageUrl,
@@ -110,11 +134,12 @@ export class AppointmentServiceServices {
     appointmentDoc: AppointmentDoc,
     serviceAttr: ServiceAttr
   ) {
-    const aService = await AppointmentService.findOne({
-      appointment: appointmentDoc.id,
-      service: serviceAttr.serviceId,
-      isDeleted: false,
-    });
+    const filter = Pagination.query();
+    filter.appointment = appointmentDoc.id;
+    filter.service = serviceAttr.serviceId;
+    filter.isDeleted = false;
+    if (serviceAttr.orderId) filter.order = serviceAttr.orderId;
+    const aService = await AppointmentService.findOne(filter);
     if (!aService) throw new NotFoundError('Appointment-Service');
     aService.set({ isDeleted: true });
     await aService.save();
@@ -131,13 +156,15 @@ export class AppointmentServiceServices {
     appointmentDoc: AppointmentDoc,
     serviceAttr: ServiceAttr
   ) {
-    const aService = await AppointmentService.findOne({
-      appointment: appointmentDoc.id,
-      service: serviceAttr.serviceId,
-      isDeleted: false,
-    })
+    const filter = Pagination.query();
+    filter.appointment = appointmentDoc.id;
+    filter.service = serviceAttr.serviceId;
+    filter.isDeleted = false;
+    if (serviceAttr.orderId) filter.order = serviceAttr.orderId;
+    const aService = await AppointmentService.findOne(filter)
       .populate('service')
-      .populate('appointment');
+      .populate('appointment')
+      .populate('order');
     if (!aService) throw new NotFoundError('Appointment-Service');
     if (aService.quantity === serviceAttr.quantity) return aService;
     const price = calcPrice(
@@ -191,7 +218,7 @@ export class AppointmentServiceServices {
     console.log('deleteService', deleteValue);
 
     const addServices = await this.newAppointmentServices(
-      appointmentId,
+      appointmentDoc,
       addValue
     );
     const updateServices: ServiceInAppointment[] = [];
@@ -208,6 +235,7 @@ export class AppointmentServiceServices {
         imageUrl: aService.service.imageUrl,
         quantity: aService.quantity,
         totalPrice: aService.totalPrice,
+        orderId: aService.order?.id,
       });
       updateServicePrices += aService.totalPrice;
     }

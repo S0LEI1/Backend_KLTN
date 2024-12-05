@@ -1,15 +1,5 @@
 import { Request, Response } from 'express';
 import { AppointmentServices } from '../services/appointment.service';
-import {
-  AppointmentServiceServices,
-  ServiceInAppointment,
-} from '../services/appointment-service.service';
-import {
-  AppointmentPackageService,
-  PackageInAppointment,
-} from '../services/appointment-package.service';
-import { UserType } from '@share-package/common';
-
 export class AppointmentController {
   static async newAppointment(req: Request, res: Response) {
     try {
@@ -22,6 +12,7 @@ export class AppointmentController {
         description,
         serviceAttrs,
         packageAttrs,
+        orderAttrs,
         consultantId,
       } = req.body;
 
