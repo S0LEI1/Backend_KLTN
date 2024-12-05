@@ -10,7 +10,7 @@ import { AppointmentPackage } from '../models/appointment-package';
 import { User, UserDoc } from '../models/user';
 import { forEachChild } from 'typescript';
 import _ from 'lodash';
-import { OrderPackage } from '../models/order-package';
+import { OrderPackage, ServiceEmbedded } from '../models/order-package';
 import { ServiceInAppointment } from './appointment-service.service';
 export interface PackageAttr {
   packageId: string;
@@ -61,43 +61,8 @@ export class AppointmentPackageService {
       quantity: packageAttr.quantity,
       totalPrice: totalPrice,
     });
-    if (packageAttr.order) {
-      const oPackage = await OrderPackage.findOne({
-        order: packageAttr.order.id,
-        package: packageAttr.packageId,
-      })
-        .populate('package')
-        .populate('order')
-        .populate({ path: 'serviceEmbedded.service' });
-      if (!oPackage) throw new NotFoundError('Order-Package');
-      const { serviceIds } = packageAttr.order;
-      const { serviceEmbedded } = oPackage;
-      const serviceEmbeddedIds: string[] = serviceEmbedded.map(
-        (srv) => srv.service.id
-      );
-      for (const serviceId of serviceIds) {
-        const isIncluded = _.includes(serviceEmbeddedIds, serviceId);
-        if (isIncluded === false)
-          throw new BadRequestError(
-            `Package not contain serviceId: ${serviceId}`
-          );
-      }
-    }
-    let employeesInAppointment: UserDoc[] = [];
-    // if (packageAttr.execEmp) {
-    //   employeesInAppointment = await User.find(
-    //     {
-    //       _id: { $in: packageAttr.execEmp },
-    //       type: UserType.Employee,
-    //       isDeleted: false,
-    //     },
-    //     { id: 1, fullName: 1, gender: 1, avatar: 1 }
-    //   );
-
-    //   aPackage.set({ execEmp: employeesInAppointment });
-    // }
     await aPackage.save();
-    return { aPackage, existPackage, employeesInAppointment };
+    return { aPackage, existPackage };
   }
   static async newAppointmentPackages(
     appointmentId: string,
@@ -108,8 +73,10 @@ export class AppointmentPackageService {
     const packages: PackageInAppointment[] = [];
     let totalPackagePrice = 0;
     for (const packageAttr of packageAttrs) {
-      const { aPackage, existPackage, employeesInAppointment } =
-        await this.newAppointmentPackage(appointmentDoc, packageAttr);
+      const { aPackage, existPackage } = await this.newAppointmentPackage(
+        appointmentDoc,
+        packageAttr
+      );
       packages.push({
         packageId: existPackage.id,
         name: existPackage.name,

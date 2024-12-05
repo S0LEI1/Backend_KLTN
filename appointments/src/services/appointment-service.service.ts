@@ -65,16 +65,10 @@ export class AppointmentServiceServices {
         );
       aService.set({ order: oService.order.id });
       await aService.save();
+      return { aService, service, order: oService.order };
     }
-    let employeesInAppointment: UserDoc[] = [];
-    // if (serviceAttr.execEmp) {
-    //   const execEmp = await User.findEmployees(serviceAttr.execEmp);
-    //   if (!execEmp) throw new NotFoundError('Execute employee not found');
-    //   employeesInAppointment = execEmp;
-    //   aService.set({ execEmp: execEmp });
-    // }
     await aService.save();
-    return { aService, service, employeesInAppointment };
+    return { aService, service };
   }
   static async newAppointmentServices(
     appointment: AppointmentDoc,
@@ -85,8 +79,10 @@ export class AppointmentServiceServices {
     const services: ServiceInAppointment[] = [];
     let totalServicePrice = 0;
     for (const serviceAttr of serviceAttrs) {
-      const { aService, service, employeesInAppointment } =
-        await this.newAppointmentService(appointment, serviceAttr);
+      const { aService, service, order } = await this.newAppointmentService(
+        appointment,
+        serviceAttr
+      );
       services.push({
         serviceId: service.id,
         name: service.name,
@@ -94,7 +90,7 @@ export class AppointmentServiceServices {
         imageUrl: service.imageUrl,
         quantity: aService.quantity,
         totalPrice: aService.totalPrice,
-        orderId: aService.order?.id,
+        orderId: order?.id,
         // execEmp: employeesInAppointment,
       });
       totalServicePrice += aService.totalPrice;
