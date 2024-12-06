@@ -21,7 +21,7 @@ interface Lookup {
 router.post(
   '/users/signin',
   [
-    body('email').isEmail().withMessage('Email must be valid'),
+    body('email').notEmpty().isEmail().withMessage('Email must be valid'),
     body('password')
       .trim()
       .notEmpty()

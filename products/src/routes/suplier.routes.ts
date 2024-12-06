@@ -22,8 +22,11 @@ router.post(
   '/products/suplier',
   [
     body('name').not().isEmpty().withMessage(`Suplier ${NAME_MESSAGE}`),
-    body('email').isEmail().withMessage(EMAIL_MESSAGE),
-    body('phoneNumber').isMobilePhone('vi-VN').withMessage(PHONE_MESSAGE),
+    body('email').notEmpty().isEmail().withMessage(EMAIL_MESSAGE),
+    body('phoneNumber')
+      .notEmpty()
+      .isMobilePhone('vi-VN')
+      .withMessage(PHONE_MESSAGE),
     body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
   ],
   validationRequest,

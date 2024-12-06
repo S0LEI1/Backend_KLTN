@@ -25,11 +25,14 @@ router.post(
       .withMessage('Package service name must be provided'),
     body('costPrice')
       .isFloat({ min: 5000 })
+      .notEmpty()
       .withMessage('Cost price must be greater than 5000VND'),
     body('count')
+      .notEmpty()
       .isFloat({ min: 1 })
       .withMessage('Count must be greater than equal 1'),
     body('expire')
+      .notEmpty()
       .isFloat({ min: 5 })
       .withMessage('Expire must be greater than equal 1 day'),
     body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
@@ -66,12 +69,15 @@ router.patch(
       .notEmpty()
       .withMessage('Package service name must be provided'),
     body('costPrice')
+      .notEmpty()
       .isFloat({ min: 5000 })
       .withMessage('Cost price must be greater than 5000VND'),
     body('count')
+      .notEmpty()
       .isFloat({ min: 1 })
       .withMessage('Count must be greater than equal 1'),
     body('expire')
+      .notEmpty()
       .isFloat({ min: 5 })
       .withMessage('Expire must be greater than equal 1 day'),
     body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
@@ -99,4 +105,5 @@ router.get(
   PackageControllers.exportPackage
 );
 router.patch('/services/package/update-code', PackageControllers.updateCode);
+router.get('/services/package/find/name', PackageControllers.getByName);
 export { router as packageRouter };

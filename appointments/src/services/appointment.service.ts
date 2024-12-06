@@ -106,14 +106,13 @@ export class AppointmentServices {
       if (!order) throw new NotFoundError('Order');
       existOrderId = order.id;
       apm.set({ order: order.id });
-      await apm.save();
     }
     let services: ServiceInAppointment[] = [];
     let totalPrice = 0;
     if (serviceAttrs) {
       const serviceInAppointment =
         await AppointmentServiceServices.newAppointmentServices(
-          apm.id,
+          apm,
           serviceAttrs,
           existOrderId
         );
@@ -125,7 +124,8 @@ export class AppointmentServices {
       const packagesInAppoitment =
         await AppointmentPackageService.newAppointmentPackages(
           apm.id,
-          packageAttrs
+          packageAttrs,
+          existOrderId
         );
       packages = packagesInAppoitment.packages;
       totalPrice += packagesInAppoitment.totalPackagePrice;

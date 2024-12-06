@@ -391,4 +391,26 @@ export class PackageServices {
     });
     return workbook;
   }
+  static async getByName(
+    name: string,
+    pages: string,
+    sort: string,
+    isManager: boolean
+  ) {
+    const filter = Pagination.query();
+    filter.isDeleted = false;
+    filter.name = new RegExp(name, 'i');
+    const sortBy = Pagination.query();
+    sortBy.name = 1;
+    if (sort === 'asc') sortBy.name = 1;
+    if (sort === 'desc') sortBy.name = -1;
+    const options = Pagination.options(pages, PER_PAGE, sortBy);
+    const packages = await Package.find(
+      filter,
+      isManager ? null : { costPrice: 0 },
+      options
+    );
+    const totalItems = await Package.find(filter).countDocuments();
+    return { packages, totalItems };
+  }
 }

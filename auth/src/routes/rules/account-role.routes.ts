@@ -13,8 +13,11 @@ const router = express.Router();
 router.post(
   '/users/account-role/new',
   [
-    body('accountId').isMongoId().withMessage('Account Id must be valid'),
-    body('roleIds').isMongoId().withMessage('Role Id must be valid'),
+    body('accountId')
+      .notEmpty()
+      .isMongoId()
+      .withMessage('Account Id must be valid'),
+    body('roleIds').notEmpty().isMongoId().withMessage('Role Id must be valid'),
   ],
   // requireAuth,
   // requireType([UserType.Manager]),

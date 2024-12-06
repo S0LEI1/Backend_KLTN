@@ -20,7 +20,10 @@ router.post(
   singleUploadMiddleware,
   [
     body('name').notEmpty().withMessage('Name service must be provided'),
-    body('costPrice').isNumeric().withMessage('Price must be number'),
+    body('costPrice')
+      .notEmpty()
+      .isNumeric()
+      .withMessage('Price must be number'),
     body('time')
       .notEmpty()
       .isInt({ min: 1 })
@@ -44,7 +47,10 @@ router.patch(
   singleUploadMiddleware,
   [
     body('name').notEmpty().withMessage('Name service must be provided'),
-    body('costPrice').isNumeric().withMessage('Price must be number'),
+    body('costPrice')
+      .notEmpty()
+      .isNumeric()
+      .withMessage('Price must be number'),
     body('time')
       .notEmpty()
       .isInt({ min: 1 })

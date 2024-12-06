@@ -74,6 +74,7 @@ export class ManagerControllers {
         address: user.address,
         email: user.email,
         type: user.type,
+        phoneNumber: user.phoneNumber,
       },
     });
   }

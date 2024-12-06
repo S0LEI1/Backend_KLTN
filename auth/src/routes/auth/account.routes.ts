@@ -26,10 +26,13 @@ const REGEX_PASSWORD =
 router.post(
   '/users/new/employee',
   [
-    body('email').isEmail().withMessage(EMAIL_MESSAGE),
+    body('email').notEmpty().isEmail().withMessage(EMAIL_MESSAGE),
     body('fullName').not().isEmpty().withMessage(NAME_MESSAGE),
     body('gender').not().isEmpty().withMessage(GENDER_MESSAGE),
-    body('phoneNumber').isMobilePhone('vi-VN').withMessage(PHONE_MESSAGE),
+    body('phoneNumber')
+      .notEmpty()
+      .isMobilePhone('vi-VN')
+      .withMessage(PHONE_MESSAGE),
     body('address').not().isEmpty().withMessage(ADDRESS_MESSAGE),
   ],
   // middleware validationRequest
@@ -103,7 +106,7 @@ router.post(
 );
 router.post(
   '/users/otp',
-  [body('email').isEmail().withMessage(EMAIL_MESSAGE)],
+  [body('email').notEmpty().isEmail().withMessage(EMAIL_MESSAGE)],
   validationRequest,
   AccountControllers.sendOtp
 );

@@ -164,4 +164,32 @@ export class PackageControllers {
     }
     res.status(200).send({ message: 'Done' });
   }
+  static async getByName(req: Request, res: Response) {
+    try {
+      const { name, pages, sort } = req.query;
+      let isManager = false;
+      if (req.currentUser) {
+        const { type, permissions } = req.currentUser!;
+        isManager = Check.isManager(type, permissions, [
+          ListPermission.PackageRead,
+        ]);
+      }
+      const { packages, totalItems } = await PackageServices.getByName(
+        name as string,
+        pages as string,
+        sort as string,
+        isManager
+      );
+      res
+        .status(200)
+        .send({
+          message: 'GET: Package by name successfully',
+          totalItems,
+          packages,
+        });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 }

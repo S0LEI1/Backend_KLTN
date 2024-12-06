@@ -6,8 +6,12 @@ const router = express.Router();
 router.post(
   '/users/role-permission/',
   [
-    body('roleId').isMongoId().withMessage('Role Id must be mongoId'),
+    body('roleId')
+      .notEmpty()
+      .isMongoId()
+      .withMessage('Role Id must be mongoId'),
     body('permissionIds')
+      .notEmpty()
       .isMongoId()
       .withMessage('Permission Id must be mongoId'),
   ],

@@ -10,9 +10,14 @@ router.post(
   [
     body('item.quantity')
       .isInt({ min: 1 })
+      .notEmpty()
       .withMessage('Quantity must be type Integer and greater than or equal 1'),
-    body('item.id').isMongoId().withMessage('Item Id must be ObjectId'),
+    body('item.id')
+      .notEmpty()
+      .isMongoId()
+      .withMessage('Item Id must be ObjectId'),
     body('type')
+      .notEmpty()
       .isIn(Object.values(AddType))
       .withMessage('Type must be: product, service, package'),
   ],
@@ -27,8 +32,12 @@ router.patch(
     body('cartAttr').isArray().withMessage('CartAttr must be array'),
     body('cartAttr.*.quantity')
       .isInt()
+      .notEmpty()
       .withMessage('Quantity must be type Integer and greater than or equal 1'),
-    body('cartAttr.*.id').isMongoId().withMessage('ItemId must be ObjectId'),
+    body('cartAttr.*.id')
+      .notEmpty()
+      .isMongoId()
+      .withMessage('ItemId must be ObjectId'),
   ],
   validationRequest,
   requireAuth,

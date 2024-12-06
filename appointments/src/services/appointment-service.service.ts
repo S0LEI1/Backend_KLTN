@@ -62,9 +62,6 @@ export class AppointmentServiceServices {
         throw new BadRequestError(
           'Service quantity in appoinment cannot greater quantity in order'
         );
-      aService.set({ order: oService.order.id });
-      await aService.save();
-      return { aService, service, order: oService.order };
     }
     await aService.save();
     return { aService, service };
@@ -79,7 +76,7 @@ export class AppointmentServiceServices {
     const services: ServiceInAppointment[] = [];
     let totalServicePrice = 0;
     for (const serviceAttr of serviceAttrs) {
-      const { aService, service, order } = await this.newAppointmentService(
+      const { aService, service } = await this.newAppointmentService(
         appointment,
         serviceAttr,
         orderId

@@ -12,7 +12,12 @@ import { body } from 'express-validator';
 const router = express.Router();
 router.post(
   '/services/package-service/new',
-  [body('packageId').isMongoId().withMessage('Package Id must be MongoId')],
+  [
+    body('packageId')
+      .notEmpty()
+      .isMongoId()
+      .withMessage('Package Id must be MongoId'),
+  ],
   validationRequest,
   requireAuth,
   requireType([UserType.Manager]),

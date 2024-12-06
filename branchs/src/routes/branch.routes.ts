@@ -20,9 +20,12 @@ router.post(
       .notEmpty()
       .isString()
       .withMessage('Branch name must be provided'),
-    body('phoneNumber').isMobilePhone('vi-VN').withMessage(PHONE_MESSAGE),
+    body('phoneNumber')
+      .notEmpty()
+      .isMobilePhone('vi-VN')
+      .withMessage(PHONE_MESSAGE),
     body('address').not().isEmpty().withMessage(ADDRESS_MESSAGE),
-    body('email').isEmail().withMessage(EMAIL_MESSAGE),
+    body('email').notEmpty().isEmail().withMessage(EMAIL_MESSAGE),
   ],
   validationRequest,
   requireAuth,
@@ -39,9 +42,12 @@ router.patch(
       .notEmpty()
       .isString()
       .withMessage('Branch name must be provided'),
-    body('phoneNumber').isMobilePhone('vi-VN').withMessage(PHONE_MESSAGE),
+    body('phoneNumber')
+      .notEmpty()
+      .isMobilePhone('vi-VN')
+      .withMessage(PHONE_MESSAGE),
     body('address').not().isEmpty().withMessage(ADDRESS_MESSAGE),
-    body('email').isEmail().withMessage(EMAIL_MESSAGE),
+    body('email').notEmpty().isEmail().withMessage(EMAIL_MESSAGE),
   ],
   validationRequest,
   requireAuth,

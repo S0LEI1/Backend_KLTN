@@ -13,7 +13,10 @@ const router = express.Router();
 router.post(
   '/orders/new',
   [
-    body('customerId').isMongoId().withMessage('Customer Id must be ObjectId'),
+    body('customerId')
+      .notEmpty()
+      .isMongoId()
+      .withMessage('Customer Id must be ObjectId'),
     body('services.*.id')
       .isMongoId()
       .withMessage('Id in services must be ObjectId'),

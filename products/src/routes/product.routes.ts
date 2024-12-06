@@ -19,13 +19,25 @@ router.post(
   singleUploadMiddleware,
   [
     body('name').notEmpty().withMessage(`Product ${NAME_MESSAGE}`),
-    body('categoryId').isMongoId().withMessage('Category Id must be valid'),
-    body('suplierId').isMongoId().withMessage('Suplier Id must be valid'),
-    body('expire').isISO8601().toDate().withMessage('Expire must be valid'),
+    body('categoryId')
+      .notEmpty()
+      .isMongoId()
+      .withMessage('Category Id must be valid'),
+    body('suplierId')
+      .notEmpty()
+      .isMongoId()
+      .withMessage('Suplier Id must be valid'),
+    body('expire')
+      .notEmpty()
+      .isISO8601()
+      .toDate()
+      .withMessage('Expire must be valid'),
     body('costPrice')
+      .notEmpty()
       .isFloat({ min: 1000 })
       .withMessage('Cost price must be greater than equal 1000đ'),
     body('quantity')
+      .notEmpty()
       .isFloat({ min: 1, max: 999 })
       .withMessage('Quanity must be greater than equal 1'),
     body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
@@ -48,13 +60,25 @@ router.patch(
   singleUploadMiddleware,
   [
     body('name').notEmpty().withMessage(`Product ${NAME_MESSAGE}`),
-    body('categoryId').isMongoId().withMessage('Category Id must be valid'),
-    body('suplierId').isMongoId().withMessage('Suplier Id must be valid'),
-    body('expire').isISO8601().toDate().withMessage('Expire must be valid'),
+    body('categoryId')
+      .notEmpty()
+      .isMongoId()
+      .withMessage('Category Id must be valid'),
+    body('suplierId')
+      .notEmpty()
+      .isMongoId()
+      .withMessage('Suplier Id must be valid'),
+    body('expire')
+      .notEmpty()
+      .isISO8601()
+      .toDate()
+      .withMessage('Expire must be valid'),
     body('costPrice')
+      .notEmpty()
       .isFloat({ min: 1000 })
       .withMessage('Cost price must be greater than equal 1000đ'),
     body('quantity')
+      .notEmpty()
       .isFloat({ min: 1, max: 999 })
       .withMessage('Quanity must be greater than equal 1'),
     body('code').notEmpty().matches(codeRegex).withMessage(CODE_MESSAGE),
@@ -110,9 +134,11 @@ router.patch(
   '/products/add/quantity/:id',
   [
     body('quantity')
+      .notEmpty()
       .isInt({ min: 1 })
       .withMessage('Add quantity must be type Integer greater than or equal 1'),
     body('costPrice')
+      .notEmpty()
       .isInt({ min: 1000 })
       .withMessage(
         'Add quantity must be type Integer and greater than or equal 1000đ'

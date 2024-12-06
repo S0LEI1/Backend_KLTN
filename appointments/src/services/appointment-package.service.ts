@@ -1,33 +1,26 @@
 import {
   BadRequestError,
   NotFoundError,
-  UserType,
   calcPrice,
 } from '@share-package/common';
 import { Appointment, AppointmentDoc } from '../models/appointment';
 import { Package } from '../models/package';
 import { AppointmentPackage } from '../models/appointment-package';
-import { User, UserDoc } from '../models/user';
-import { forEachChild } from 'typescript';
+
 import _ from 'lodash';
-import { OrderPackage, ServiceEmbedded } from '../models/order-package';
+import { OrderPackage } from '../models/order-package';
 import { ServiceInAppointment } from './appointment-service.service';
+import { ServiceDoc } from '../models/service';
 export interface PackageAttr {
   packageId: string;
-  // execEmp?: string[];
-  order?: {
-    id: string;
-    serviceIds: string[];
-  };
+  // execEmp?: string[]
+  serviceIds?: string[];
   quantity: number;
 }
 
 export interface PackageInAppointment {
   packageId: string;
-  order?: {
-    id: string;
-    services: ServiceInAppointment[];
-  };
+  services?: ServiceInAppointment[];
   name: string;
   salePrice: number;
   imageUrl: string;
@@ -39,7 +32,8 @@ export interface PackageInAppointment {
 export class AppointmentPackageService {
   static async newAppointmentPackage(
     appointmentDoc: AppointmentDoc,
-    packageAttr: PackageAttr
+    packageAttr: PackageAttr,
+    orderId: string | null
   ) {
     const existPackage = await Package.findPackage(packageAttr.packageId);
     if (!existPackage) throw new NotFoundError('Package not found');
@@ -61,22 +55,69 @@ export class AppointmentPackageService {
       quantity: packageAttr.quantity,
       totalPrice: totalPrice,
     });
+    if (orderId && packageAttr.serviceIds) {
+      const oPackage = await OrderPackage.findOne({
+        order: orderId,
+        package: packageAttr.packageId,
+        isDeleted: false,
+      })
+        .populate('package')
+        .populate('order')
+        .populate({ path: 'serviceEmbedded.service' });
+      if (!oPackage) throw new NotFoundError('Oder-Package');
+      const { serviceEmbedded } = oPackage;
+      const services: ServiceDoc[] = [];
+      const serviceInAppointment: ServiceInAppointment[] = [];
+      for (const serviceId of packageAttr.serviceIds) {
+        const serviceEmb = serviceEmbedded.find(
+          (srv) => srv.service.id === serviceId
+        );
+        if (!serviceEmb)
+          throw new BadRequestError(
+            `Package not contain service: ${serviceId}`
+          );
+        const { quantity, usageLogs } = serviceEmb;
+        if (usageLogs!.length >= quantity)
+          throw new BadRequestError('Number of Uses Exhausted.');
+        if (packageAttr.quantity > oPackage.quantity)
+          throw new BadRequestError(
+            'Service quantity in appoinment cannot greater quantity in order'
+          );
+        services.push(serviceEmb.service);
+        const totalPrice = calcPrice(
+          serviceEmb.service.salePrice,
+          packageAttr.quantity,
+          serviceEmb.service.discount
+        );
+        serviceInAppointment.push({
+          serviceId: serviceEmb.service.id,
+          name: serviceEmb.service.name,
+          salePrice: serviceEmb.service.salePrice,
+          imageUrl: serviceEmb.service.imageUrl,
+          quantity: packageAttr.quantity,
+          totalPrice: totalPrice,
+        });
+      }
+      aPackage.set({ servicesEmbedded: services });
+      await aPackage.save();
+      return { aPackage, existPackage, serviceInAppointment };
+    }
+
     await aPackage.save();
     return { aPackage, existPackage };
   }
   static async newAppointmentPackages(
-    appointmentId: string,
-    packageAttrs: PackageAttr[]
+    appointment: AppointmentDoc,
+    packageAttrs: PackageAttr[],
+    orderId: string | null
   ) {
-    const appointmentDoc = await Appointment.findAppointment(appointmentId);
-    if (!appointmentDoc) throw new NotFoundError('Appointment');
+    // const appointmentDoc = await Appointment.findAppointment(appointmentId);
+    // if (!appointmentDoc) throw new NotFoundError('Appointment');
     const packages: PackageInAppointment[] = [];
     let totalPackagePrice = 0;
     for (const packageAttr of packageAttrs) {
-      const { aPackage, existPackage } = await this.newAppointmentPackage(
-        appointmentDoc,
-        packageAttr
-      );
+      const { aPackage, existPackage, serviceInAppointment } =
+        await this.newAppointmentPackage(appointment, packageAttr, orderId);
       packages.push({
         packageId: existPackage.id,
         name: existPackage.name,
@@ -84,7 +125,7 @@ export class AppointmentPackageService {
         imageUrl: existPackage.imageUrl,
         quantity: aPackage.quantity,
         totalPrice: aPackage.totalPrice,
-        // execEmp: employeesInAppointment,
+        services: serviceInAppointment,
       });
       totalPackagePrice += aPackage.totalPrice;
     }
@@ -96,11 +137,27 @@ export class AppointmentPackageService {
     const aPackages = await AppointmentPackage.find({
       appointment: appointment.id,
       isDeleted: false,
-    }).populate('package');
+    })
+      .populate('package')
+      .populate('servicesEmbedded');
     // .populate({ path: 'execEmp', select: 'id fullName avatar gender' });
     const packages: PackageInAppointment[] = [];
     let totalPackagePrice = 0;
     for (const as of aPackages) {
+      const servicesInAppointment: ServiceInAppointment[] = [];
+      const { servicesEmbedded } = as;
+      if (servicesEmbedded) {
+        for (const service of servicesEmbedded!) {
+          servicesInAppointment.push({
+            serviceId: service.id,
+            name: service.name,
+            salePrice: service.salePrice,
+            imageUrl: service.imageUrl,
+            quantity: 0,
+            totalPrice: 0,
+          });
+        }
+      }
       packages.push({
         packageId: as.package.id,
         name: as.package.name,
@@ -108,6 +165,7 @@ export class AppointmentPackageService {
         imageUrl: as.package.imageUrl,
         quantity: as.quantity,
         totalPrice: as.totalPrice,
+        services: [],
       });
       totalPackagePrice += as.totalPrice;
     }
@@ -202,8 +260,9 @@ export class AppointmentPackageService {
       'packageId'
     );
     const addPackages = await this.newAppointmentPackages(
-      appointmentId,
-      addValue
+      appointmentDoc,
+      addValue,
+      null
     );
     console.log('addPackage', addValue);
     console.log('updatePackage', updateValue);
@@ -222,6 +281,7 @@ export class AppointmentPackageService {
         imageUrl: aPackage.package.imageUrl,
         quantity: aPackage.quantity,
         totalPrice: aPackage.totalPrice,
+        services: [],
       });
       totalPrice += aPackage.totalPrice;
     }
