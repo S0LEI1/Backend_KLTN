@@ -16,5 +16,5 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      - run: cd auth && docker build -t vanngoc/auth .
+      - run: cd auth && docker build -t vannggoc/auth .
       - run: docker push vannggoc/auth
