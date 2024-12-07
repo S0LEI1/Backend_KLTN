@@ -30,7 +30,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(
   cookieSession({
     signed: false,
-    secure: process.env.NODE_ENV != 'test',
+    secure: false,
   })
 );
 app.use(cors());
