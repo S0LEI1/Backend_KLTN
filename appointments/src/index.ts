@@ -23,6 +23,7 @@ import { OrderPackageCreatedListener } from './events/listeners/order-package/or
 import { OrderPackageUpdatedListener } from './events/listeners/order-package/order-package-updated-listener';
 import { OrderPackageDeletedListener } from './events/listeners/order-package/order-package-deleted-listener';
 const start = async () => {
+  console.log('starting................');
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
   }
