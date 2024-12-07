@@ -18,3 +18,8 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       - run: cd auth && docker build -t vannggoc/auth .
       - run: docker push vannggoc/auth
+      - uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - run: doctl kubernetes cluster kubeconfig save kimbeautyspa
+      - run: kubectl rollout restart deployment auth-depl
