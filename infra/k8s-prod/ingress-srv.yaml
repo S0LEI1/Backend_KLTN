@@ -85,8 +85,8 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: 'true'
-    service.beta.kubernetes.io/do-loadbalancer-hostname: 'www.kimbeautyspa.io.vn'
+    service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: "true"
+    service.beta.kubernetes.io/do-loadbalancer-hostname: "www.kimbeautyspa.io.vn"
   labels:
     helm.sh/chart: ingress-nginx-2.0.3
     app.kubernetes.io/name: ingress-nginx
