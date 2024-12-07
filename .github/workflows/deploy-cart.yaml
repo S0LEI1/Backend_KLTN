@@ -1,11 +1,11 @@
-name: deploy-auth
+name: deploy-cart
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'auth/**'
+      - 'cart/**'
 
 jobs:
   build:
@@ -16,11 +16,10 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      - run: cd auth && docker build -t vannggoc/auth .
-      - run: docker push vannggoc/auth
+      - run: cd cart && docker build -t vannggoc/cart .
+      - run: docker push vannggoc/cart
       - uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - run: doctl kubernetes cluster kubeconfig save kimbeautyspa
-      # refesh
-      - run: kubectl rollout restart deployment auth-depl
+      - run: kubectl rollout restart deployment cart-depl
