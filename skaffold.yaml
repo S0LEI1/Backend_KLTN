@@ -1,10 +1,9 @@
-apiVersion: skaffold/v2alpha3
+apiVersion: skaffold/v4beta3
 kind: Config
-deploy:
-  kubectl:
-    manifests:
-      - ./infra/k8s/*
-      - ./infra/k8s-dev/*
+manifests:
+  rawYaml:
+    - ./infra/k8s/*
+    - ./infra/k8s-dev/*
 build:
   local:
     push: false
@@ -17,14 +16,14 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    # - image: vannggoc/branchs
-    #   context: branchs
-    #   docker:
-    #     dockerfile: Dockerfile
-    #   sync:
-    #     manual:
-    #       - src: 'src/**/*.ts'
-    #         dest: .
+    - image: vannggoc/branchs
+      context: branchs
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
     - image: vannggoc/orders
       context: orders
       docker:
@@ -41,14 +40,14 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    # - image: vannggoc/products
-    #   context: products
-    #   docker:
-    #     dockerfile: Dockerfile
-    #   sync:
-    #     manual:
-    #       - src: 'src/**/*.ts'
-    #         dest: .
+    - image: vannggoc/products
+      context: products
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
     - image: vannggoc/services
       context: services
       docker:
@@ -73,14 +72,14 @@ build:
     #     manual:
     #       - src: 'src/**/*.tsx'
     #         dest: .
-    # - image: vannggoc/cart
-    #   context: cart
-    #   docker:
-    #     dockerfile: Dockerfile
-    #   sync:
-    #     manual:
-    #       - src: 'src/**/*.ts'
-    #         dest: .
+    - image: vannggoc/cart
+      context: cart
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
     - image: vannggoc/payments
       context: payments
       docker:
