@@ -3,6 +3,7 @@ import {
   NotFoundError,
   OrderStatus,
   PaymentType,
+  UserType,
 } from '@share-package/common';
 import { Order, OrderDoc } from '../models/order';
 import { Request, Response } from 'express';
@@ -12,7 +13,12 @@ import { natsWrapper } from '../nats-wrapper';
 import { Payment } from '../models/payment';
 const callback = process.env.NGROK_LINK!;
 export class PaymentServices {
-  static async payment(cusId: string, orderId: string, type: string) {
+  static async payment(
+    cusId: string,
+    orderId: string,
+    type: string,
+    userType: string
+  ) {
     const order = await Order.findOne({ _id: orderId, isDeleted: false });
     if (!order) throw new NotFoundError('Order');
     if (order.status === OrderStatus.Cancelled)
@@ -21,6 +27,13 @@ export class PaymentServices {
       throw new BadRequestError('Cannot pay for an complete order');
     if (order.status === OrderStatus.CashPayment)
       throw new BadRequestError('Cannot pay for an cash payment order');
+    if (
+      (userType === UserType.Employee || userType === UserType.Manager) &&
+      type === PaymentType.Cash
+    ) {
+      const result = await this.cashPayment(order);
+      return result;
+    }
     if (cusId != order.customer)
       throw new BadRequestError('You not own this order,can not payment');
     if (type !== PaymentType.Cash && type !== PaymentType.Online)

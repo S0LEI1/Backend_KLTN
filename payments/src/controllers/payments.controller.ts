@@ -5,8 +5,9 @@ export class PaymentControllers {
     const { orderId } = req.params;
     const { type } = req.body;
     const id = req.currentUser!.id;
+    const userType = req.currentUser!.type;
 
-    const result = await PaymentServices.payment(id, orderId, type);
+    const result = await PaymentServices.payment(id, orderId, type, userType);
     res.status(200).send({ message: 'Payment successfully', result });
   }
   static async callback(req: Request, res: Response) {
