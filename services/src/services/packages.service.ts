@@ -133,16 +133,16 @@ export class PackageServices {
     if (count === 'asc') sort.count = 1;
     if (count === 'desc') sort.count = -1;
     // get total package by query
-    const options = Pagination.options(pages, PER_PAGE, sort);
-    console.log(options);
-    console.log(query);
+    // const options = Pagination.options(pages, PER_PAGE, sort);
+    // console.log(options);
+    // console.log(query);
 
     const totalItems = await Package.find(query).countDocuments();
     // get packages
     const packages = await Package.find(
       query,
       isManager ? null : { costPrice: 0 },
-      options
+      sort
     );
     return { packages, totalItems };
   }

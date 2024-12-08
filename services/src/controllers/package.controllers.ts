@@ -30,6 +30,7 @@ export class PackageControllers {
       });
     } catch (error) {
       console.log(error);
+      throw error;
     }
   }
   static async readAll(req: Request, res: Response) {
@@ -180,13 +181,11 @@ export class PackageControllers {
         sort as string,
         isManager
       );
-      res
-        .status(200)
-        .send({
-          message: 'GET: Package by name successfully',
-          totalItems,
-          packages,
-        });
+      res.status(200).send({
+        message: 'GET: Package by name successfully',
+        totalItems,
+        packages,
+      });
     } catch (error) {
       console.log(error);
       throw error;

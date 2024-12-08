@@ -208,11 +208,7 @@ export class ServiceServices {
     if (sortBy === 'desc') sort.name = -1;
     const options = Pagination.options(pages, PER_PAGE!, sort);
     const totalItems = await Service.find(query).countDocuments();
-    const services = await Service.find(
-      query,
-      isManager ? null : select,
-      options
-    );
+    const services = await Service.find(query, isManager ? null : select, sort);
     return { services, totalItems };
   }
   static async exportService() {
