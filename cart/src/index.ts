@@ -20,6 +20,7 @@ import { PackageCreatedListener } from './events/listeners/packages/package-crea
 import { PackageUpdatedListener } from './events/listeners/packages/package-updated-listener';
 import { PackageDeletedListener } from './events/listeners/packages/package-deleted-listener';
 const start = async () => {
+  console.log('Starting.........');
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
   }
