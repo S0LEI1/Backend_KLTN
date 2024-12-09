@@ -8,7 +8,7 @@ metadata:
 spec:
   # ingressClassName: nginx
   rules:
-  # congig 1
+  # congig 2
   # domain name
     - host: www.kimbeautyspa.io.vn
       http:
