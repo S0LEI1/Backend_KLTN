@@ -8,7 +8,7 @@ spec:
   # 8
   ingressClassName: nginx
   rules:
-    - host: www.kimbeautyspa.io.vn
+    - host: www.kimbeautyspa.store
       http:
         paths:
           - path: /users/?(.*)
@@ -87,7 +87,7 @@ kind: Service
 metadata:
   annotations:
     service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: 'true'
-    service.beta.kubernetes.io/do-loadbalancer-hostname: 'www.kimbeautyspa.io.vn'
+    service.beta.kubernetes.io/do-loadbalancer-hostname: 'www.kimbeautyspa.store'
   labels:
     helm.sh/chart: ingress-nginx-2.0.3
     app.kubernetes.io/name: ingress-nginx
