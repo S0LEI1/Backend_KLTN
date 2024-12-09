@@ -5,7 +5,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/use-regex: 'true'
 spec:
-  # 12
+  # 13
   ingressClassName: nginx
   rules:
     - host: www.kimbeautyspa.store
