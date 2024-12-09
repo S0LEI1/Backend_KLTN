@@ -31,7 +31,7 @@ export class ServiceService {
     const packageSrvs = await PackageService.find({
       package: packageId,
       isDeleted: false,
-    }).populate('service');
+    }).populate({ path: 'service', match: { isDeleted: false } });
 
     const servicesInPackage: ServiceInPackage[] = [];
     // packageSrvs.map((pSrv) => {

@@ -156,25 +156,25 @@ export class PackageServices {
     if (!existPackage) throw new NotFoundError('Package');
     // check package service exist
     const packageServices = await PackageService.find(
-      { package: existPackage.id },
+      { package: existPackage.id, isDelete: false },
       isManager ? null : select
-    ).populate('service');
+    ).populate({ path: 'service' });
     // if packageService lenght => no service attach package => return package
     if (packageServices.length === 0) return { existPackage };
     // define service id array
     // const serviceIds: mongoose.Types.ObjectId[] = [];
     const serviceInPackage: ServiceInPacakge[] = [];
-    packageServices.forEach((ps) =>
-      // push service id
-      {
-        serviceInPackage.push({
-          serviceId: ps.service.id,
-          name: ps.service.name,
-          imageUrl: ps.service.imageUrl,
-          quantity: ps.quantity,
-        });
-      }
-    );
+    for (const ps of packageServices) {
+      // if (ps.service.isDeleted === true) continue;
+      serviceInPackage.push({
+        serviceId: ps.service.id,
+        name: ps.service.name,
+        imageUrl: ps.service.imageUrl,
+        quantity: ps.quantity,
+      });
+    }
+    // push service id
+
     // find services attach with package
 
     // if user = manager => return services not attach with package

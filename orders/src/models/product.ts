@@ -67,10 +67,10 @@ const productSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    costPrice: {
-      type: Number,
-      required: true,
-    },
+    // costPrice: {
+    //   type: Number,
+    //   required: true,
+    // },
     salePrice: {
       type: Number,
     },

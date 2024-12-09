@@ -11,23 +11,30 @@ import { Check } from '../utils/check-type';
 import { AwsServices } from '../services/aws.service';
 export class ServiceControllers {
   static async new(req: Request, res: Response) {
-    const { file } = req;
-    const { name, description, costPrice, time, expire, code } = req.body;
-    if (!file) throw new BadRequestError('Image must be provided');
-    Check.checkImage(file);
-    const service = await ServiceServices.new(
-      name,
-      file,
-      description,
-      costPrice,
-      parseInt(time as string),
-      parseInt(expire as string),
-      code
-    );
-    // ServicePublishers.new(service);
-    res
-      .status(201)
-      .send({ message: 'POST: Add new services successfully', service });
+    try {
+      const { file } = req;
+      const { name, description, costPrice, time, expire, code } = req.body;
+      if (!file) throw new BadRequestError('Image must be provided');
+      // console.log(file.mimetype);
+
+      Check.checkImage(file);
+      const service = await ServiceServices.new(
+        name,
+        file,
+        description,
+        costPrice,
+        parseInt(time as string),
+        parseInt(expire as string),
+        code
+      );
+      // ServicePublishers.new(service);
+      res
+        .status(201)
+        .send({ message: 'POST: Add new services successfully', service });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
   static async readAll(req: Request, res: Response) {
     const {
