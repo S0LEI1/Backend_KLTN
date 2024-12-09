@@ -5,7 +5,7 @@ import { OrderCreatedListener } from './events/listeners/order-created--listener
 import { OrderUpdatedListener } from './events/listeners/order-updated-listener';
 import { OrderDeletedListener } from './events/listeners/order-deleted-listener';
 const start = async () => {
-  console.log('starting.........');
+  console.log('Starting.........');
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
   }

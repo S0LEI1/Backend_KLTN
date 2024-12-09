@@ -25,7 +25,7 @@ import { PackageServiceUpdatedListener } from './events/listeners/package-servic
 import { PaymentCreatedListener } from './events/payments/payment-created-listener';
 
 const start = async () => {
-  console.log('starting.........');
+  console.log('Starting.........');
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
   }
