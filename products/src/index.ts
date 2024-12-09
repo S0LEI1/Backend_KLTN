@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { app } from './app';
 import { natsWrapper } from './nats-wrapper';
 const start = async () => {
-  console.log('Starting.........');
+  console.log('Starting..........');
 
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
