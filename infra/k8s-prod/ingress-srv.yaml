@@ -3,13 +3,10 @@ kind: Ingress
 metadata:
   name: ingress-service
   annotations:
-    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/use-regex: 'true'
 spec:
-  # ingressClassName: nginx
+  ingressClassName: nginx
   rules:
-    # congig 3
-    # domain name
     - host: www.kimbeautyspa.io.vn
       http:
         paths:
@@ -32,6 +29,13 @@ spec:
             backend:
               service:
                 name: branchs-srv
+                port:
+                  number: 3000
+          - path: /shifts/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: shifts-srv
                 port:
                   number: 3000
           - path: /services/?(.*)
@@ -69,6 +73,13 @@ spec:
                 name: appointments-srv
                 port:
                   number: 3000
+          # - path: /?(.*)
+          #   pathType: ImplementationSpecific
+          #   backend:
+          #     service:
+          #       name: client-srv
+          #       port:
+          #         number: 3000
 ---
 apiVersion: v1
 kind: Service
