@@ -149,7 +149,7 @@ export class PackageServiceServices {
       service: serviceId,
       isDeleted: false,
     })
-      .populate('service')
+      .populate({ path: 'service', match: { isDeleted: false } })
       .populate('package');
     return packageSrvExist;
   }

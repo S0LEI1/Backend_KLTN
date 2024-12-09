@@ -18,6 +18,7 @@ export class ServiceDeletedListener extends Listener<ServiceDeletedEvent> {
     });
     if (!service) throw new NotFoundError('Service');
     service.set({ isDeleted: data.isDeleted });
+    // await PackageService.updateMany({ service: id }, { isDeleted: true });
     await service.save();
     msg.ack();
   }

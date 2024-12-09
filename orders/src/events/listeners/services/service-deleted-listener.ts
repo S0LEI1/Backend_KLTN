@@ -7,6 +7,7 @@ import {
 import { Message } from 'node-nats-streaming';
 import { queueGroupName } from '../queueGroupName';
 import { Service } from '../../../models/service';
+import { PackageService } from '../../../models/package-service';
 
 export class ServiceDeletedListener extends Listener<ServiceDeletedEvent> {
   subject: Subjects.ServiceDeleted = Subjects.ServiceDeleted;
@@ -18,6 +19,10 @@ export class ServiceDeletedListener extends Listener<ServiceDeletedEvent> {
     });
     if (!service) throw new NotFoundError('Service');
     service.set({ isDeleted: data.isDeleted });
+    await PackageService.updateMany(
+      { service: service.id },
+      { isDeleted: true }
+    );
     await service.save();
     msg.ack();
   }

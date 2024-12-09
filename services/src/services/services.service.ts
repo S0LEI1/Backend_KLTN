@@ -13,6 +13,7 @@ import { ServicePublishers } from './services.publisher.service';
 import exceljs from 'exceljs';
 import { getIO } from '../socket';
 import _ from 'lodash';
+import { PackageService } from '../models/package-service';
 const PER_PAGE = process.env.PER_PAGE;
 export class ServiceServices {
   static async new(
@@ -184,6 +185,7 @@ export class ServiceServices {
     if (!service) throw new NotFoundError('Service');
     service.set({ isDeleted: true });
     await service.save();
+    await PackageService.updateMany({ service: id }, { isDeleted: true });
     return service;
   }
   static async readByName(

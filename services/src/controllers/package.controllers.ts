@@ -77,23 +77,28 @@ export class PackageControllers {
       .send({ message: 'GET: Packages successfully', packages, totalItems });
   }
   static async readOne(req: Request, res: Response) {
-    const { id } = req.params;
-    let isManager = false;
-    if (req.currentUser) {
-      const { type, permissions } = req.currentUser!;
-      isManager = Check.isManager(type, permissions, [
-        ListPermission.PackageRead,
-      ]);
+    try {
+      const { id } = req.params;
+      let isManager = false;
+      if (req.currentUser) {
+        const { type, permissions } = req.currentUser!;
+        isManager = Check.isManager(type, permissions, [
+          ListPermission.PackageRead,
+        ]);
+      }
+      const { existPackage, services } = await PackageServices.readOne(
+        id,
+        isManager
+      );
+      res.status(200).send({
+        message: 'GET: Package successfully',
+        package: existPackage,
+        services,
+      });
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
-    const { existPackage, services } = await PackageServices.readOne(
-      id,
-      isManager
-    );
-    res.status(200).send({
-      message: 'GET: Package successfully',
-      package: existPackage,
-      services,
-    });
   }
   static async deletePackage(req: Request, res: Response) {
     try {

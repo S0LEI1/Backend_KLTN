@@ -27,7 +27,9 @@ export class Check {
     if (!file) throw new BadRequestError('File must be provided');
     const { mimetype } = file;
     if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
-      throw new BadRequestError('Image invalid');
+      throw new BadRequestError(
+        'Image invalid. Only allowed to upload image jpeg or png.'
+      );
     }
   };
   static checkExcel(file: Express.Multer.File) {
