@@ -5,8 +5,7 @@ import { natsWrapper } from './nats-wrapper';
 // import { PermissionUpdatedListener } from './events/listeners/permissions/permission-updated-listener';
 // import { PermissionDeletedListener } from './events/listeners/permissions/permission-deleted-listener';
 const start = async () => {
-  console.log('starting.........');
-
+  console.log('Starting.........');
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
   }
