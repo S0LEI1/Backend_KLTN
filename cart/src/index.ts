@@ -21,7 +21,6 @@ import { PackageUpdatedListener } from './events/listeners/packages/package-upda
 import { PackageDeletedListener } from './events/listeners/packages/package-deleted-listener';
 const start = async () => {
   if (!process.env.JWT_KEY) {
-    console.log('Starting.........');
     throw new Error('JWT must be defined');
   }
   if (!process.env.MONGO_URI) {
