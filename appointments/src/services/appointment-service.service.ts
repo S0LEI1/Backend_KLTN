@@ -53,7 +53,7 @@ export class AppointmentServiceServices {
       const oService = await OrderServiceM.findOne({
         order: orderId,
         service: service.id,
-      }).populate('order');
+      });
       if (!oService) throw new NotFoundError('Order-Service');
       const { usageLogs, quantity } = oService;
       if (usageLogs!.length >= quantity)
@@ -151,8 +151,8 @@ export class AppointmentServiceServices {
     filter.isDeleted = false;
     const aService = await AppointmentService.findOne(filter)
       .populate('service')
-      .populate('appointment')
-      .populate('order');
+      .populate('appointment');
+    // .populate('order');
     if (!aService) throw new NotFoundError('Appointment-Service');
     if (aService.quantity === serviceAttr.quantity) return aService;
     const price = calcPrice(

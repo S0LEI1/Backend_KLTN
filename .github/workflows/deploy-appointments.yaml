@@ -1,25 +1,25 @@
-name: deploy-appointments
+# name: deploy-appointments
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'appointments/**'
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - 'appointments/**'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      - run: cd appointments && docker build -t vannggoc/appointments .
-      - run: docker push vannggoc/appointments
-      - uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - run: doctl kubernetes cluster kubeconfig save 7820a70c-156b-4fbb-ab96-e8c60890e02d
-      - run: kubectl rollout restart deployment appointments-depl
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+#         env:
+#           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+#       - run: cd appointments && docker build -t vannggoc/appointments .
+#       - run: docker push vannggoc/appointments
+#       - uses: digitalocean/action-doctl@v2
+#         with:
+#           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+#       - run: doctl kubernetes cluster kubeconfig save 7820a70c-156b-4fbb-ab96-e8c60890e02d
+#       - run: kubectl rollout restart deployment appointments-depl

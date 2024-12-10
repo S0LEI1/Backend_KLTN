@@ -1,19 +1,19 @@
-name: deploy-manifests
+# name: deploy-manifests
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'infra/**'
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - 'infra/**'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - run: doctl kubernetes cluster kubeconfig save 7820a70c-156b-4fbb-ab96-e8c60890e02d
-      - run: kubectl apply -f infra/k8s && kubectl apply -f infra/k8s-prod
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - uses: digitalocean/action-doctl@v2
+#         with:
+#           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+#       - run: doctl kubernetes cluster kubeconfig save 7820a70c-156b-4fbb-ab96-e8c60890e02d
+#       - run: kubectl apply -f infra/k8s && kubectl apply -f infra/k8s-prod

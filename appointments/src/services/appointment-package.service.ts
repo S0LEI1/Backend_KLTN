@@ -62,7 +62,6 @@ export class AppointmentPackageService {
         isDeleted: false,
       })
         .populate('package')
-        .populate('order')
         .populate({ path: 'serviceEmbedded.service' });
       if (!oPackage) throw new NotFoundError('Oder-Package');
       const { serviceEmbedded } = oPackage;
