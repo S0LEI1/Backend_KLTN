@@ -103,8 +103,8 @@ appointmentSchema.statics.findAppointment = async (
     .populate('customer')
     .populate('creator')
     .populate('consultant')
-    .populate('branch')
-    .populate('order');
+    .populate('branch');
+  // .populate('order');
   return apm;
 };
 const Appointment = mongoose.model<AppointmentDoc, AppointmentModel>(
