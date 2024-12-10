@@ -17,7 +17,7 @@ spec:
           image: vannggoc/products
           env:
             - name: MONGO_URI
-              value: 'mongodb://product-mongo-srv:27017/products'
+              value: 'mongodb+srv://soleil:01636878201@cluster0.4x48u.mongodb.net/products?retryWrites=true&w=majority&appName=Cluster0'
             - name: JWT_KEY
               valueFrom:
                 secretKeyRef:
