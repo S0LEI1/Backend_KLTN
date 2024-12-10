@@ -4,8 +4,6 @@ import { natsWrapper } from './nats-wrapper';
 import { Socket, Server } from 'socket.io';
 import { init } from './socket';
 const start = async () => {
-  console.log('Starting.........');
-
   if (!process.env.JWT_KEY) {
     throw new Error('JWT must be defined');
   }
