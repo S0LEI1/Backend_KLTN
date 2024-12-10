@@ -1,25 +1,25 @@
-# name: deploy-payments
+name: deploy-payments
 
-# on:
-#   push:
-#     branches:
-#       - main
-#     paths:
-#       - 'payments/**'
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'payments/**'
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-#       - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-#         env:
-#           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-#           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-#       - run: cd payments && docker build -t vannggoc/payments .
-#       - run: docker push vannggoc/payments
-#       - uses: digitalocean/action-doctl@v2
-#         with:
-#           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-#       - run: doctl kubernetes cluster kubeconfig save 7820a70c-156b-4fbb-ab96-e8c60890e02d
-#       - run: kubectl rollout restart deployment payments-depl
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - run: cd payments && docker build -t vannggoc/payments .
+      - run: docker push vannggoc/payments
+      - uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - run: doctl kubernetes cluster kubeconfig save 17512bdd-416d-4521-846a-9fbccc0ba605
+      - run: kubectl rollout restart deployment payments-depl

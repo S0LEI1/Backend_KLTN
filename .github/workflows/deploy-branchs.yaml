@@ -1,25 +1,25 @@
-# name: deploy-branchs
+name: deploy-branchs
 
-# on:
-#   push:
-#     branches:
-#       - main
-#     paths:
-#       - 'branchs/**'
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'branchs/**'
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-#       - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-#         env:
-#           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-#           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-#       - run: cd branchs && docker build -t vannggoc/branchs .
-#       - run: docker push vannggoc/branchs
-#       - uses: digitalocean/action-doctl@v2
-#         with:
-#           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-#       - run: doctl kubernetes cluster kubeconfig save 7820a70c-156b-4fbb-ab96-e8c60890e02d
-#       - run: kubectl rollout restart deployment branchs-depl
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - run: cd branchs && docker build -t vannggoc/branchs .
+      - run: docker push vannggoc/branchs
+      - uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - run: doctl kubernetes cluster kubeconfig save 17512bdd-416d-4521-846a-9fbccc0ba605
+      - run: kubectl rollout restart deployment branchs-depl
