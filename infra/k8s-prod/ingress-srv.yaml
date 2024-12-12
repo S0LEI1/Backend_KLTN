@@ -4,7 +4,7 @@ metadata:
   name: ingress-service
   annotations:
     # kubernetes.io/ingress.class: nginx
-    # 36
+    # 37
     nginx.ingress.kubernetes.io/use-regex: 'true'
 spec:
   ingressClassName: nginx
@@ -12,49 +12,49 @@ spec:
     - host: www.kimbeautyspa.store
       http:
         paths:
-          - path: /api/payments/?(.*)
+          - path: /payments/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: payments-srv
                 port:
                   number: 3000
-          - path: /api/users/?(.*)
+          - path: /users/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: auth-srv
                 port:
                   number: 3000
-          - path: /api/products/?(.*)
+          - path: /products/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: products-srv
                 port:
                   number: 3000
-          - path: /api/orders/?(.*)
+          - path: /orders/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: orders-srv
                 port:
                   number: 3000
-          - path: /api/cart/?(.*)
+          - path: /cart/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: cart-srv
                 port:
                   number: 3000
-          - path: /api/appointments/?(.*)
+          - path: /appointments/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: appointments-srv
                 port:
                   number: 3000
-          - path: /api/services/?(.*)
+          - path: /services/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
