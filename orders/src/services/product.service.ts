@@ -4,6 +4,7 @@ import { Attrs } from './order.service';
 
 export class ProductService {
   static async getProduct(attrs: Attrs) {
+    console.log(attrs);
     const product = await Product.findProduct(attrs.id);
     if (!product) throw new NotFoundError('Product');
     const price = product.salePrice * attrs.quantity;
