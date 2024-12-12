@@ -32,14 +32,7 @@ spec:
                 name: branchs-srv
                 port:
                   number: 3000
-          - path: /shifts/?(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: shifts-srv
-                port:
-                  number: 3000
-          - path: /services/?(.*)
+          - path: /api/services/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
