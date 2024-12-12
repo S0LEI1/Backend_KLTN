@@ -53,7 +53,7 @@ export class PaymentServices {
     var orderInfo = 'Pay with MoMo';
     var partnerCode = 'MOMO';
     var redirectUrl = '';
-    var ipnUrl = 'www.kimbeautyspa.store/payments/callback';
+    var ipnUrl = 'www.kimbeautyspa.store/payments/callback/data';
     var requestType = 'payWithMethod';
     var amount = order.postTaxTotal;
     var orderId = order.id + new Date().getTime();
