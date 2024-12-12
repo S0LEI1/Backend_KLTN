@@ -13,7 +13,7 @@ spec:
     - hosts:
         - www.kimbeautyspa.store
       secretName: echo-tls
-  # ingressClassName: nginx
+  ingressClassName: nginx
   rules:
     - host: www.kimbeautyspa.store
       http:
