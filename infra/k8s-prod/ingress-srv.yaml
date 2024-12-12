@@ -5,7 +5,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/use-regex: 'true'
-    # 28
+    # 27
 spec:
   rules:
     - host: www.kimbeautyspa.store
@@ -102,11 +102,11 @@ spec:
   externalTrafficPolicy: Local
   ports:
     - name: http
-      port: 31278
+      port: 80
       protocol: TCP
       targetPort: http
     - name: https
-      port: 30811
+      port: 443
       protocol: TCP
       targetPort: https
   selector:
