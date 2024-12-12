@@ -11,13 +11,8 @@ export class PaymentControllers {
     res.status(200).send({ message: 'Payment successfully', result });
   }
   static async callback(req: Request, res: Response) {
-    try {
-      console.log('callback::');
-      console.log(req.body);
-      res.status(200).send(req.body);
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
+    console.log('callback::');
+    console.log(req.body);
+    res.status(200).send(req.body);
   }
 }
