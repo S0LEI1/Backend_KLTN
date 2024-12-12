@@ -5,12 +5,18 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/use-regex: 'true'
-    # 32
 spec:
   rules:
-    - host: 'www.kimbeautyspa.store'
+    - host: www.kimbeautyspa.store
       http:
         paths:
+          - path: /api/payments/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: payments-srv
+                port:
+                  number: 3000
           - path: /api/users/?(.*)
             pathType: ImplementationSpecific
             backend:
@@ -18,69 +24,48 @@ spec:
                 name: auth-srv
                 port:
                   number: 3000
-          - path: /products/?(.*)
+          - path: /api/products/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: products-srv
                 port:
                   number: 3000
-          - path: /branchs/?(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: branchs-srv
-                port:
-                  number: 3000
-          - path: /api/services/?(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: services-srv
-                port:
-                  number: 3000
-          - path: /orders/?(.*)
+          - path: /api/orders/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: orders-srv
                 port:
                   number: 3000
-          - path: /payments/?(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: payments-srv
-                port:
-                  number: 3000
-          - path: /cart/?(.*)
+          - path: /api/cart/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: cart-srv
                 port:
                   number: 3000
-          - path: /appointments/?(.*)
+          - path: /api/appointments/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: appointments-srv
                 port:
                   number: 3000
-          # - path: /?(.*)
-          #   pathType: ImplementationSpecific
-          #   backend:
-          #     service:
-          #       name: client-srv
-          #       port:
-          #         number: 3000
+          - path: /api/services/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: appointments-srv
+                port:
+                  number: 3000
 ---
 apiVersion: v1
 kind: Service
 metadata:
   annotations:
     service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: 'true'
-    service.beta.kubernetes.io/do-loadbalancer-hostname: 'www.kimbeautyspa.store'
+    service.beta.kubernetes.io/do-loadbalancer-hostname: 'www.YOURDOMAIN.com'
   labels:
     helm.sh/chart: ingress-nginx-2.0.3
     app.kubernetes.io/name: ingress-nginx

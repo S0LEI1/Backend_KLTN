@@ -131,7 +131,7 @@ router.post(
   ]),
   AccountControllers.importUser
 );
-router.get('/users/welcome', async (req: Request, res: Response) => {
+router.get('/api/users/welcome', async (req: Request, res: Response) => {
   res.status(200).send({ message: 'Welcome to Kim Beauty Spa !!!!!' });
 });
 export { router as authRouter };
