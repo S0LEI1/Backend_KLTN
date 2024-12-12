@@ -156,7 +156,7 @@ export class PackageServices {
     if (!existPackage) throw new NotFoundError('Package');
     // check package service exist
     const packageServices = await PackageService.find(
-      { package: existPackage.id, isDelete: false },
+      { package: existPackage.id, isDeleted: false },
       isManager ? null : select
     ).populate({ path: 'service' });
     // if packageService lenght => no service attach package => return package

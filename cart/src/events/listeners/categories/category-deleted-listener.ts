@@ -19,6 +19,7 @@ export class CategoryDeletedListener extends Listener<CategoryDeletedEvent> {
     if (!category) throw new NotFoundError('Category');
     category.set({ isDeleted: data.isDeleted });
     await category.save();
+    console.log('Message received' + Subjects.CategoryDeleted + 'done');
     msg.ack();
   }
 }

@@ -22,6 +22,7 @@ export class CategoryUpdatedListener extends Listener<CategoryUpdatedEvent> {
       description: data.description,
     });
     await category.save();
+    console.log('Message received' + Subjects.CategoryUpdated + 'done');
     msg.ack();
   }
 }
