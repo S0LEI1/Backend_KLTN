@@ -135,8 +135,8 @@ productSchema.statics.findByName = async (name: string) => {
 productSchema.statics.findProduct = async (id: string) => {
   return await Product.findById({ _id: id, isDeleted: false })
     .populate('category')
-    .populate('suplier')
-    .exec();
+    .populate('suplier');
+  // .exec();
 };
 productSchema.statics.findByEvent = async (event: {
   id: string;

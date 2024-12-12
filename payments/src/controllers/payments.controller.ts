@@ -17,6 +17,7 @@ export class PaymentControllers {
       res.status(200).send({ message: 'Done' });
     } catch (error) {
       console.log(error);
+      throw error;
     }
   }
 }
