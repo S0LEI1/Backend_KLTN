@@ -17,6 +17,7 @@ export class CategoryCreatedListener extends Listener<CategoryCreatedEvent> {
       description: data.description,
     });
     await category.save();
+    console.log('Message received' + Subjects.CategoryCreated + 'done');
     msg.ack();
   }
 }

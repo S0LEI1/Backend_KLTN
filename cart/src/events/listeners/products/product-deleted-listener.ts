@@ -18,6 +18,7 @@ export class ProductDeletedListener extends Listener<ProductDeletedEvent> {
       isDeleted: data.isDeleted,
     });
     await product.save();
+    console.log('Message received: ' + Subjects.ProductDeleted + 'done');
     msg.ack();
   }
 }

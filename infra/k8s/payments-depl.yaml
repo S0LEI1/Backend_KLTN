@@ -36,8 +36,6 @@ spec:
                 secretKeyRef:
                   name: per-page
                   key: PER_PAGE
-            - name: NGROK_LINK
-              value: https://ba82-113-178-249-117.ngrok-free.app
 ---
 apiVersion: v1
 kind: Service

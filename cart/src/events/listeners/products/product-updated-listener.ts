@@ -33,6 +33,7 @@ export class ProductUpdatedListener extends Listener<ProductUpdatedEvent> {
       code: data.code,
     });
     await product.save();
+    console.log('Message received: ' + Subjects.ProductUpdated + 'done');
     msg.ack();
   }
 }
