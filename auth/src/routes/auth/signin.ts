@@ -76,9 +76,9 @@ router.post(
 
       // store jwt
 
-      req.session = {
-        jwt: userJWT,
-      };
+      // req.session = {
+      //   jwt: userJWT,
+      // };
       res.status(200).send({
         token: userJWT,
         type: existUser.type,
