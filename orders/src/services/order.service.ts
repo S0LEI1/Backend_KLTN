@@ -13,13 +13,9 @@ import { OrderPackageService, PackageInOrder } from './order-package.service';
 import mongoose, { FilterQuery } from 'mongoose';
 import { format } from 'date-fns';
 import { OrderPublisher } from './orders.publisher.service';
-import { OrderPackage, OrderPackageDoc } from '../models/order-package';
+import { OrderPackage } from '../models/order-package';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-import {
-  OrderServiceDoc,
-  OrderServiceM,
-  UsageLog,
-} from '../models/order-service';
+import { OrderServiceM, UsageLog } from '../models/order-service';
 import { writeFileSync } from 'fs';
 import { Convert } from '../utils/convert';
 
@@ -52,8 +48,6 @@ export class OrderService {
     // check customer
     const customer = await User.findUser(order.customerId);
     if (!customer) throw new NotFoundError('Customer');
-    if (!order.serviceAttrs && !order.productAttrs && !order.packageAttrs)
-      throw new BadRequestError('Product, service, package, must be least 1');
     // check product, service, package must be define one
     // define previous tax price
     const newOrder = Order.build({
@@ -63,15 +57,8 @@ export class OrderService {
     });
     await newOrder.save();
     OrderPublisher.newOrder(newOrder);
-    const {
-      orderDoc,
-      products,
-      services,
-      packages,
-      newOrderServices,
-      newOrderPackages,
-    } = await this.addAndRemove(
-      newOrder,
+    const { orderDoc, products, services, packages } = await this.addAndRemove(
+      newOrder.id,
       order.serviceAttrs,
       order.packageAttrs,
       order.productAttrs
@@ -79,17 +66,17 @@ export class OrderService {
     return { orderDoc, products, services, packages };
   }
   static async addAndRemove(
-    orderDoc: OrderDoc,
+    orderId: String,
     serviceAttrs: Attrs[],
     packageAttrs: Attrs[],
     productAttrs: Attrs[]
   ) {
-    // const orderDoc = await Order.findOne<OrderDoc>({
-    //   _id: orderId,
-    //   isDeleted: false,
-    // })
-    //   .populate('customer')
-    //   .populate('creator');
+    const orderDoc = await Order.findOne<OrderDoc>({
+      _id: orderId,
+      isDeleted: false,
+    })
+      .populate('customer')
+      .populate('creator');
 
     if (!orderDoc) throw new NotFoundError('Order');
     let preTaxTotal = orderDoc.preTaxTotal | 0;
@@ -103,22 +90,18 @@ export class OrderService {
       products = productsInPackage;
     }
     let services: ServiceInOrder[] = [];
-    let newOrderServices: OrderServiceDoc[] = [];
     if (serviceAttrs) {
       const { orderServices, serviceTotalPrice, servicesInPackage } =
         await OrderServiceService.newOrderServices(orderDoc, serviceAttrs);
       preTaxTotal += serviceTotalPrice;
       services = servicesInPackage;
-      newOrderServices = orderServices;
     }
     let packages: PackageInOrder[] = [];
-    let newOrderPackages: OrderPackageDoc[] = [];
     if (packageAttrs) {
       const { orderPackages, packageTotalPrice, packagesInOrder } =
         await OrderPackageService.newOrderPacakages(orderDoc, packageAttrs);
       preTaxTotal += packageTotalPrice;
       packages = packagesInOrder;
-      newOrderPackages = orderPackages;
     }
     orderDoc.set({ preTaxTotal: preTaxTotal });
     await orderDoc.save();
@@ -126,14 +109,7 @@ export class OrderService {
 
     OrderPublisher.updateOrder(orderDoc);
     const orderConvert = Convert.order(orderDoc);
-    return {
-      orderDoc: orderConvert,
-      products,
-      services,
-      packages,
-      newOrderServices,
-      newOrderPackages,
-    };
+    return { orderDoc: orderConvert, products, services, packages };
   }
   static async readOrders(
     pages: number,

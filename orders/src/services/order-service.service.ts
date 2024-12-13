@@ -19,7 +19,6 @@ export interface ServiceInOrder {
   usageLogs: UsageLog[] | null;
 }
 export class OrderServiceService {
-  static async newOss(order: OrderDoc, servicesAttr: Attrs[]) {}
   static async newOrderService(order: OrderDoc, attr: Attrs) {
     // find order service
     const orderServiceExist = await OrderServiceM.findOne({

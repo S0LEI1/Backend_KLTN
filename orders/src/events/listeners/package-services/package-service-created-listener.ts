@@ -32,8 +32,6 @@ export class PackageServiceCreatedListener extends Listener<PackageServiceCreate
       quantity: data.quantity,
     });
     await packageService.save();
-    console.log('packageService', packageService);
-
     msg.ack();
   }
 }

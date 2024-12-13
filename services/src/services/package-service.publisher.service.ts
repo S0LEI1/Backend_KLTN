@@ -15,6 +15,7 @@ export class PackageServicePublisher {
   }
   static async newPackageServices(packageServices: PackageServiceDoc[]) {
     for (const packageService of packageServices) {
+      await packageService.save();
       new PackageServiceCreatedPublisher(natsWrapper.client).publish({
         id: packageService.id,
         serviceId: packageService.service.id,

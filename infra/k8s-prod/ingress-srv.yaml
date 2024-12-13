@@ -77,14 +77,15 @@ metadata:
   annotations:
     service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: 'true'
     service.beta.kubernetes.io/do-loadbalancer-hostname: 'www.kimbeautyspa.store'
-    # service.beta.kubernetes.io/do-loadbalancer-protocol: 'https'
-    # service.beta.kubernetes.io/do-loadbalancer-certificate-id: '5e66e05d-20b2-491e-8bb8-edf581525fa2'
-    # service.beta.kubernetes.io/do-loadbalancer-disable-lets-encrypt-dns-records: 'false'
-    # service.beta.kubernetes.io/do-loadbalancer-tls-ports: '443'
-    # service.beta.kubernetes.io/do-loadbalancer-http-ports: '80'
-    # service.beta.kubernetes.io/do-loadbalancer-healthcheck-port: '443'
-    # service.beta.kubernetes.io/do-loadbalancer-healthcheck-protocol: 'https'
-    # service.beta.kubernetes.io/do-loadbalancer-healthcheck-path: /healthz
+    service.beta.kubernetes.io/do-loadbalancer-name: 'af8ac681c6dd4468b9af8f01aae12e20'
+    service.beta.kubernetes.io/do-loadbalancer-protocol: 'https'
+    service.beta.kubernetes.io/do-loadbalancer-certificate-id: '5e66e05d-20b2-491e-8bb8-edf581525fa2'
+    service.beta.kubernetes.io/do-loadbalancer-disable-lets-encrypt-dns-records: 'false'
+    service.beta.kubernetes.io/do-loadbalancer-tls-ports: '443'
+    service.beta.kubernetes.io/do-loadbalancer-http-ports: '80'
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-port: '443'
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-protocol: 'https'
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-path: /healthz
     # service.beta.kubernetes.io/do-loadbalancer-tls-passthrough: 'true'
   labels:
     helm.sh/chart: ingress-nginx-2.0.3
