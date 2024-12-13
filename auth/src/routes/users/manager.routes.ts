@@ -26,11 +26,6 @@ router.get(
 router.patch(
   '/users/manager/:id',
   requireAuth,
-  requireType([UserType.Manager, UserType.Employee]),
-  requirePermission([
-    ListPermission.EmployeeUpdate,
-    ListPermission.CustomerUpdate,
-  ]),
   ManagerControllers.updateUserProfile
 );
 router.delete(
