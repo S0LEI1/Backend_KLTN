@@ -18,7 +18,7 @@ export class OrderUpdatedListener extends Listener<OrderUpdatedEvent> {
       id: data.id,
       version: data.version,
     });
-    console.log(data);
+    console.log(existOrder);
     if (!existOrder) throw new NotFoundError('Order not found');
     existOrder.set({
       customer: data.customer,

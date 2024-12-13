@@ -13,6 +13,47 @@ export interface ProductInOrder {
   totalPrice: number;
 }
 export class OrderProductService {
+  static async newOP(order: OrderDoc, attr: Attrs) {
+    const { product, price } = await ProductService.getProduct(attr);
+    if (attr.quantity <= 0)
+      throw new BadRequestError(
+        'Product quantity must be greater than or equal  1'
+      );
+    if (attr.quantity > product.quantity)
+      throw new BadRequestError(
+        `Insufficient quantity of product: ${product.name}`
+      );
+    const orderProduct = OrderProduct.build({
+      order: order,
+      product: product,
+      quantity: attr.quantity,
+      totalPrice: price,
+    });
+    await orderProduct.save();
+    return orderProduct;
+  }
+  static async newOPs(order: OrderDoc, attrs: Attrs[]) {
+    // declare products in order
+    const productsInPackage: ProductInOrder[] = [];
+    const orderProducts: OrderProductDoc[] = [];
+    // declare total price product in order
+    let productTotalPrice: number = 0;
+    for (const attr of attrs) {
+      const orderProduct = await this.newOrderProduct(order, attr);
+      if (orderProduct.isDeleted === true) continue;
+      orderProducts.push(orderProduct);
+      productsInPackage.push({
+        productId: orderProduct.product.id,
+        name: orderProduct.product.name,
+        imageUrl: orderProduct.product.imageUrl,
+        salePrice: orderProduct.product.salePrice,
+        quantity: orderProduct.quantity,
+        totalPrice: orderProduct.totalPrice,
+      });
+      productTotalPrice += orderProduct.totalPrice;
+    }
+    return { orderProducts, productsInPackage, productTotalPrice };
+  }
   static async newOrderProduct(order: OrderDoc, attr: Attrs) {
     const orderProductExist = await OrderProduct.findOne({
       order: order.id,
