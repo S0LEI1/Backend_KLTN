@@ -26,6 +26,7 @@ export class OrderUpdatedListener extends Listener<OrderUpdatedEvent> {
       customer: customer,
       creator: creator,
       status: data.status,
+      postTaxTotal: data.postTaxTotal,
     });
     await order.save();
     msg.ack();

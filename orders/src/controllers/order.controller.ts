@@ -5,6 +5,8 @@ import fs from 'fs';
 import { OrderServiceService } from '../services/order-service.service';
 import { OrderPackageService } from '../services/order-package.service';
 import { ServiceService } from '../services/service.service';
+import { Order } from '../models/order';
+import { NotFoundError } from '@share-package/common';
 
 export class OrderController {
   static async newOrder(req: Request, res: Response) {
@@ -37,8 +39,13 @@ export class OrderController {
     const { services, packages, products } = req.body;
     const { orderId } = req.params;
     try {
+      const orderExist = await Order.findOne({
+        _id: orderId,
+        isDeleted: false,
+      });
+      if (!orderExist) throw new NotFoundError('Order');
       const order = await OrderService.addAndRemove(
-        orderId,
+        orderExist,
         services,
         packages,
         products

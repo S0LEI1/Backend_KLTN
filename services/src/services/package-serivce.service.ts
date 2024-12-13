@@ -33,27 +33,25 @@ export class PackageServiceServices {
   }
   static async newPackageServices(
     serviceAttrs: ServiceAttrs[],
-    packageId: string
+    packageDoc: PackageDoc
   ) {
-    const packageExist = await Package.findPackage(packageId);
-    if (!packageExist) throw new NotFoundError('Package');
     const servicesInPackage: ServiceInPackage[] = [];
     for (const serviceAttr of serviceAttrs) {
       const serviceExist = await Service.findOne({
         _id: serviceAttr.id,
         isDeleted: false,
       });
-      if (!serviceExist) throw new NotFoundError('Service');
+      if (!serviceExist) throw new NotFoundError('Service' + serviceAttr.id);
       const packageServiceExist = await this.findPackageService(
         serviceExist.id,
-        packageExist.id
+        packageDoc.id
       );
       if (packageServiceExist)
         throw new BadRequestError('Package-Service exist');
       const { packageService, service, quantity } =
         await this.newPackageService(
           { service: serviceExist, quantity: serviceAttr.quantity },
-          packageExist
+          packageDoc
         );
       if (packageService.isDeleted === true) continue;
       servicesInPackage.push({
@@ -62,7 +60,7 @@ export class PackageServiceServices {
       });
     }
     // publish create event
-    return { packageExist, servicesInPackage };
+    return { packageDoc, servicesInPackage };
   }
   static async deletePackageSevice(
     serviceAttr: ServiceAttrs,

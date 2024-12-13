@@ -55,28 +55,28 @@ export class OrderService {
       customer: customer,
       status: OrderStatus.Created,
     });
-    await newOrder.save();
-    OrderPublisher.newOrder(newOrder);
     const { orderDoc, products, services, packages } = await this.addAndRemove(
-      newOrder.id,
+      newOrder,
       order.serviceAttrs,
       order.packageAttrs,
       order.productAttrs
     );
+    await newOrder.save();
+    OrderPublisher.newOrder(newOrder);
     return { orderDoc, products, services, packages };
   }
   static async addAndRemove(
-    orderId: String,
+    orderDoc: OrderDoc,
     serviceAttrs: Attrs[],
     packageAttrs: Attrs[],
     productAttrs: Attrs[]
   ) {
-    const orderDoc = await Order.findOne<OrderDoc>({
-      _id: orderId,
-      isDeleted: false,
-    })
-      .populate('customer')
-      .populate('creator');
+    // const orderDoc = await Order.findOne<OrderDoc>({
+    //   _id: orderId,
+    //   isDeleted: false,
+    // })
+    //   .populate('customer')
+    //   .populate('creator');
 
     if (!orderDoc) throw new NotFoundError('Order');
     let preTaxTotal = orderDoc.preTaxTotal | 0;

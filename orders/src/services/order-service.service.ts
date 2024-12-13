@@ -19,6 +19,13 @@ export interface ServiceInOrder {
   usageLogs: UsageLog[] | null;
 }
 export class OrderServiceService {
+  static async newOss(order: OrderDoc, servicesAttr: Attrs[]) {
+    const orderServices: OrderServiceDoc[] = [];
+    const servicesInPackage: ServiceInOrder[] = [];
+    let serviceTotalPrice: number = 0;
+    for (const attr of servicesAttr) {
+    }
+  }
   static async newOrderService(order: OrderDoc, attr: Attrs) {
     // find order service
     const orderServiceExist = await OrderServiceM.findOne({
