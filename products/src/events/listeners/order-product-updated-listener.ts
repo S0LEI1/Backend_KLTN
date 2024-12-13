@@ -15,12 +15,14 @@ export class OrderProductUpdatedListener extends Listener<OrderProductUpdatedEve
     const product = await Product.findOne({
       _id: data.productId,
       isDeleted: false,
-    });
+    })
+      .populate('category')
+      .populate('suplier');
     if (!product) throw new NotFoundError('Product not found');
     const newQuantity = product.quantity - data.quantity;
     product.set({ quantity: newQuantity });
     await product.save();
-    ProductPublisher.new(product);
+    ProductPublisher.update(product);
     msg.ack();
   }
 }
