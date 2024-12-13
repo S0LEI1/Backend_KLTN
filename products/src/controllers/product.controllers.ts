@@ -241,16 +241,21 @@ export class ProductControllers {
     }
   }
   static async addQuantity(req: Request, res: Response) {
-    const { id } = req.params;
-    const { quantity, costPrice, salePrice } = req.body;
-    const product = await ProductService.addQuantity(
-      id,
-      quantity,
-      costPrice,
-      salePrice
-    );
-    res
-      .status(200)
-      .send({ message: 'PATCH: Add quantit successfully', product });
+    try {
+      const { id } = req.params;
+      const { quantity, costPrice, salePrice } = req.body;
+      const product = await ProductService.addQuantity(
+        id,
+        quantity,
+        costPrice,
+        salePrice
+      );
+      res
+        .status(200)
+        .send({ message: 'PATCH: Add quantit successfully', product });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 }

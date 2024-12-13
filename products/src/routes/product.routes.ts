@@ -10,6 +10,7 @@ import {
   singleUploadMiddleware,
   validationRequest,
   codeRegex,
+  currentUser,
 } from '@share-package/common';
 import { ProductControllers } from '../controllers/product.controllers';
 
