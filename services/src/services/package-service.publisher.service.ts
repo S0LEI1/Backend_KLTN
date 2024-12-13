@@ -13,6 +13,16 @@ export class PackageServicePublisher {
       quantity: packageService.quantity,
     });
   }
+  static async newPackageServices(packageServices: PackageServiceDoc[]) {
+    for (const packageService of packageServices) {
+      new PackageServiceCreatedPublisher(natsWrapper.client).publish({
+        id: packageService.id,
+        serviceId: packageService.service.id,
+        packageId: packageService.package.id,
+        quantity: packageService.quantity,
+      });
+    }
+  }
   static async deletePackageService(packageService: PackageServiceDoc) {
     new PackageServiceDeletedPublisher(natsWrapper.client).publish({
       id: packageService.id,

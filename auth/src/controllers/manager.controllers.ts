@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { User } from '../models/user';
 import {
+  BadRequestError,
   Check,
   ListPermission,
   NotFoundError,
@@ -22,7 +23,25 @@ export class ManagerControllers {
   static async updateUserProfile(req: Request, res: Response) {
     const { fullName, gender, phoneNumber, address } = req.body;
     const { id } = req.params;
+    const userId = req.currentUser!.id;
+    const type = req.currentUser!.type;
+    const perrmissions = req.currentUser!.permissions;
     const user = await User.findUser(id);
+    const isManager = Check.isManager(type, perrmissions, [
+      ListPermission.CustomerUpdate,
+      ListPermission.EmployeeUpdate,
+    ]);
+    const isEmployee = Check.checkTypeAndPermission(
+      type,
+      UserType.Employee,
+      perrmissions,
+      [ListPermission.CustomerUpdate, ListPermission.EmployeeUpdate]
+    );
+
+    if (userId !== id && !isEmployee && !isManager)
+      throw new BadRequestError(
+        'You can not update information of another user'
+      );
     user!.set({
       fullName: fullName,
       gender: gender,

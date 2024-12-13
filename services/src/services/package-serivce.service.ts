@@ -24,7 +24,6 @@ export class PackageServiceServices {
       quantity: service.quantity,
     });
     await newPS.save();
-    PackageServicePublisher.newPackageService(newPS);
     return {
       packageService: newPS,
       service: service.service,
@@ -36,6 +35,7 @@ export class PackageServiceServices {
     packageDoc: PackageDoc
   ) {
     const servicesInPackage: ServiceInPackage[] = [];
+    const packageServices: PackageServiceDoc[] = [];
     for (const serviceAttr of serviceAttrs) {
       const serviceExist = await Service.findOne({
         _id: serviceAttr.id,
@@ -58,9 +58,10 @@ export class PackageServiceServices {
         service: service,
         quantity: quantity,
       });
+      packageServices.push(packageService);
     }
     // publish create event
-    return { packageDoc, servicesInPackage };
+    return { packageDoc, servicesInPackage, packageServices };
   }
   static async deletePackageSevice(
     serviceAttr: ServiceAttrs,

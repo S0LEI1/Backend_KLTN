@@ -65,12 +65,13 @@ export class PackageServices {
       code: code,
     });
     // save package on database
-    const { packageDoc, servicesInPackage } =
+    const { packageDoc, servicesInPackage, packageServices } =
       await PackageServiceServices.newPackageServices(services, newPackage);
     // publish created event
     // return package for controller
     await newPackage.save();
     PackagePublisher.newPackage(newPackage);
+    PackageServicePublisher.newPackageServices(packageServices);
     return { newPackage, servicesInPackage };
   }
   static async readAll(
