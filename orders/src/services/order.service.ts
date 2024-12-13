@@ -149,6 +149,7 @@ export class OrderService {
     if (priceRange === 'lowprice') filter.postTaxTotal = { $lt: lowPrice };
     if (priceRange === 'mediumprice')
       filter.postTaxTotal = { $gte: lowPrice, $lte: highPrice };
+    sort.createdAt = 1;
     if (date === 'asc') sort.createdAt = 1;
     if (date === 'desc') sort.createdAt = -1;
     console.log(filter);
