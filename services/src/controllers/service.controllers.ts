@@ -52,7 +52,9 @@ export class ServiceControllers {
     } = req.query;
     let isManager = false;
     if (req.currentUser) {
-      const { type, permissions } = req.currentUser!;
+      const { type, permissions } = req.currentUser;
+      console.log(req.currentUser);
+
       isManager = Check.isManager(type, permissions, [
         ListPermission.ServiceRead,
       ]);
