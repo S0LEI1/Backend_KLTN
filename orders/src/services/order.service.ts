@@ -22,8 +22,6 @@ import {
 } from '../models/order-service';
 import { writeFileSync } from 'fs';
 import { Convert } from '../utils/convert';
-import { OrderPackagePublisher } from './order-package-publisher.service';
-import { OrderServicePublisher } from './order-service-publisher.service';
 
 const PER_PAGE = process.env.PER_PAGE;
 export interface Attrs {
@@ -61,6 +59,8 @@ export class OrderService {
       customer: customer,
       status: OrderStatus.Created,
     });
+    await newOrder.save();
+    OrderPublisher.newOrder(newOrder);
     const {
       orderDoc,
       products,
@@ -74,10 +74,6 @@ export class OrderService {
       order.packageAttrs,
       order.productAttrs
     );
-    await newOrder.save();
-    OrderPublisher.newOrder(newOrder);
-    OrderPackagePublisher.newOrderPackages(newOrderPackages);
-    OrderServicePublisher.newOrderServices(newOrderServices);
     return { orderDoc, products, services, packages };
   }
   static async addAndRemove(
