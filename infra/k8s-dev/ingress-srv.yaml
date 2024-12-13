@@ -73,13 +73,13 @@ spec:
                 name: appointments-srv
                 port:
                   number: 3000
-          # - path: /?(.*)
-          #   pathType: ImplementationSpecific
-          #   backend:
-          #     service:
-          #       name: client-srv
-          #       port:
-          #         number: 3000
+          - path: /?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: client-srv
+                port:
+                  number: 3000
 # ---
 # apiVersion: v1
 # kind: Service
