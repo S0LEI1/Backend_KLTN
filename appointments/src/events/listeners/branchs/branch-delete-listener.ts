@@ -17,7 +17,7 @@ export class BranchDeletedListener extends Listener<BranchDeletedEvent> {
       version: data.version,
     });
     if (!branch) throw new BadRequestError('Branch not found');
-    branch.set({ isDeleted: data.isDeleted });
+    branch.set({ isDeleted: true });
     await branch.save();
     msg.ack();
   }

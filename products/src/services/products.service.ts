@@ -75,8 +75,6 @@ export class ProductService {
     discountRange: string,
     featured: string
   ) {
-    console.log(price);
-
     const query = Pagination.query();
     const sort = Pagination.query();
     query.isDeleted = false;

@@ -78,6 +78,7 @@ export class BranchService {
     if (!deleteBranch) throw new NotFoundError('Update branch not found');
     deleteBranch.set({ isDeleted: true });
     await deleteBranch.save();
+    BranchPublisher.deleteBranch(deleteBranch);
     return deleteBranch;
   }
 }
