@@ -9,6 +9,7 @@ metadata:
     cert-manager.io/cluster-issuer: 'letsencrypt-staging'
     kubernetes.io/ingress.class: 'nginx'
     nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    service.beta.kubernetes.io/do-loadbalancer-certificate-id: '5e66e05d-20b2-491e-8bb8-edf581525fa2'
 spec:
   tls:
     - hosts:
@@ -75,6 +76,9 @@ metadata:
   annotations:
     service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: 'true'
     service.beta.kubernetes.io/do-loadbalancer-hostname: 'www.kimbeautyspa.store'
+    service.beta.kubernetes.io/do-loadbalancer-protocol: 'https'
+    service.beta.kubernetes.io/do-loadbalancer-certificate-id: '5e66e05d-20b2-491e-8bb8-edf581525fa2'
+    service.beta.kubernetes.io/do-loadbalancer-disable-lets-encrypt-dns-records: 'false'
   labels:
     helm.sh/chart: ingress-nginx-2.0.3
     app.kubernetes.io/name: ingress-nginx
