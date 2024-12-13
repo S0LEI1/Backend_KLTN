@@ -51,7 +51,7 @@ export class ServiceControllers {
       expire,
     } = req.query;
     let isManager = false;
-    console.log(req.currentUser);
+    console.log('user', req.currentUser);
     if (req.currentUser) {
       const { type, permissions } = req.currentUser;
       console.log(req.currentUser);
