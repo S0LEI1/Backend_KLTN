@@ -15,6 +15,12 @@ export class OrderServicePublisher {
       execEmployee: orderServiceDoc.execEmployee?.id,
     });
   }
+  static async newOrderServices(orderServiceDocs: OrderServiceDoc[]) {
+    for (const os of orderServiceDocs) {
+      this.newOrderService(os);
+    }
+  }
+
   static async updateOrderService(orderServiceDoc: OrderServiceDoc) {
     new OrderServiceUpdatedPublisher(natsWrapper.client).publish({
       id: orderServiceDoc.id,

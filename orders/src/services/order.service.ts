@@ -13,11 +13,17 @@ import { OrderPackageService, PackageInOrder } from './order-package.service';
 import mongoose, { FilterQuery } from 'mongoose';
 import { format } from 'date-fns';
 import { OrderPublisher } from './orders.publisher.service';
-import { OrderPackage } from '../models/order-package';
+import { OrderPackage, OrderPackageDoc } from '../models/order-package';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { OrderServiceM, UsageLog } from '../models/order-service';
+import {
+  OrderServiceDoc,
+  OrderServiceM,
+  UsageLog,
+} from '../models/order-service';
 import { writeFileSync } from 'fs';
 import { Convert } from '../utils/convert';
+import { OrderPackagePublisher } from './order-package-publisher.service';
+import { OrderServicePublisher } from './order-service-publisher.service';
 
 const PER_PAGE = process.env.PER_PAGE;
 export interface Attrs {
@@ -55,7 +61,14 @@ export class OrderService {
       customer: customer,
       status: OrderStatus.Created,
     });
-    const { orderDoc, products, services, packages } = await this.addAndRemove(
+    const {
+      orderDoc,
+      products,
+      services,
+      packages,
+      newOrderServices,
+      newOrderPackages,
+    } = await this.addAndRemove(
       newOrder,
       order.serviceAttrs,
       order.packageAttrs,
@@ -63,6 +76,8 @@ export class OrderService {
     );
     await newOrder.save();
     OrderPublisher.newOrder(newOrder);
+    OrderPackagePublisher.newOrderPackages(newOrderPackages);
+    OrderServicePublisher.newOrderServices(newOrderServices);
     return { orderDoc, products, services, packages };
   }
   static async addAndRemove(
@@ -90,18 +105,22 @@ export class OrderService {
       products = productsInPackage;
     }
     let services: ServiceInOrder[] = [];
+    let newOrderServices: OrderServiceDoc[] = [];
     if (serviceAttrs) {
       const { orderServices, serviceTotalPrice, servicesInPackage } =
         await OrderServiceService.newOrderServices(orderDoc, serviceAttrs);
       preTaxTotal += serviceTotalPrice;
       services = servicesInPackage;
+      newOrderServices = orderServices;
     }
     let packages: PackageInOrder[] = [];
+    let newOrderPackages: OrderPackageDoc[] = [];
     if (packageAttrs) {
       const { orderPackages, packageTotalPrice, packagesInOrder } =
         await OrderPackageService.newOrderPacakages(orderDoc, packageAttrs);
       preTaxTotal += packageTotalPrice;
       packages = packagesInOrder;
+      newOrderPackages = orderPackages;
     }
     orderDoc.set({ preTaxTotal: preTaxTotal });
     await orderDoc.save();
@@ -109,7 +128,14 @@ export class OrderService {
 
     OrderPublisher.updateOrder(orderDoc);
     const orderConvert = Convert.order(orderDoc);
-    return { orderDoc: orderConvert, products, services, packages };
+    return {
+      orderDoc: orderConvert,
+      products,
+      services,
+      packages,
+      newOrderServices,
+      newOrderPackages,
+    };
   }
   static async readOrders(
     pages: number,

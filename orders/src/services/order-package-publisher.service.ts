@@ -32,6 +32,11 @@ export class OrderPackagePublisher {
       totalPrice: orderPackageDoc.totalPrice,
     });
   }
+  static async newOrderPackages(orderPackageDocs: OrderPackageDoc[]) {
+    for (const op of orderPackageDocs) {
+      this.newOrderPackage(op);
+    }
+  }
   static async updateOrderPackage(orderPackageDoc: OrderPackageDoc) {
     const serviceEmbeddeds: ServiceEmbedded[] = [];
     for (const serviceEmbedded of orderPackageDoc.serviceEmbedded) {
