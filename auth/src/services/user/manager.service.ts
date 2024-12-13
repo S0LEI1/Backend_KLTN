@@ -15,7 +15,7 @@ export class ManagerService {
     const query = Pagination.query();
     let filter: FilterQuery<UserDoc> = {};
 
-    query.isDeleted = false;
+    filter.isDeleted = false;
     if (type) filter = { type: type };
     const isMale = gender === 'true' ? true : false;
     if (gender) filter = { ...filter, gender: isMale };
