@@ -52,6 +52,8 @@ export class OrderService {
     // check customer
     const customer = await User.findUser(order.customerId);
     if (!customer) throw new NotFoundError('Customer');
+    if (!order.serviceAttrs && !order.productAttrs && !order.packageAttrs)
+      throw new BadRequestError('Product, service, package, must be least 1');
     // check product, service, package must be define one
     // define previous tax price
     const newOrder = Order.build({
