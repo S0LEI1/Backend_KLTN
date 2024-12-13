@@ -81,22 +81,23 @@ export class AppointmentController {
     }
   }
   static async cancelAppointment(req: Request, res: Response) {
-    const { appointmentId } = req.params;
-    const { id, type } = req.currentUser!;
-    try {
-      const appointment = await AppointmentServices.cancelAppointment(
-        id,
-        type,
-        appointmentId
-      );
-      res.status(200).send({
-        message: 'PATCH: Cancel appointment successfully',
-        appointment,
-      });
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
+    res.status(200).send({ message: 'message' });
+    // const { appointmentId } = req.params;
+    // const { id, type } = req.currentUser!;
+    // try {
+    //   const appointment = await AppointmentServices.cancelAppointment(
+    //     id,
+    //     type,
+    //     appointmentId
+    //   );
+    //   res.status(200).send({
+    //     message: 'PATCH: Cancel appointment successfully',
+    //     appointment,
+    //   });
+    // } catch (error) {
+    //   console.log(error);
+    //   throw error;
+    // }
   }
   static async deleteAppointment(req: Request, res: Response) {
     const { appointmentId } = req.params;
