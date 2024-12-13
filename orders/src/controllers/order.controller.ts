@@ -56,7 +56,7 @@ export class OrderController {
   }
   static async readOrders(req: Request, res: Response) {
     const {
-      pages = 1,
+      pages,
       status,
       cusName,
       creName,
