@@ -82,6 +82,9 @@ metadata:
     service.beta.kubernetes.io/do-loadbalancer-disable-lets-encrypt-dns-records: 'false'
     service.beta.kubernetes.io/do-loadbalancer-tls-ports: '443'
     service.beta.kubernetes.io/do-loadbalancer-http-ports: '80'
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-port: '443'
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-protocol: 'https'
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-path: /healthz
     # service.beta.kubernetes.io/do-loadbalancer-tls-passthrough: 'true'
   labels:
     helm.sh/chart: ingress-nginx-2.0.3
