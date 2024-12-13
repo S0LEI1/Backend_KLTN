@@ -50,7 +50,7 @@ router.get(
   requireAuth,
   AppointmentController.getAppointment
 );
-router.patch(
+router.post(
   '/appointments/api/cancel/:appointmentId',
   // requireAuth,
   AppointmentController.cancelAppointment
