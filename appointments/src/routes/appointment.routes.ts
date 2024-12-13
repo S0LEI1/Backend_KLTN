@@ -25,6 +25,7 @@ router.post(
     body('consultantId')
       .isMongoId()
       .withMessage('Consultant Id must be ObjectId'),
+    body('orderId').isMongoId().withMessage('Order Id must be ObjectId'),
     // body('serviceAttrs').isArray().withMessage('ServiceAttrs must be array'),
     body('serviceAttrs.*.serviceId')
       .isMongoId()
