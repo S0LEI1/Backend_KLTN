@@ -146,7 +146,6 @@ router.patch(
       ),
   ],
   validationRequest,
-  requireAuth,
   requireType([UserType.Manager]),
   requirePermission([ListPermission.ProductCreate]),
   ProductControllers.addQuantity

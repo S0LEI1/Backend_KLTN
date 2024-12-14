@@ -126,13 +126,13 @@ export class OrderController {
     }
   }
   static async cancelOrder(req: Request, res: Response) {
-    res.status(200).send({ message: 'message' });
-    // const { orderId } = req.params;
-    // const { id, type } = req.currentUser!;
-    // const order = await OrderService.cancelOrder(orderId, id, type);
-    // res
-    //   .status(200)
-    //   .send({ message: 'PATCH: Cancel order successfully', order });
+    // res.status(200).send({ message: 'message' });
+    const { orderId } = req.params;
+    const { id, type } = req.currentUser!;
+    const order = await OrderService.cancelOrder(orderId, id, type);
+    res
+      .status(200)
+      .send({ message: 'PATCH: Cancel order successfully', order });
   }
   // static async findByUserPhone(req: Request, res: Response) {
   //   const { key } = req.query;
