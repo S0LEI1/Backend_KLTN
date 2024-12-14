@@ -55,10 +55,6 @@ router.get(
 //   // requireAuth,
 //   AppointmentController.cancelAppointment
 // );
-router.post(
-  '/appointments/cancelled/:id',
-  AppointmentController.cancelAppointment
-);
 router.patch(
   '/appointments/delete/:appointmentId',
   requireAuth,
@@ -109,3 +105,8 @@ router.patch(
   AppointmentController.completeAppointment
 );
 export { router as AppointmentRouter };
+
+router.post(
+  '/appointments/cancel/:id',
+  AppointmentController.cancelAppointment
+);
