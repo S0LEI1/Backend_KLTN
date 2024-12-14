@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: client
-          image: thuthism/client
+          image: vannggoc/client
           env:
             - name: MONGO_URI
               value: 'mongodb+srv://soleil:01636878201@cluster0.4x48u.mongodb.net/client?retryWrites=true&w=majority&appName=Cluster0'

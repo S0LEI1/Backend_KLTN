@@ -1,0 +1,25 @@
+name: deploy-cart
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'client/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - run: cd cart && docker build -t vannggoc/client .
+      - run: docker push vannggoc/client
+      - uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - run: doctl kubernetes cluster kubeconfig save 06e6f452-b467-4349-883d-081456b01684
+      - run: kubectl rollout restart deployment client-depl
