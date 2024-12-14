@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@share-package/common": "^1.0.177",
+    "@share-package/common": "^1.0.178",
     "@types/aws-sdk": "^2.7.0",
     "@types/cookie-session": "^2.0.49",
     "@types/cors": "^2.8.17",
