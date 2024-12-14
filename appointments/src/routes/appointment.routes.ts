@@ -108,5 +108,8 @@ export { router as AppointmentRouter };
 
 router.post(
   '/appointments/cancel/:id',
-  AppointmentController.cancelAppointment
+  AppointmentController.cancelAppointment,
+  async (req: Request, res: Response) => {
+    res.status(200).send({ message: 'message' });
+  }
 );
